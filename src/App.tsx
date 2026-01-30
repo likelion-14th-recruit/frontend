@@ -7,7 +7,7 @@ import MainLayout from "./layouts/mainLayout";
 import About from "./pages/about/About";
 import People from "./pages/people/People";
 import RecruitHome from "./pages/recruit/RecruitHome";
-import Project from "./pages/project/project";
+import Project from "./pages/project/Project";
 
 function App() {
   return (
