@@ -1,7 +1,7 @@
-const Home = () => {
+const RecruitHome = () => {
   return (
     <div>
-      <section data-header="dark" className="bg-black h-[1000px]">
+      <section data-header="dark" className="bg-black h-[680px]">
         {/* 어두운 배경 */}
       </section>
 
@@ -12,4 +12,4 @@ const Home = () => {
   );
 };
 
-export default Home;
+export default RecruitHome;
