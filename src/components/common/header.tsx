@@ -26,11 +26,10 @@ const Header = () => {
   const logoTo = isAdmin ? "/admin" : "/"; //admin일 때 아닐 때 로고 navigate 루트 다르게
 
   return (
-    <div className="bg-white/0 h-[80px] fixed top-0 left-0 px-[40px] w-full flex items-center justify-between">
-      {/* 헤더 배경 색상 설정 - dark일 때 light일 때 다르게 */}
+
       <header
         className={cx(
-          "fixed top-0 left-0 z-50 w-full transition-colors duration-350",
+          "fixed top-0 left-0 z-[100] w-full transition-colors duration-350",
           isDark ? "bg-header-dark" : "bg-header-light"
         )}
       >
@@ -79,7 +78,7 @@ const Header = () => {
           </nav>
         </div>
       </header>
-    </div>
+
   );
 };
 
