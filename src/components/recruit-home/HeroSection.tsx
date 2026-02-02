@@ -52,6 +52,13 @@ const HeroSection = () => {
     text-[20px]
     font-semibold
     leading-[140%]
+
+    after:content-['']
+    after:absolute after:inset-0
+    after:bg-[#121212]/20
+    after:opacity-0
+    after:transition-opacity after:duration-200
+    hover:after:opacity-100
   "
 >
   14기 지원하기
