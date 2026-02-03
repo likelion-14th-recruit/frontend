@@ -35,7 +35,7 @@ const HeroSection = () => {
     LikeLion 14th <br/>Recruit
   </h1>
 
-  <p className="text-[rgba(255,255,255,0.8)] text-center font-pretendard text-[20px] font-normal leading-[140%] relative z-10 mt-[24px] mb-[40px] ">
+  <p className="text-white/80 text-center font-pretendard text-[20px] font-normal leading-[140%] relative z-10 mt-[24px] mb-[40px] ">
     멋쟁이사자처럼에서 꿈을 실현할 아기사자를 모집합니다!
   </p>
 

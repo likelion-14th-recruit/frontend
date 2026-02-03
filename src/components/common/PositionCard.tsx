@@ -82,12 +82,12 @@ const PositionCard = ({ title, description, imageUrl, link }: Position) => {
       <p
         className="
           px-[8px]
-          py-[8px]
+          py-[12x]
           font-pretendard
           text-[16px]
           font-semibold
           leading-[160%]
-          text-[rgba(18,18,18,0.8)]
+          text-black/80
         "
       >
         {description}

@@ -1,4 +1,5 @@
 import PositionCard from "../../components/common/PositionCard";
+import FAQList from "../../components/recruit-home/FAQList";
 import HeroSection from "../../components/recruit-home/HeroSection";
 import ScheduleItem from "../../components/recruit-home/ScheduleItem";
 import Section from "../../components/recruit-home/Section";
@@ -41,7 +42,7 @@ const RecruitHome = () => {
               text-[20px]
               font-semibold
               leading-[140%]
-              text-[black]]">
+              text[black">
             아이디어를 현실로 만들고 싶은 기획자·디자이너·개발자, 그리고 IT 창업에 관심 있는 서강대학교 학생</p>
         </div>
       </Section>
@@ -84,9 +85,9 @@ const RecruitHome = () => {
         </div>
       </Section>
 
-      {/* <Section title="FAQ">
+      <Section title="FAQ">
         <FAQList />
-      </Section> */}
+      </Section>
       </div>
       </div>
     </>
