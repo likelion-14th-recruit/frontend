@@ -1,8 +1,17 @@
 import PositionCard from "../../components/common/PositionCard";
 import HeroSection from "../../components/recruit-home/HeroSection";
+import ScheduleItem from "../../components/recruit-home/ScheduleItem";
 import Section from "../../components/recruit-home/Section";
 
 const RecruitHome = () => {
+
+  const schedules = [
+  { label: "1차 서류 접수", date: "02.21 (토) ~ 03.05 (목)" },
+  { label: "1차 발표", date: "03.07 (토)" },
+  { label: "2차 면접", date: "03.09 (월) ~ 03.12 (목)" },
+  { label: "최종 발표", date: "03.14 (토)" },
+];
+
   return (
     <>
       <HeroSection />
@@ -63,14 +72,19 @@ const RecruitHome = () => {
         </div>
       </Section>
 
-      {/* <Section title="지원 일정">
-        <ScheduleItem />
-        <ScheduleItem />
-        <ScheduleItem />
-        <ScheduleItem />
+      <Section title="지원 일정">
+        <div className="flex gap-[20px]">
+        { schedules.map((item) => (
+          <ScheduleItem
+            key={item.label}
+            label={item.label}
+            date={item.date}
+          />
+        )) }
+        </div>
       </Section>
 
-      <Section title="FAQ">
+      {/* <Section title="FAQ">
         <FAQList />
       </Section> */}
       </div>
