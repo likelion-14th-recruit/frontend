@@ -32,7 +32,10 @@ const programsData = [
 const ProgramSection = () => {
   const nav = useNavigate();
   return (
-    <section className="flex p-[100px] flex-col justify-center items-end gap-10 self-stretch bg-[lightGray]">
+    <section
+      data-header="light"
+      className="flex p-[100px] flex-col justify-center items-end gap-10 self-stretch bg-[lightGray]"
+    >
       <div className="flex w-[752px] flex-col items-start gap-[40px]">
         <div className="text-black/80 font-sogang text-[40px] font-normal leading-[120%]">
           Programs

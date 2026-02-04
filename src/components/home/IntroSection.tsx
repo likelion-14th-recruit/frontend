@@ -4,7 +4,10 @@ import { useNavigate } from "react-router-dom";
 const IntroSection = () => {
   const nav = useNavigate();
   return (
-    <div className="flex p-[100px] flex-col justify-center items-start gap-10 self-strech">
+    <section
+      data-header="light"
+      className="flex p-[100px] flex-col justify-center items-start gap-10 self-strech"
+    >
       <div className="flex flex-col justify-start items-start gap-[40px] w-[720px] max-w-[720px]">
         <img
           className="w-[720px] max-w-[720px] h-[400px]"
@@ -34,7 +37,7 @@ const IntroSection = () => {
           <ChevronRight size={18} />
         </div>
       </div>
-    </div>
+    </section>
   );
 };
 

@@ -4,7 +4,6 @@ import FAQItem from "../../components/recruit-home/FAQItem";
 import ProgramSection from "../../components/home/ProgramSection";
 import ProjectSection from "../../components/home/ProjectSection";
 import OurValuesSection from "../../components/home/OurValuesSection";
-import FAQList from "../../components/recruit-home/FAQList";
 
 const ExperiencesData = [
   {
@@ -80,7 +79,7 @@ const faqList: FAQ[] = [
 const Home = () => {
   return (
     <div>
-      <section data-header="light" className="relative z-0 w-full text-white">
+      <section data-header="dark" className="relative z-0 w-full text-white">
         {/* 1. 배경 이미지: absolute를 제거하고 'relative'로 두어 section의 실제 높이를 결정하게 합니다. */}
         <div className="relative w-full">
           <img
@@ -130,7 +129,7 @@ const Home = () => {
         </div>
       </section>
 
-      <section data-header="light" className="bg-white h-[1000px]">
+      <section data-header="light" className="bg-white">
         <IntroSection />
         <ProgramSection />
         <ProjectSection />
