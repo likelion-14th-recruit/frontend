@@ -14,6 +14,21 @@ const TAB_TO_PART_MAP: Record<
   product_design: "PRODUCT_DESIGN",
 };
 
+const CACHE_KEY = "PPL";
+const CACHE_EXPIRY = 24 * 60 * 60 * 1000;
+
+
+// const getCachedPeople = (): PeopleType[] | null => {
+//   const cached = localStorage.getItem(CACHE_KEY);
+//   if (!cached) return null;
+
+//   const { data, timestamp } = JSON.parse(cached);
+//   if (Date.now() - timestamp > CACHE_EXPIRY) {
+//     localStorage.removeItem(CACHE_KEY);
+//     return null;
+//   }
+//   return data;
+// };
 
 const People = () => {
 

@@ -75,7 +75,7 @@ const projectsData = [
 const Project = () => {
  const [activeTab, setActiveTab] = useState("all");
 
-   const [projects, setProjects] = useState<Post[]>(projectsData);
+  const [projects, setProjects] = useState<Post[]>(projectsData);
   const nav = useNavigate();
 
  //api
