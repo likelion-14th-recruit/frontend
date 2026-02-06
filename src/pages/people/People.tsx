@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import PageTitle from "../../components/people+project/PageTitle";
-import PeopleGrid from "../../components/people+project/PeopleGrid";
+import PageTitle from "../../components/people/PageTitle";
+import PeopleGrid from "../../components/people/PeopleGrid";
 import { type PeopleType } from "../../types/people";
 
 type TabValue = "all" | "backend" | "frontend" | "product_design";

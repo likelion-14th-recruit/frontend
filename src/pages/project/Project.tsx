@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import PageTitle from '../../components/people+project/PageTitle';
+import PageTitle from '../../components/people/PageTitle';
 
 const Project = () => {
  const [activeTab, setActiveTab] = useState("all");
