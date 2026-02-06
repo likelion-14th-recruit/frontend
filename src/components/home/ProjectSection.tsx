@@ -117,33 +117,34 @@ const ProjectSection = () => {
   }, []);
 
   return (
-    <section className="flex p-[100px] flex-col justify-center items-start gap-10 self-strech">
-      <div className="flex flex-col items-start gap-[40px]">
-        <div className="text-black/80 font-sogang text-[40px] font-normal leading-[120%]">
-          Projects
-        </div>
-        <div className="inline-grid grid-cols-2 gap-8">
-          {projects.map((project, index) => (
-            <ProjectItem
-              key={index}
-              imageUrl={project.imageUrl}
-              name={project.name}
-              description={project.description}
-              linkUrl={project.instagramUrl}
-            />
-          ))}
-        </div>
-        <div
-          onClick={() => nav("/project")}
-          className="h-10 inline-flex justify-center items-center gap-1 cursor-pointer hover:opacity-70 transition-opacity"
-        >
-          <div className="justify-start text-neutral-900 text-[16px] font-semibold font-['Pretendard'] leading-6">
-            더 알아보기
-          </div>
-          <ChevronRight size={18} />
-        </div>
+    <div className="flex flex-col items-start gap-[40px]">
+      <div className="text-black/80 font-sogang text-[40px] font-normal leading-[120%]">
+        Projects
       </div>
-    </section>
+      <div className="inline-grid grid-cols-2 gap-8">
+        {projects.map((project, index) => (
+          <ProjectItem
+            key={index}
+            imageUrl={project.imageUrl}
+            name={project.name}
+            description={project.description}
+            linkUrl={project.instagramUrl}
+          />
+        ))}
+      </div>
+      <div
+        onClick={() => {
+          nav("/project");
+          window.scrollTo(0, 0);
+        }}
+        className="h-10 inline-flex justify-center items-center gap-1 cursor-pointer hover:opacity-70 transition-opacity"
+      >
+        <div className="justify-start text-neutral-900 text-[16px] font-semibold font-['Pretendard'] leading-6">
+          더 알아보기
+        </div>
+        <ChevronRight size={18} />
+      </div>
+    </div>
   );
 };
 

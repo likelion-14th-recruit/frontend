@@ -1,6 +1,6 @@
 const OurValuesSection = () => {
   return (
-    <section className="flex flex-col justify-center items-end gap-[60px] p-[100px] self-stretch bg-[lightGray]">
+    <div>
       <div className="flex items-start gap-8">
         <div className="w-96 h-48 bg-white/20">
           <img src="https://likrlion.s3.us-east-1.amazonaws.com/14th+web/Home/value/1.png"></img>
@@ -55,7 +55,7 @@ const OurValuesSection = () => {
           </div>
         </div>
       </div>
-    </section>
+    </div>
   );
 };
 

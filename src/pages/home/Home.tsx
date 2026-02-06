@@ -1,9 +1,12 @@
+import HHeroSection from "../../components/home/HHeroSection";
 import IntroSection from "../../components/home/IntroSection";
 import ExperienceItem from "../../components/home/ExperienceItem";
 import FAQItem from "../../components/recruit-home/FAQItem";
 import ProgramSection from "../../components/home/ProgramSection";
 import ProjectSection from "../../components/home/ProjectSection";
 import OurValuesSection from "../../components/home/OurValuesSection";
+import { useEffect } from "react";
+import HSection from "../../components/home/HSection";
 
 const ExperiencesData = [
   {
@@ -77,103 +80,65 @@ const faqList: FAQ[] = [
 ];
 
 const Home = () => {
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
   return (
-    <div>
-      <section data-header="dark" className="relative z-0 w-full text-white">
-        {/* 1. 배경 이미지: absolute를 제거하고 'relative'로 두어 section의 실제 높이를 결정하게 합니다. */}
-        <div className="relative w-full">
-          <img
-            src="https://likrlion.s3.us-east-1.amazonaws.com/14th+web/Home/1.png"
-            className="w-full h-auto block object-contain"
-            alt="background"
-          />
-          {/* 어두운 오버레이: 이미지 위에 덮음 */}
-          <div className="absolute inset-0 bg-black/60 pointer-events-none" />
+    <div className="max-w-[1440px]">
+      {/* <section data-header="light" className="bg-white"> */}
+      <HHeroSection />
 
-          {/* 2. 글씨 Wrapper: 이미지 영역(inset-0)을 100% 상속받음 */}
-          <div className="absolute inset-0 flex flex-col items-center justify-center p-4">
-            {/* 발광 효과 (Wrapper 중앙) */}
-            <div
-              className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-[80%] max-w-[800px] max-h-[500px] pointer-events-none z-0"
-              style={{
-                background:
-                  "radial-gradient(50% 50% at 50% 50%, #121212 0%, rgba(18, 18, 18, 0) 100%)",
-              }}
-            />
+      <HSection color="light">{<IntroSection />}</HSection>
+      <HSection color="lightGray">{<ProgramSection />}</HSection>
+      <HSection color="light">{<ProjectSection />}</HSection>
+      <HSection color="lightGray">{<OurValuesSection />}</HSection>
 
-            {/* 3. 글씨 사진 (Title Image) */}
-            <img
-              src="https://likrlion.s3.us-east-1.amazonaws.com/14th+web/Home/title.png"
-              className="relative z-10 w-[70%] max-w-[700px] h-auto object-contain mb-[5%] md:mb-10"
-              alt="LikeLion Sogang 14th"
-            />
-
-            {/* 4. 버튼 */}
-            <button
-              className="
-          relative z-10
-          px-[4%] py-[1.5%] md:px-[24px] md:py-[10px]
-          rounded-[12px]
-          bg-sogang
-          text-white
-          font-pretendard
-          text-[16px] md:text-[20px]
-          font-semibold
-          leading-[140%]
-          transition-transform hover:scale-105
-        "
-            >
-              14기 지원하기
-            </button>
+      {/********************************************  Experiences  *********************************************/}
+      <section
+        data-header="light"
+        className="flex flex-col justify-center items-center gap-[60px] p-[150px_200px] self-stretch"
+      >
+        <div className="flex flex-col items-center gap-[4px]">
+          <div className="text-black/60 text-center font-pretendard text-[20px] font-semibold leading-[140%]">
+            (LikeLion)
           </div>
+          <div className="text-black/80 font-sogang text-[40px] font-normal leading-[48px]">
+            Experiences
+          </div>
+        </div>
+        <div className="flex items-start gap-[32px]">
+          {ExperiencesData.map((data, index) => (
+            <ExperienceItem
+              key={index}
+              track={data.track}
+              content={data.content}
+            />
+          ))}
         </div>
       </section>
 
-      <section data-header="light" className="bg-white">
-        <IntroSection />
-        <ProgramSection />
-        <ProjectSection />
-        <OurValuesSection />
-        {/********************************************  Experiences  *********************************************/}
-        <section className="flex flex-col justify-center items-center gap-[60px] p-[150px_200px] self-stretch">
-          <div className="flex flex-col items-center gap-[4px]">
-            <div className="text-black/60 text-center font-pretendard text-[20px] font-semibold leading-[140%]">
-              (LikeLion)
-            </div>
-            <div className="text-black/80 font-sogang text-[40px] font-normal leading-[48px]">
-              Experiences
-            </div>
-          </div>
-          <div className="flex items-start gap-[32px]">
-            {ExperiencesData.map((data, index) => (
-              <ExperienceItem
+      {/********************************************  FAQ  *********************************************/}
+      <section
+        data-header="light"
+        className="flex flex-col items-center gap-10 p-[100px_200px] self-stretch"
+      >
+        <div className="text-black/80 text-center font-sogang text-[40px] font-normal leading-[120%]">
+          FAQ
+        </div>
+
+        <div className="flex flex-col items-center gap-6 self-stretch">
+          <div className="flex flex-col gap-6 self-stretch">
+            {faqList.map((faq, index) => (
+              <FAQItem
                 key={index}
-                track={data.track}
-                content={data.content}
+                question={faq.question}
+                answer={faq.answer}
               />
             ))}
           </div>
-        </section>
-
-        {/********************************************  FAQ  *********************************************/}
-        <section className="flex flex-col items-center gap-10 p-[100px_200px] self-stretch">
-          <div className="text-black/80 text-center font-sogang text-[40px] font-normal leading-[120%]">
-            FAQ
-          </div>
-
-          <div className="flex flex-col items-center gap-6 self-stretch">
-            <div className="flex flex-col gap-6 self-stretch">
-              {faqList.map((faq, index) => (
-                <FAQItem
-                  key={index}
-                  question={faq.question}
-                  answer={faq.answer}
-                />
-              ))}
-            </div>
-          </div>
-        </section>
+        </div>
       </section>
+      {/* </section> */}
     </div>
   );
 };
