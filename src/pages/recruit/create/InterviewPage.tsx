@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import SubmitModal from "../../../components/recruit/SubmitModal";
 
 const InterviewPage = () => {
   const navigate = useNavigate();
 
-  // 면접 시간 데이터 구조
   const interviewData = [
     {
       date: "3월 9일 (월)",
@@ -64,10 +64,8 @@ const InterviewPage = () => {
     },
   ];
 
-  // 선택된 시간들을 관리하는 상태 (Set을 써서 중복 방지 및 토글 용이)
   const [selectedTimes, setSelectedTimes] = useState(new Set());
 
-  // 시간 토글 함수
   const toggleTime = (timeId) => {
     const newSelection = new Set(selectedTimes);
     if (newSelection.has(timeId)) {
@@ -78,7 +76,6 @@ const InterviewPage = () => {
     setSelectedTimes(newSelection);
   };
 
-  // 날짜별 전체 선택 함수
   const toggleDateAll = (date, times) => {
     const newSelection = new Set(selectedTimes);
     const allOfDateSelected = times.every((t) =>
@@ -95,10 +92,30 @@ const InterviewPage = () => {
 
   const handleSubmit = () => {
     if (window.confirm("정말로 제출하시겠습니까?")) {
-      // 14기 지원 완료 신호를 state에 담아서 홈으로 보냅니다.
       navigate("/recruit", { state: { showCompleteModal: true } });
     }
   };
+
+  // ✅ 공통 체크박스 스타일 (서정님이 주신 수치 유지)
+  const checkboxStyle = `
+    appearance-none min-w-[24px] min-h-[24px] w-[24px] h-[24px] aspect-square border border-[#000] rounded-[4px] 
+    cursor-pointer flex items-center justify-center transition-all
+    checked:bg-[#000] checked:bg-[url('https://upload.wikimedia.org/wikipedia/commons/thumb/2/27/White_check.svg/1200px-White_check.svg.png')] 
+    checked:bg-[length:14px_14px] checked:bg-no-repeat checked:bg-center
+  `;
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleSubmitClick = () => {
+    setIsModalOpen(true); // 버튼 클릭 시 모달 열기
+  };
+
+  const handleFinalSubmit = () => {
+    // 실제 제출 로직
+    setIsModalOpen(false);
+    navigate("/recruit", { state: { showCompleteModal: true } });
+  };
+
   return (
     <div className="flex flex-col max-w-[800px] mx-auto pb-20 font-pretendard">
       <p className="text-center font-normal text-[19px] mb-12">
@@ -109,41 +126,41 @@ const InterviewPage = () => {
       <div className="flex flex-col gap-14">
         {interviewData.map((item) => (
           <section key={item.date} className="flex flex-col gap-6">
-            <h3 className="text-[20px] font-bold border-l-4 border-[#b90000] pl-3">
-              {item.date}
-            </h3>
+            <h3 className="text-[20px] font-bold text-[#000]">{item.date}</h3>
 
-            <div className="grid grid-cols-2 gap-y-4 gap-x-10 px-2">
-              {/* 전체 선택 체크박스 */}
-              <label className="flex items-center gap-3 cursor-pointer group">
+            {/* ✅ 행 간격(gap-y-5 = 20px) 설정 */}
+            <div className="grid grid-cols-2 gap-y-5 gap-x-10 px-2">
+              {/* 전체 선택 */}
+              <label className="flex items-start gap-6 cursor-pointer group">
                 <input
                   type="checkbox"
                   checked={item.times.every((t) =>
                     selectedTimes.has(`${item.date}-${t}`),
                   )}
                   onChange={() => toggleDateAll(item.date, item.times)}
-                  className="w-[24px] h-[24px] accent-[#000]"
+                  className={checkboxStyle}
                 />
-                <span className="font-normal text-[#000] text-[16px]">
+                {/* ✅ gap-4 (16px)로 체크박스와 글자 사이를 띄웠습니다. 필요하면 gap-5(20px)로 늘려보세요! */}
+                <span className="font-normal text-[#000] text-[16px] leading-[24px]">
                   전체 선택
                 </span>
               </label>
 
-              {/* 시간별 체크박스 */}
+              {/* 시간별 선택 */}
               {item.times.map((time, idx) => {
                 const id = `${item.date}-${time}`;
                 return (
                   <label
                     key={id}
-                    className="flex items-center gap-3 cursor-pointer"
+                    className="flex items-start gap-6 cursor-pointer"
                   >
                     <input
                       type="checkbox"
                       checked={selectedTimes.has(id)}
                       onChange={() => toggleTime(id)}
-                      className="w-[24px] h-[24px] accent-[#000]"
+                      className={checkboxStyle}
                     />
-                    <span className="text-[16px] text-[#000]">
+                    <span className="text-[16px] text-[#000] leading-[24px]">
                       타임 {idx + 1}{" "}
                       <span className="mx-2 text-gray-300">|</span> {time}
                     </span>
@@ -170,17 +187,20 @@ const InterviewPage = () => {
         </button>
         <button
           disabled={selectedTimes.size === 0}
-          onClick={handleSubmit}
+          onClick={handleSubmitClick} // 🔥 수정
           className={`flex-1 py-5 rounded-[15px] text-lg font-bold transition-all
-            ${
-              selectedTimes.size > 0
-                ? "bg-[#000] text-white cursor-pointer hover:bg-[#000]"
-                : "bg-gray-300 text-white cursor-not-allowed"
-            }`}
+            ${selectedTimes.size > 0 ? "bg-[#000] text-white cursor-pointer" : "bg-gray-300 text-white cursor-not-allowed"}`}
         >
           제출하기
         </button>
       </footer>
+
+      {/* 🔥 모달 컴포넌트 추가 */}
+      <SubmitModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onConfirm={handleFinalSubmit}
+      />
     </div>
   );
 };
