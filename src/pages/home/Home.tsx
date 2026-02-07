@@ -8,6 +8,79 @@ import OurValuesSection from "../../components/home/OurValuesSection";
 import { useEffect } from "react";
 import HSection from "../../components/home/HSection";
 
+const Home = () => {
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+  return (
+    <div className="max-w-[1440px]" data-header="light">
+      {/* <section data-header="light" className="bg-white"> */}
+      <HHeroSection />
+
+      <HSection color="light">{<IntroSection />}</HSection>
+      <HSection color="lightGray">{<ProgramSection />}</HSection>
+      <HSection color="light">{<ProjectSection />}</HSection>
+      <HSection color="lightGray">{<OurValuesSection />}</HSection>
+
+      {/********************************************  Experiences  *********************************************/}
+      <section
+        data-header="light"
+        className="flex flex-col justify-center items-center 
+        gap-[32px] p-[40px_20px] 
+        md:gap-[60px] md:p-[90px_60px]
+        lg:p-[150px_200px] self-stretch"
+      >
+        <div className="flex flex-col items-center md:gap-[4px]">
+          <div className="text-black/60 text-center text-[16px] md:text-[20px] font-semibold leading-[140%]">
+            (LikeLion)
+          </div>
+          <div className="text-black/80 font-sogang text-[32px] md:text-[40px] font-normal leading-[48px]">
+            Experiences
+          </div>
+        </div>
+        <div className="flex items-start gap-[20px] lg:gap-[32px]">
+          {ExperiencesData.map((data, index) => (
+            <ExperienceItem
+              key={index}
+              track={data.track}
+              content={data.content}
+            />
+          ))}
+        </div>
+      </section>
+
+      {/********************************************  FAQ  *********************************************/}
+      <section
+        data-header="light"
+        className="flex flex-col items-center gap-[32px] md:gap-[40px] p-[28px_20px] md:p-[60px] lg:p-[100px_200px] self-stretch"
+      >
+        <div className="text-black/80 text-center font-sogang text-[32px] md:text-[40px] font-normal leading-[120%]">
+          FAQ
+        </div>
+
+        <div className="flex flex-col items-center gap-6 self-stretch">
+          <div className="flex flex-col gap-4 md:gap-6 self-stretch">
+            {faqList.map((faq, index) => (
+              <FAQItem
+                key={index}
+                question={faq.question}
+                answer={faq.answer}
+              />
+            ))}
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+};
+
+export default Home;
+
+type FAQItemProps = {
+  question: string;
+  answer: string;
+};
+
 const ExperiencesData = [
   {
     track: "( Backend Part )",
@@ -46,7 +119,7 @@ const ExperiencesData = [
   },
 ];
 
-const faqList: FAQ[] = [
+const faqList: FAQItemProps[] = [
   {
     question: "멋쟁이사자처럼 공식 활동은 언제인가요?",
     answer:
@@ -78,69 +151,3 @@ const faqList: FAQ[] = [
       "궁금한 점이 있으시면 멋쟁이사자처럼 서강대학교 공식 인스타그램(@likelion_sg) DM으로 편하게 문의해 주세요.",
   },
 ];
-
-const Home = () => {
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
-  return (
-    <div className="max-w-[1440px]">
-      {/* <section data-header="light" className="bg-white"> */}
-      <HHeroSection />
-
-      <HSection color="light">{<IntroSection />}</HSection>
-      <HSection color="lightGray">{<ProgramSection />}</HSection>
-      <HSection color="light">{<ProjectSection />}</HSection>
-      <HSection color="lightGray">{<OurValuesSection />}</HSection>
-
-      {/********************************************  Experiences  *********************************************/}
-      <section
-        data-header="light"
-        className="flex flex-col justify-center items-center gap-[60px] p-[150px_200px] self-stretch"
-      >
-        <div className="flex flex-col items-center gap-[4px]">
-          <div className="text-black/60 text-center font-pretendard text-[20px] font-semibold leading-[140%]">
-            (LikeLion)
-          </div>
-          <div className="text-black/80 font-sogang text-[40px] font-normal leading-[48px]">
-            Experiences
-          </div>
-        </div>
-        <div className="flex items-start gap-[32px]">
-          {ExperiencesData.map((data, index) => (
-            <ExperienceItem
-              key={index}
-              track={data.track}
-              content={data.content}
-            />
-          ))}
-        </div>
-      </section>
-
-      {/********************************************  FAQ  *********************************************/}
-      <section
-        data-header="light"
-        className="flex flex-col items-center gap-10 p-[100px_200px] self-stretch"
-      >
-        <div className="text-black/80 text-center font-sogang text-[40px] font-normal leading-[120%]">
-          FAQ
-        </div>
-
-        <div className="flex flex-col items-center gap-6 self-stretch">
-          <div className="flex flex-col gap-6 self-stretch">
-            {faqList.map((faq, index) => (
-              <FAQItem
-                key={index}
-                question={faq.question}
-                answer={faq.answer}
-              />
-            ))}
-          </div>
-        </div>
-      </section>
-      {/* </section> */}
-    </div>
-  );
-};
-
-export default Home;

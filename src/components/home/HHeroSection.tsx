@@ -1,7 +1,12 @@
 const HeroSection = () => {
   const homeIntrobg =
     "https://likrlion.s3.us-east-1.amazonaws.com/14th+web/Home/1.png";
-  const homeIntrotitle =
+
+  const homeIntroMobile =
+    "https://likrlion.s3.us-east-1.amazonaws.com/14th+web/Home/title_2.png";
+  const homeIntroTablet =
+    "https://likrlion.s3.us-east-1.amazonaws.com/14th+web/Home/title_1.png";
+  const homeIntroDesktop =
     "https://likrlion.s3.us-east-1.amazonaws.com/14th+web/Home/title.png";
   return (
     <section
@@ -11,24 +16,28 @@ const HeroSection = () => {
                 h-[600px] md:h-[700px] lg:h-[960px] "
       //   className="relative z-0 w-full text-white flex h-[960px] flex-col justify-center items-center gap-[60px] self-stretch "
       style={{
-        background: `url(${homeIntrobg}) lightgray 0px 0px / 100% 100% no-repeat`,
+        backgroundImage: `url(${homeIntrobg})`,
+        backgroundPosition: "center",
+        backgroundSize: "cover",
+        backgroundRepeat: "no-repeat",
+        backgroundColor: "lightgray",
       }}
     >
-      <div
-        className="flex shrink-0 bg-no-repeat bg-center bg-contain
-    
-    /* [모바일] 기본값: 작게 시작 */
-    h-[141.75px] w-[280px]
-    
-    /* [태블릿/작은 데스크톱] 1024px 이상: 디자이너 지침 수치 */
-    md:h-[262px] md:max-w-[520px]
-    
-    /* [큰 데스크톱] 1440px 이상 (xl 또는 사용자 정의) */
-    lg:h-[342px] lg:max-w-[678px]"
-        style={{
-          backgroundImage: `url(${homeIntrotitle})`,
-        }}
-      ></div>
+      <div>
+        <img
+          className="block md:hidden 
+          h-[141.75px] w-[280px] flex shrink-0 bg-no-repeat bg-center bg-contain"
+          src={homeIntroMobile}
+        ></img>
+        <img
+          className="hidden md:block lg:hidden md:h-[255px] md:w-[520px] "
+          src={homeIntroTablet}
+        ></img>
+        <img
+          className="hidden lg:block lg:h-[342px] lg:max-w-[678px]"
+          src={homeIntroDesktop}
+        ></img>
+      </div>
       {/* 4. 버튼 */}
       <button
         className="
