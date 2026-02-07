@@ -19,6 +19,15 @@ export default {
         white: "#FFFFFF",
         sogang: "#B60005",
       },
+      animation: {
+        "infinite-scroll": "infinite-scroll 10s linear infinite",
+      },
+      keyframes: {
+        "infinite-scroll": {
+          from: { transform: "translateX(0)" },
+          to: { transform: "translateX(-50%)" },
+        },
+      },
     },
   },
   plugins: [],

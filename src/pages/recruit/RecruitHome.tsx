@@ -1,75 +1,122 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import RecruitActionCard from "../../components/recruit/RecruitActionCard";
+import PositionCard from "../../components/common/PositionCard";
+import FAQList from "../../components/recruit-home/FAQList";
+import HeroSection from "../../components/recruit-home/HeroSection";
+import ScheduleItem from "../../components/recruit-home/ScheduleItem";
+import Section from "../../components/recruit-home/Section";
+import { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const RecruitHome = () => {
+  const schedules = [
+    { label: "1차 서류 접수", date: "02.21 (토) ~ 03.05 (목)" },
+    { label: "1차 발표", date: "03.07 (토)" },
+    { label: "2차 면접", date: "03.09 (월) ~ 03.12 (목)" },
+    { label: "최종 발표", date: "03.14 (토)" },
+  ];
+
   const navigate = useNavigate();
-  // 수정하기 클릭 시 띄울 인증 모달 상태
+  const location = useLocation();
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
+  // 성공 모달 상태 관리
+  const [isCompleteModalOpen, setIsCompleteModalOpen] = useState(false);
+
+  useEffect(() => {
+    // 1. 변수를 미리 선언합니다.
+    let scrollUp;
+
+    // 2. 페이지에 진입하자마자 스크롤을 맨 위로 올립니다.
+    scrollUp = requestAnimationFrame(() => {
+      window.scrollTo({ top: 0, behavior: "instant" });
+    });
+
+    // 3. 만약 완료 신호(state)가 있다면 모달을 켭니다.
+    if (location.state?.showCompleteModal) {
+      setIsCompleteModalOpen(true);
+
+      // 뒤로가기 시 모달 재발생 방지를 위한 state 초기화
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+
+    // 클린업 함수에서 정확히 참조 가능합니다.
+    return () => {
+      if (scrollUp) cancelAnimationFrame(scrollUp);
+    };
+  }, [location.pathname, location.state, navigate]);
   return (
-    /* 1. 배경은 화면 끝까지 차도록 (2560px 대응) */
-    <div className="w-full min-h-screen bg-white">
-      {/* 2. 컨텐츠를 담는 큰 바구니 */}
-      <main className="w-full">
-        {/* 3. 실제 카드가 놓일 공간 - 헤더의 최대 너비와 맞춤 */}
-        <div className="min-h-screen flex flex-col md:flex-row items-center justify-center gap-[24px] md:gap-[40px] bg-white">
-          <RecruitActionCard
-            image="/recruit/add.svg"
-            title="지원서 생성하기"
-            description="처음 지원하는 경우"
-            onClick={() => navigate("/recruit/terms")}
-          />
+    <>
+      <HeroSection />
 
-          <RecruitActionCard
-            image="/recruit/modify.svg"
-            title="지원서 수정하기"
-            description="이전에 작성한 지원서가 있는 경우"
-            onClick={() => setIsAuthModalOpen(true)}
-          />
-        </div>
-      </main>
-      {/* [AuthModal] 다음 브랜치에서 본격적으로 작업할 영역 */}
-      {isAuthModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-white w-full max-w-[400px] p-10 rounded-[20px] shadow-xl flex flex-col items-center gap-6">
-            <h2 className="text-2xl font-bold text-[#333]">지원자 인증</h2>
-
-            {/* 전화번호 & 비밀번호 입력 구조 (가안) */}
-            <div className="w-full flex flex-col gap-4">
-              <input
-                type="text"
-                placeholder="전화번호"
-                className="p-3 border rounded-lg w-full"
-              />
-              <input
-                type="password"
-                placeholder="비밀번호"
-                className="p-3 border rounded-lg w-full"
-              />
-            </div>
-
-            <button className="w-full py-3 bg-black text-white rounded-lg font-bold">
-              인증하기
-            </button>
-
-            {/* 비밀번호 찾기 시나리오 추가 필요 지점 */}
-            <div className="flex gap-4 text-sm text-[#666]">
-              <button onClick={() => console.log("비밀번호 찾기 이동/전환")}>
-                비밀번호를 잊으셨나요?
-              </button>
-            </div>
-
+      {/* --- 성공 완료 모달 --- */}
+      {isCompleteModalOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-4">
+          <div className="bg-white w-full max-w-[450px] p-12 rounded-[25px] shadow-2xl flex flex-col items-center text-center gap-6">
+            <p className="text-[#000] text-[20px] leading-relaxed">
+              멋쟁이사자처럼 서강대 14기 지원이 성공적으로 완료되었습니다.
+              지원해주셔서 감사합니다.
+            </p>
             <button
-              onClick={() => setIsAuthModalOpen(false)}
-              className="text-gray-400 text-sm underline"
+              onClick={() => setIsCompleteModalOpen(false)}
+              className="w-full py-4 bg-[#000] text-white rounded-[12px] font-bold text-lg hover:bg-[#a00000] transition-colors"
             >
-              닫기
+              확인
             </button>
           </div>
         </div>
       )}
-    </div>
+
+      <div className="bg-lightGray">
+        <div className="px-[100px] py-[120px] flex flex-col gap-[80px]">
+          <Section title="모집 대상">
+            <div className="bg-white flex flex-col justify-center items-center gap-[10px] px-[20px] py-[24px] self-stretch">
+              <p className="text-center text-[20px] font-semibold leading-[140%] text-black">
+                아이디어를 현실로 만들고 싶은 기획자·디자이너·개발자, 그리고 IT
+                창업에 관심 있는 서강대학교 학생
+              </p>
+            </div>
+          </Section>
+
+          <Section title="모집 직군">
+            <div className="grid grid-cols-3 gap-[24px]">
+              <PositionCard
+                title="Backend"
+                description="데이터를 처리하고 비즈니스 로직을 설계하며, 서버 환경을 구축하고 관리합니다."
+                imageUrl="https://likrlion.s3.us-east-1.amazonaws.com/14th+web/Recruit/BE.png"
+                link="https://example.com/BEnotion"
+              />
+              <PositionCard
+                title="Frontend"
+                description="사용자와 직접 상호작용하는 인터페이스를 구현하고, 서버와 연동해 동적 웹사이트를 개발합니다."
+                imageUrl="https://likrlion.s3.us-east-1.amazonaws.com/14th+web/Recruit/FE.png"
+                link="https://example.com/FEnotion"
+              />
+              <PositionCard
+                title="Product Design"
+                description="사용자의 문제를 정의하고 서비스 전략부터 구조와 UI를 설계해 실제 시장에서 작동하는 제품으로 시각화합니다."
+                imageUrl="https://likrlion.s3.us-east-1.amazonaws.com/14th+web/Recruit/DE.png"
+                link="https://example.com/DEnotion"
+              />
+            </div>
+          </Section>
+
+          <Section title="지원 일정">
+            <div className="flex gap-[20px]">
+              {schedules.map((item) => (
+                <ScheduleItem
+                  key={item.label}
+                  label={item.label}
+                  date={item.date}
+                />
+              ))}
+            </div>
+          </Section>
+
+          <Section title="FAQ">
+            <FAQList />
+          </Section>
+        </div>
+      </div>
+    </>
   );
 };
 
