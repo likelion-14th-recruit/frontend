@@ -1,5 +1,5 @@
 // components/project/ProjectGrid.tsx
-import ProjectItem from "../home/ProjectItem";
+import ProjectItem from "./ProjectItem";
 import ProjectSkeletonCard from "./ProjectSkeletonCard";
 
 interface Post {
@@ -14,9 +14,8 @@ interface ProjectGridProps {
   isLoading: boolean;
 }
 
-const ProjectGrid = ({ projects, isLoading}: ProjectGridProps) => {
-
-    if (isLoading) {
+const ProjectGrid = ({ projects, isLoading }: ProjectGridProps) => {
+  if (isLoading) {
     return (
       <div className="flex justify-center">
         <div className="grid grid-cols-3 gap-[24px] w-fit">
@@ -29,17 +28,17 @@ const ProjectGrid = ({ projects, isLoading}: ProjectGridProps) => {
   }
   return (
     <div className="flex justify-center mb-[120px]">
-        <div className="grid grid-cols-3 gap-[24px]">
+      <div className="grid grid-cols-3 gap-[24px]">
         {projects.map((project, index) => (
-            <ProjectItem
+          <ProjectItem
             key={index}
             imageUrl={project.imageUrl}
             name={project.name}
             description={project.description}
             linkUrl={project.instagramUrl}
-            />
+          />
         ))}
-        </div>
+      </div>
     </div>
   );
 };

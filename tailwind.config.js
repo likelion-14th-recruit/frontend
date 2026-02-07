@@ -28,6 +28,11 @@ export default {
           to: { transform: "translateX(-50%)" },
         },
       },
+      screens: {
+        // 기본(모바일): 375px ~ 768px
+        md: "769px", // 769px 이상부터 태블릿
+        lg: "1025px", // 1025px 이상부터 데스크탑
+      },
     },
   },
   plugins: [],

@@ -90,7 +90,10 @@ const Header = ({ onOpenMenu }: HeaderProps) => {
             </nav>
           </div>
           {
-            <div className="md:hidden" onClick={onOpenMenu}>
+            <div
+              className="md:hidden w-[40px] h-[40px] flex p-[6px_3px] flex-col justify-center items-center gap-[10px] shrink-0"
+              onClick={onOpenMenu}
+            >
               <img
                 className="invert brightness-0"
                 src={hamburger}

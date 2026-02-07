@@ -1,14 +1,15 @@
 import { ChevronRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import ProjectItem from "./ProjectItem";
+import ProjectItem from "../project/ProjectItem";
 import { useState, useEffect } from "react";
-import axios from "axios";
+import ProjectSkeletonCard from "../project/ProjectSkeletonCard";
 
 interface Post {
   imageUrl: string;
   name: string;
   description: string;
   instagramUrl: string;
+  cohort: number;
 }
 
 const CACHE_KEY = "PJT";
@@ -76,28 +77,37 @@ const projectsData = [
 
 const ProjectSection = () => {
   // 1. 초기값은 항상 빈 배열 [] 로 설정
-  const [projects, setProjects] = useState<Post[]>(projectsData);
+  const [projects, setProjects] = useState<Post[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true); // 로딩 상태 추가 const nav = useNavigate();
   const nav = useNavigate();
-
+  const cohort = 13;
+  const getUpdatedProjects = (projects: Post[], cohortValue: number) => {
+    return projects.map((project) => ({
+      ...project,
+      cohort: cohortValue,
+    }));
+  };
   useEffect(() => {
     const fetchProjects = async () => {
       try {
-        // 캐시 확인
+        // 1. 캐시 확인
         const cachedData = getCachedProjects();
         if (cachedData && Array.isArray(cachedData)) {
           setProjects(cachedData);
+          setIsLoading(false); // 캐시가 있으면 즉시 로딩 종료
           return;
         }
 
-        // API 호출 (fetch 기준)
-        const response = await fetch("/api/projects");
+        // 2. API 호출
+        const response = await fetch(`/api/projects?cohort=${cohort}`);
         const result = await response.json();
 
-        // 서버 응답 구조에 따라 result.data 혹은 result를 체크
-        const finalData = Array.isArray(result) ? result : result.data;
+        const finalData: Post[] = Array.isArray(result)
+          ? result
+          : result.data.content.slice(0, 6);
 
         if (Array.isArray(finalData)) {
-          setProjects(finalData);
+          setProjects(getUpdatedProjects(finalData, cohort));
           localStorage.setItem(
             CACHE_KEY,
             JSON.stringify({
@@ -105,23 +115,40 @@ const ProjectSection = () => {
               timestamp: Date.now(),
             }),
           );
-        } else {
-          console.error("받아온 데이터가 배열 형식이 아닙니다:", finalData);
         }
       } catch (error) {
         console.error("데이터 로드 실패:", error);
+        // 에러 발생 시 fallback 데이터를 보여주고 싶다면 여기서 setProjects(projectsData)
+      } finally {
+        setIsLoading(false); // 성공하든 실패하든 로딩 종료
       }
     };
 
     fetchProjects();
   }, []);
 
+  // 로딩 중일 때 보여줄 UI
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-start gap-[24px] md:gap-[32px] lg:gap-[40px]">
+        <div className="text-black/80 font-sogang text-[40px] font-normal leading-[120%]">
+          Projects
+        </div>
+        <div className="inline-grid grid-cols-2 gap-8 w-full">
+          {/* 6개 정도의 스켈레톤을 보여줍니다 */}
+          {Array.from({ length: 6 }).map((_, i) => (
+            <ProjectSkeletonCard key={i} />
+          ))}
+        </div>
+      </div>
+    );
+  }
   return (
-    <div className="flex flex-col items-start gap-[40px]">
-      <div className="text-black/80 font-sogang text-[40px] font-normal leading-[120%]">
+    <div className="flex flex-col  min-w-[375] md:w-[596px] lg:w-[752px] items-start gap-[20px] md:gap-[32px] lg:gap-[40px]">
+      <div className="text-black/80 font-sogang text-[32px] md:text-[40px] font-normal leading-[120%]">
         Projects
       </div>
-      <div className="inline-grid grid-cols-2 gap-8">
+      <div className="inline-grid grid-cols-2 gap-[16px] md:gap-[20px] lg:gap-[32px] self-stretch ">
         {projects.map((project, index) => (
           <ProjectItem
             key={index}
@@ -129,6 +156,7 @@ const ProjectSection = () => {
             name={project.name}
             description={project.description}
             linkUrl={project.instagramUrl}
+            cohort={project.cohort}
           />
         ))}
       </div>
@@ -139,7 +167,7 @@ const ProjectSection = () => {
         }}
         className="h-10 inline-flex justify-center items-center gap-1 cursor-pointer hover:opacity-70 transition-opacity"
       >
-        <div className="justify-start text-neutral-900 text-[16px] font-semibold font-['Pretendard'] leading-6">
+        <div className="justify-start text-neutral-900 text-[14px] lg:text-[16px] font-semibold font-['Pretendard'] leading-6">
           더 알아보기
         </div>
         <ChevronRight size={18} />
