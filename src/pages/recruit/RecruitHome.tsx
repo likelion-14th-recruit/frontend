@@ -3,6 +3,7 @@ import FAQList from "../../components/recruit-home/FAQList";
 import HeroSection from "../../components/recruit-home/HeroSection";
 import ScheduleItem from "../../components/recruit-home/ScheduleItem";
 import Section from "../../components/recruit-home/Section";
+import CompleteModal from "../../components/recruit/CompleteModal";
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 
@@ -47,23 +48,10 @@ const RecruitHome = () => {
     <>
       <HeroSection />
 
-      {/* --- 성공 완료 모달 --- */}
-      {isCompleteModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-4">
-          <div className="bg-white w-full max-w-[450px] p-12 rounded-[25px] shadow-2xl flex flex-col items-center text-center gap-6">
-            <p className="text-[#000] text-[20px] leading-relaxed">
-              멋쟁이사자처럼 서강대 14기 지원이 성공적으로 완료되었습니다.
-              지원해주셔서 감사합니다.
-            </p>
-            <button
-              onClick={() => setIsCompleteModalOpen(false)}
-              className="w-full py-4 bg-[#000] text-white rounded-[12px] font-bold text-lg hover:bg-[#a00000] transition-colors"
-            >
-              확인
-            </button>
-          </div>
-        </div>
-      )}
+      <CompleteModal
+        isOpen={isCompleteModalOpen}
+        onClose={() => setIsCompleteModalOpen(false)}
+      />
 
       <div className="bg-lightGray">
         <div className="px-[100px] py-[120px] flex flex-col gap-[80px]">
