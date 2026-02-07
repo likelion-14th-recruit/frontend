@@ -10,7 +10,7 @@ const FAQItem = ({ question, answer }: FAQItemProps) => {
 
   return (
     <div
-      className={`flex flex-col gap-[12px] ${open ? "" : "border border-[var(--Black-20,rgba(18,18,18,0.20))]"}`}
+      className={`flex flex-col ${open ? "" : "border border-[var(--Black-20,rgba(18,18,18,0.20))]"}`}
     >
       {/* 질문 영역 (고정 카드) */}
       <button
@@ -18,13 +18,14 @@ const FAQItem = ({ question, answer }: FAQItemProps) => {
         className={`
     w-full
     flex justify-between items-center
-    px-[40px] py-[24px]
+    px-[16px] py-[12px]
+    md:px-[40px] md:py-[24px]
     text-left
     transition-colors
     ${open ? "bg-lightGray border border-black/40" : "bg-white"}
   `}
       >
-        <span className="font-pretendard text-[20px] font-semibold leading-[140%] text-black/80">
+        <span className="font-pretendard text-[14px] md:text-[20px] font-semibold leading-[140%] text-black/80">
           Q. {question}
         </span>
 
@@ -43,15 +44,15 @@ const FAQItem = ({ question, answer }: FAQItemProps) => {
 
       {/* 답변 영역 (완전히 분리) */}
       {open && (
-        <div className="px-[20px] py-[24px]">
+        <div className="px-[16px] py-[12px] md:px-[40px] md:py-[24px] lg:px-[60px]">
           <div
             className="
-            px-[40px]
-            text-[16px]
+            text-[14px]
+            md:text-[16px]
             font-pretendard
             font-regular
             leading-[160%]
-            text-black/60
+            text-black/100
           "
           >
             {answer}

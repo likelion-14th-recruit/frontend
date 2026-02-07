@@ -49,7 +49,7 @@ const Footer = () => {
             <img
               src={instaIcon}
               alt="instagram"
-              className="w-[24px] h-[24px] md:w-auto md:h-auto"
+              className="w-[44px] h-[44px] md:w-auto md:h-auto"
             />
           </a>
           <div className="flex flex-col items-center md:items-start gap-[4px] text-center md:text-left">
@@ -57,8 +57,7 @@ const Footer = () => {
               서강대학교 IT 창업 동아리
             </div>
             <div className="text-black/60 font-pretendard text-[12px] md:text-[14px] leading-[140%] self-stretch">
-              © 2025 LikeLion Sogang 14th.
-              <br className="md:hidden" /> All rights reserved.
+              © 2025 LikeLion Sogang 14th. All rights reserved.
             </div>
           </div>
         </div>
