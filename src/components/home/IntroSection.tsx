@@ -1,15 +1,32 @@
 import { ChevronRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
+import type { Variants } from "framer-motion";
+// Props 타입 정의
+const itemVariants: Variants = {
+  hidden: { opacity: 0, y: 30 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.8, ease: "easeOut" },
+  },
+};
 
 const IntroSection = () => {
   const nav = useNavigate();
   return (
-    <div className="flex flex-col justify-start items-start gap-[24px] md:gap-[32px] lg:gap-[40px] max-w-[334px] md:max-w-[576px] lg:max-w-[720px]">
-      <img
+    <motion.div
+      variants={itemVariants}
+      className="flex flex-col justify-start items-start gap-[24px] md:gap-[32px] lg:gap-[40px] max-w-[334px] md:max-w-[576px] lg:max-w-[720px]"
+    >
+      <motion.img
         className="w-[320px] md:w-[576px] lg:w-[720px] h-[178px] md:h-[320px] lg:h-[400px] "
         src="https://likrlion.s3.us-east-1.amazonaws.com/14th+web/Home/intro/1.png"
-      ></img>
-      <div className="flex flex-col items-start gap-5 self-stretch">
+      ></motion.img>
+      <motion.div
+        variants={itemVariants}
+        className="flex flex-col items-start gap-5 self-stretch"
+      >
         <div className="px-3 py-1 bg-red-700/60 inline-flex justify-center items-center gap-2.5">
           <div className="text-white font-pretendard text-[20px] md:text-[28px] lg:text-[32px] font-regular md:font-semibold leading-[120%] tracking-[-0.64px]">
             서강대학교 멋쟁이사자처럼은
@@ -22,8 +39,8 @@ const IntroSection = () => {
           결과로, 2025 신촌 대학 연합 SW 창업 경진 대회에서 은상과 동상 수상
           팀을 배출했습니다.
         </div>
-      </div>
-      <div
+      </motion.div>
+      <motion.div
         onClick={() => {
           nav("/about");
           window.scrollTo(0, 0);
@@ -34,8 +51,8 @@ const IntroSection = () => {
           더 알아보기
         </div>
         <ChevronRight size={18} />
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 };
 

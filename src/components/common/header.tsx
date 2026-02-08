@@ -1,10 +1,8 @@
-import { useState } from "react";
 import { useLocation, useNavigate, NavLink } from "react-router-dom";
 import mainLogo from "/main-logo.svg";
 import textLogoLight from "/text-logo.svg";
 import textLogoDark from "/text-logo-dark.svg";
 import { useHeaderTheme } from "../../hooks/useHeaderTheme";
-import MenuBar from "./menuBar";
 
 interface HeaderProps {
   onOpenMenu: () => void;
@@ -29,7 +27,19 @@ const Header = ({ onOpenMenu }: HeaderProps) => {
   const textLogo = isDark ? textLogoDark : textLogoLight; // dark일 때 light일 때 로고 다르게
   const isAdmin = pathname.startsWith("/admin");
   const logoTo = isAdmin ? "/admin" : "/"; //admin일 때 아닐 때 로고 navigate 루트 다르게
-
+  // 공통 네비게이션 & 스크롤 함수
+  const handleNavClick = (to: string) => {
+    // 1. 스크롤 주체인 <main> 요소를 찾아 상단으로 이동
+    const mainElement = document.querySelector("main");
+    if (mainElement) {
+      mainElement.scrollTo({
+        top: 0,
+        behavior: "smooth",
+      });
+    }
+    // 2. 페이지 이동
+    navigate(to);
+  };
   const hamburger =
     "https://likrlion.s3.us-east-1.amazonaws.com/14th+web/menu.svg";
 
@@ -45,7 +55,7 @@ const Header = ({ onOpenMenu }: HeaderProps) => {
         <div className="mx-auto flex h-[80px] w-full items-center justify-between px-[20px] lg:px-[40px]">
           <div
             className="flex items-center gap-[12px] cursor-pointer"
-            onClick={() => navigate(logoTo)}
+            onClick={() => handleNavClick(logoTo)}
           >
             <img className="h-[56px] w-[56px]" src={mainLogo} alt="logo" />
             <img
@@ -95,9 +105,8 @@ const Header = ({ onOpenMenu }: HeaderProps) => {
               onClick={onOpenMenu}
             >
               <img
-                className="invert brightness-0"
+                className={`${isDark ? "invert" : ""} brightness-0`}
                 src={hamburger}
-                color={isDark ? "white" : ""}
               />
             </div>
           }

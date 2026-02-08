@@ -1,5 +1,6 @@
 import React from "react";
 import ArchiveItem from "./ArchiveItem";
+import { motion } from "framer-motion";
 
 interface Archive {
   id: number;
@@ -94,18 +95,37 @@ const activitiesData: Archive[] = [
 ];
 
 const ArchiveList = () => {
+  const duplicatedactivities = [
+    ...activitiesData,
+    ...activitiesData,
+    ...activitiesData,
+    ...activitiesData,
+  ];
+
   return (
-    <div className="flex justify-center items-center gap-[24px] self-stretch">
-      {activitiesData.map((data) => (
-        <ArchiveItem
-          id={data.id}
-          title={data.title}
-          term={data.title}
-          imageURL={data.imageURL}
-          instaURL={data.instaURL}
-        />
+    <motion.div
+      className="flex gap-[24px] w-max"
+      animate={{
+        x: [0, "-25%"], // 전체 너비의 절반만큼 이동 (데이터가 반복되므로)
+      }}
+      transition={{
+        duration: 45, // 속도 조절
+        ease: "linear",
+        repeat: Infinity,
+      }}
+    >
+      {duplicatedactivities.map((data, index) => (
+        <div key={index} className="flex-shrink-0">
+          <ArchiveItem
+            id={data.id}
+            title={data.title}
+            term={data.term}
+            imageURL={data.imageURL}
+            instaURL={data.instaURL}
+          />
+        </div>
       ))}
-    </div>
+    </motion.div>
   );
 };
 

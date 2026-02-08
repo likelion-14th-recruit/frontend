@@ -7,58 +7,117 @@ import ProjectSection from "../../components/home/ProjectSection";
 import OurValuesSection from "../../components/home/OurValuesSection";
 import { useEffect } from "react";
 import HSection from "../../components/home/HSection";
+import { motion } from "framer-motion";
+import type { Variants } from "framer-motion";
+
+// 1. 부모(Section) 애니메이션 설정
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.2, // 자식 요소들이 0.2초 간격으로 순차 등장
+      delayChildren: 0.1, // 섹션 진입 후 0.1초 뒤 시작
+    },
+  },
+};
+
+const itemVariants: Variants = {
+  hidden: { opacity: 0, y: 30 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.8, ease: "easeOut" },
+  },
+};
 
 const Home = () => {
+  const duplicatedexperience = [
+    ...ExperiencesData,
+    ...ExperiencesData,
+    ...ExperiencesData,
+    ...ExperiencesData,
+  ];
+
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
   return (
-    <div className="max-w-[1440px]" data-header="light">
-      {/* <section data-header="light" className="bg-white"> */}
+    <div className="overflow-x-hidden w-full max-w-[1440px]" data-header="dark">
       <HHeroSection />
-
       <HSection color="light">{<IntroSection />}</HSection>
       <HSection color="lightGray">{<ProgramSection />}</HSection>
       <HSection color="light">{<ProjectSection />}</HSection>
       <HSection color="lightGray">{<OurValuesSection />}</HSection>
-
       {/********************************************  Experiences  *********************************************/}
-      <section
+
+      <motion.section
         data-header="light"
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.3 }} // 20% 정도 보일 때 한 번만 실행
+        variants={containerVariants}
         className="flex flex-col justify-center items-center 
         gap-[32px] p-[40px_20px] 
         md:gap-[60px] md:p-[90px_60px]
         lg:p-[150px_200px] self-stretch"
       >
-        <div className="flex flex-col items-center md:gap-[4px]">
+        <motion.div
+          variants={itemVariants}
+          className="flex flex-col items-center md:gap-[4px]"
+        >
           <div className="text-black/60 text-center text-[16px] md:text-[20px] font-semibold leading-[140%]">
             (LikeLion)
           </div>
           <div className="text-black/80 font-sogang text-[32px] md:text-[40px] font-normal leading-[48px]">
             Experiences
           </div>
-        </div>
-        <div className="flex items-start gap-[20px] lg:gap-[32px]">
-          {ExperiencesData.map((data, index) => (
-            <ExperienceItem
-              key={index}
-              track={data.track}
-              content={data.content}
-            />
-          ))}
-        </div>
-      </section>
-
+        </motion.div>
+        <motion.div
+          variants={itemVariants}
+          className="flex items-start gap-[20px] lg:gap-[32px]"
+        >
+          <motion.div
+            className="flex w-max gap-[20px] lg:gap-[32px]"
+            animate={{
+              x: [0, "-25%"], // 전체 너비의 절반만큼 이동 (데이터가 반복되므로)
+            }}
+            transition={{
+              duration: 35, // 속도 조절
+              ease: "linear",
+              repeat: Infinity,
+            }}
+          >
+            {duplicatedexperience.map((data, index) => (
+              <ExperienceItem
+                key={index}
+                track={data.track}
+                content={data.content}
+              />
+            ))}
+          </motion.div>
+        </motion.div>
+      </motion.section>
       {/********************************************  FAQ  *********************************************/}
-      <section
+      <motion.section
         data-header="light"
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.3 }} // 20% 정도 보일 때 한 번만 실행
+        variants={containerVariants}
         className="flex flex-col items-center gap-[32px] md:gap-[40px] p-[28px_20px] md:p-[60px] lg:p-[100px_200px] self-stretch"
       >
-        <div className="text-black/80 text-center font-sogang text-[32px] md:text-[40px] font-normal leading-[120%]">
+        <motion.div
+          variants={itemVariants}
+          className="text-black/80 text-center font-sogang text-[32px] md:text-[40px] font-normal leading-[120%]"
+        >
           FAQ
-        </div>
+        </motion.div>
 
-        <div className="flex flex-col items-center gap-6 self-stretch">
+        <motion.div
+          variants={itemVariants}
+          className="flex flex-col items-center gap-6 self-stretch"
+        >
           <div className="flex flex-col gap-4 md:gap-6 self-stretch">
             {faqList.map((faq, index) => (
               <FAQItem
@@ -68,8 +127,8 @@ const Home = () => {
               />
             ))}
           </div>
-        </div>
-      </section>
+        </motion.div>
+      </motion.section>
     </div>
   );
 };
@@ -105,7 +164,7 @@ const ExperiencesData = [
   {
     track: "( Design Part )",
     content:
-      "Figma 기초부터 실제 개발 프로젝트의 디자인을 전담하며, 디자인의 심미성과 사용성을 동시에 고려하는 경험을 할 수 있었습니다. 단순히 화면을 예쁘게 만드는 것을 넘어, 사용자 관점에서 문제를 정의하고 이를 구조적으로 해결하는 디자인 과정을 직접 고민해볼 수 있었습니다.",
+      "Figma 기초부터 실제 개발 프로젝트의 디자인을 전담하며, 디자인의 심미성과 사용성을 동시에 고려하는 경험을 할 수 있었습니다. 사용자 관점에서 문제를 정의하고 이를 구조적으로 해결하는 디자인 과정을 직접 고민해볼 수 있었습니다.",
   },
   {
     track: "( Backend Part )",

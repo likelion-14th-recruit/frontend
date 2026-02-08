@@ -1,4 +1,16 @@
 import ValueItem from "./ValueItem";
+import { motion } from "framer-motion";
+import type { Variants } from "framer-motion";
+// Props 타입 정의
+const itemVariants: Variants = {
+  hidden: { opacity: 0, y: 30 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.8, ease: "easeOut" },
+  },
+};
+
 type ValueType = {
   id: string;
   content_sm: string;
@@ -8,8 +20,14 @@ type ValueType = {
 
 const OurValuesSection = () => {
   return (
-    <div className="flex flex-col gap-[24px] md:gap-[60px]">
-      <div className="flex items-start self-stretch gap-[16px] md:gap-[20px] lg:gap-[32px]">
+    <motion.div
+      variants={itemVariants}
+      className="flex flex-col gap-[24px] md:gap-[60px]"
+    >
+      <motion.div
+        variants={itemVariants}
+        className="flex items-start self-stretch gap-[16px] md:gap-[20px] lg:gap-[32px]"
+      >
         <div className="flex items-start self-stretch gap-[16px] md:gap-[20px] lg:gap-[32px]">
           {/* 첫 번째 이미지 박스 */}
           <div className="w-[159px] md:w-[288px] lg:w-[360px] aspect-[9/5] shrink-0">
@@ -29,8 +47,11 @@ const OurValuesSection = () => {
             />
           </div>
         </div>
-      </div>
-      <div className="flex flex-col items-start gap-[20px] md:gap-[40px]">
+      </motion.div>
+      <motion.div
+        variants={itemVariants}
+        className="flex flex-col items-start gap-[20px] md:gap-[40px]"
+      >
         <div className="justify-start text-neutral-900/80 text-[32px] md:text-[40px] font-normal font-sogang leading-[48px]">
           Our Values
         </div>
@@ -45,8 +66,8 @@ const OurValuesSection = () => {
             />
           ))}
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 };
 
