@@ -30,8 +30,11 @@ export default {
       },
       screens: {
         // 기본(모바일): 375px ~ 768px
+        "mobile-lg": "660px",
         md: "769px", // 769px 이상부터 태블릿
+        "tablet-lg": "800px",
         lg: "1025px", // 1025px 이상부터 데스크탑
+        desktop: "1200px",
       },
     },
   },

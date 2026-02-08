@@ -16,10 +16,11 @@ import RecruitLayout from "./layouts/recruitLayout";
 import RecruitApplyPage from "./pages/recruit/RecruitApplyPage";
 import InterviewPage from "./pages/recruit/create/InterviewPage";
 import FindPasswordPage from "./pages/recruit/FindPasswordPage";
-
+import ScrollToTop from "./components/common/ScrollToTop";
 function App() {
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <Routes>
         <Route element={<MainLayout />}>
           <Route path="/" element={<Home />} />

@@ -3,6 +3,17 @@ import { useNavigate } from "react-router-dom";
 import ProjectItem from "../project/ProjectItem";
 import { useState, useEffect } from "react";
 import ProjectSkeletonCard from "../project/ProjectSkeletonCard";
+import { motion } from "framer-motion";
+import type { Variants } from "framer-motion";
+// Props 타입 정의
+const itemVariants: Variants = {
+  hidden: { opacity: 0, y: 30 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.8, ease: "easeOut" },
+  },
+};
 
 interface Post {
   imageUrl: string;
@@ -30,63 +41,13 @@ const getCachedProjects = (): Post[] | null => {
   return data;
 };
 
-const projectsData = [
-  {
-    imageUrl: "https://www.instagram.com/",
-    name: "RunCord | 13기",
-    description:
-      "기존 러닝 기록에 아카이빙을 더해 러닝의 의미와 재미를 확장하는 서비스",
-    instagramUrl: "https://www.instagram.com/",
-  },
-  {
-    imageUrl: "https://www.instagram.com/",
-    name: "RunCord | 13기",
-    description:
-      "기존 러닝 기록에 아카이빙을 더해 러닝의 의미와 재미를 확장하는 서비스",
-    instagramUrl: "https://www.instagram.com/",
-  },
-  {
-    imageUrl: "https://www.instagram.com/",
-    name: "RunCord | 13기",
-    description:
-      "기존 러닝 기록에 아카이빙을 더해 러닝의 의미와 재미를 확장하는 서비스",
-    instagramUrl: "https://www.instagram.com/",
-  },
-  {
-    imageUrl: "https://www.instagram.com/",
-    name: "RunCord | 13기",
-    description:
-      "기존 러닝 기록에 아카이빙을 더해 러닝의 의미와 재미를 확장하는 서비스",
-    instagramUrl: "https://www.instagram.com/",
-  },
-  {
-    imageUrl: "https://www.instagram.com/",
-    name: "RunCord | 13기",
-    description:
-      "기존 러닝 기록에 아카이빙을 더해 러닝의 의미와 재미를 확장하는 서비스",
-    instagramUrl: "https://www.instagram.com/",
-  },
-  {
-    imageUrl: "https://www.instagram.com/",
-    name: "RunCord | 13기",
-    description:
-      "기존 러닝 기록에 아카이빙을 더해 러닝의 의미와 재미를 확장하는 서비스",
-    instagramUrl: "https://www.instagram.com/",
-  },
-];
-
 const ProjectSection = () => {
   // 1. 초기값은 항상 빈 배열 [] 로 설정
   const [projects, setProjects] = useState<Post[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true); // 로딩 상태 추가 const nav = useNavigate();
   const nav = useNavigate();
-  const cohort = 13;
-  const getUpdatedProjects = (projects: Post[], cohortValue: number) => {
-    return projects.map((project) => ({
-      ...project,
-      cohort: cohortValue,
-    }));
-  };
+  const cohort: number = 13;
+
   useEffect(() => {
     const fetchProjects = async () => {
       try {
@@ -107,7 +68,7 @@ const ProjectSection = () => {
           : result.data.content.slice(0, 6);
 
         if (Array.isArray(finalData)) {
-          setProjects(getUpdatedProjects(finalData, cohort));
+          setProjects(finalData);
           localStorage.setItem(
             CACHE_KEY,
             JSON.stringify({
@@ -130,7 +91,10 @@ const ProjectSection = () => {
   // 로딩 중일 때 보여줄 UI
   if (isLoading) {
     return (
-      <div className="flex flex-col items-start gap-[24px] md:gap-[32px] lg:gap-[40px]">
+      <motion.div
+        variants={itemVariants}
+        className="flex flex-col items-start gap-[24px] md:gap-[32px] lg:gap-[40px]"
+      >
         <div className="text-black/80 font-sogang text-[40px] font-normal leading-[120%]">
           Projects
         </div>
@@ -140,15 +104,24 @@ const ProjectSection = () => {
             <ProjectSkeletonCard key={i} />
           ))}
         </div>
-      </div>
+      </motion.div>
     );
   }
   return (
-    <div className="flex flex-col  min-w-[375] md:w-[596px] lg:w-[752px] items-start gap-[20px] md:gap-[32px] lg:gap-[40px]">
-      <div className="text-black/80 font-sogang text-[32px] md:text-[40px] font-normal leading-[120%]">
+    <motion.div
+      variants={itemVariants}
+      className="flex flex-col  min-w-[375] md:w-[596px] lg:w-[752px] items-start gap-[20px] md:gap-[32px] lg:gap-[40px]"
+    >
+      <motion.div
+        variants={itemVariants}
+        className="text-black/80 font-sogang text-[32px] md:text-[40px] font-normal leading-[120%]"
+      >
         Projects
-      </div>
-      <div className="inline-grid grid-cols-2 gap-[16px] md:gap-[20px] lg:gap-[32px] self-stretch ">
+      </motion.div>
+      <motion.div
+        variants={itemVariants}
+        className="inline-grid grid-cols-2 gap-[16px] md:gap-[20px] lg:gap-[32px] self-stretch "
+      >
         {projects.map((project, index) => (
           <ProjectItem
             key={index}
@@ -159,8 +132,9 @@ const ProjectSection = () => {
             cohort={project.cohort}
           />
         ))}
-      </div>
-      <div
+      </motion.div>
+      <motion.div
+        variants={itemVariants}
         onClick={() => {
           nav("/project");
           window.scrollTo(0, 0);
@@ -171,8 +145,8 @@ const ProjectSection = () => {
           더 알아보기
         </div>
         <ChevronRight size={18} />
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 };
 

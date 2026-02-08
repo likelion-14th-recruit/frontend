@@ -1,5 +1,5 @@
-import React from "react";
-import ActivityItem from "./activityItem";
+import { React, useState } from "react";
+import ActivityItem from "./ActivityItem";
 
 interface Activity {
   id: number;
@@ -66,10 +66,25 @@ const activitiesData: Activity[] = [
   },
 ];
 const ActivityList = () => {
+  const [selectedId, setSelectedId] = useState(null);
+
   return (
-    <div className="inline-grid w-full max-w-[1200px] gap-[24px] grid-cols-3 items-start mx-auto">
+    <div
+      className="inline-grid 
+    w-[320px] mobile-lg:w-[656px] tablet-lg:w-[792px] desktop:w-[1200px] gap-[16px] tablet-lg:gap-[24px] 
+    grid-cols-1 mobile-lg:grid-cols-2 desktop:grid-cols-3 items-start mx-auto"
+    >
       {activitiesData.map((data) => (
-        <ActivityItem key={data.id} data={data} />
+        <ActivityItem
+          key={data.id}
+          data={data}
+          // 현재 내가 선택되었는지 여부 전달
+          isSelected={selectedId === data.id}
+          // 아무것도 선택되지 않았는지 여부 전달 (모두 100% 유지를 위해)
+          isNothingSelected={selectedId === null}
+          // 클릭 시 상태 업데이트
+          onClick={() => setSelectedId(data.id)}
+        />
       ))}
     </div>
   );

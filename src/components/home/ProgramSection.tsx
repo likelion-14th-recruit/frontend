@@ -1,6 +1,17 @@
 import { ChevronRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import ProgramItem from "./ProgramItem";
+import { motion } from "framer-motion";
+import type { Variants } from "framer-motion";
+// Props 타입 정의
+const itemVariants: Variants = {
+  hidden: { opacity: 0, y: 30 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.8, ease: "easeOut" },
+  },
+};
 
 const programsData = [
   {
@@ -32,11 +43,20 @@ const programsData = [
 const ProgramSection = () => {
   const nav = useNavigate();
   return (
-    <div className="flex flex-col  min-w-[375] md:w-[596px] lg:w-[752px] items-start gap-[20px] md:gap-[32px] lg:gap-[40px]">
-      <div className="text-black/80 font-sogang text-[32px] md:text-[40px] font-normal leading-[120%]">
+    <motion.div
+      variants={itemVariants}
+      className="flex flex-col  min-w-[375] md:w-[596px] lg:w-[752px] items-start gap-[20px] md:gap-[32px] lg:gap-[40px]"
+    >
+      <motion.div
+        variants={itemVariants}
+        className="text-black/80 font-sogang text-[32px] md:text-[40px] font-normal leading-[120%]"
+      >
         Programs
-      </div>
-      <div className="inline-grid grid-cols-2 gap-[16px] md:gap-[20px] lg:gap-[32px] self-stretch">
+      </motion.div>
+      <motion.div
+        variants={itemVariants}
+        className="inline-grid grid-cols-2 gap-[16px] md:gap-[20px] lg:gap-[32px] self-stretch"
+      >
         {programsData.map((program, index) => (
           <ProgramItem
             key={index}
@@ -45,14 +65,17 @@ const ProgramSection = () => {
             content={program.content}
           />
         ))}
-      </div>
-      <div className="h-10 inline-flex justify-center items-center gap-1 cursor-pointer hover:opacity-70 transition-opacity">
+      </motion.div>
+      <motion.div
+        variants={itemVariants}
+        className="h-10 inline-flex justify-center items-center gap-1 cursor-pointer hover:opacity-70 transition-opacity"
+      >
         <div className="justify-start text-neutral-900 text-[14px] lg:text-[16px] font-semibold font-['Pretendard'] leading-6">
           더 알아보기
         </div>
         <ChevronRight size={18} />
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 };
 
