@@ -48,7 +48,7 @@ const Header = ({ onOpenMenu }: HeaderProps) => {
       <header
         className={cx(
           "fixed top-0 left-0 z-[100] w-full transition-colors duration-350 max-w-[1440px]",
-          isDark ? "bg-header-dark" : "bg-header-light",
+          isDark ? "bg-header-dark" : "bg-header-light"
         )}
       >
         {/* logo 부분 */}
@@ -88,8 +88,8 @@ const Header = ({ onOpenMenu }: HeaderProps) => {
                         isActive
                           ? "text-sogang" //현재 탭 활성화면 색상 변경
                           : isDark
-                            ? "text-white" //배경 dark일 때 텍스트
-                            : "text-black", //배경 light일 때 텍스트
+                          ? "text-white" //배경 dark일 때 텍스트
+                          : "text-black" //배경 light일 때 텍스트
                       )
                     }
                   >

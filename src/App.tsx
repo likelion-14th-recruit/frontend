@@ -8,6 +8,7 @@ import About from "./pages/about/About";
 import People from "./pages/people/People";
 import RecruitHome from "./pages/recruit/RecruitHome";
 import Project from "./pages/project/Project";
+
 import TermsPage from "./pages/recruit/create/TermsPage";
 import InfoPage from "./pages/recruit/create/Infopage";
 import ApplyPage from "./pages/recruit/create/Applypage";
@@ -17,6 +18,8 @@ import RecruitApplyPage from "./pages/recruit/RecruitApplyPage";
 import InterviewPage from "./pages/recruit/create/InterviewPage";
 import FindPasswordPage from "./pages/recruit/FindPasswordPage";
 import ScrollToTop from "./components/common/ScrollToTop";
+import AdminDetail from "./pages/admin/AdminDetail";
+
 function App() {
   return (
     <BrowserRouter>
@@ -42,6 +45,7 @@ function App() {
 
         <Route element={<AdminLayout />}>
           <Route path="/admin" element={<Admin />} />
+          <Route path="/admin/:applicationPublicId" element={<AdminDetail />} />
         </Route>
       </Routes>
     </BrowserRouter>
