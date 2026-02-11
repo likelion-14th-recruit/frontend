@@ -8,10 +8,10 @@ const MainLayout = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
-    <div className="relative flex h-screen w-screen flex-col overflow-hidden">
+    <div className="relative flex flex-col w-screen h-screen overflow-hidden">
       <Header onOpenMenu={() => setIsMenuOpen(true)} />
       <MenuBar isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} />
-      <main className="no-scrollbar w-full h-full overflow-y-auto">
+      <main className="w-full h-full overflow-y-auto no-scrollbar">
         <Outlet />
         <Footer />
       </main>

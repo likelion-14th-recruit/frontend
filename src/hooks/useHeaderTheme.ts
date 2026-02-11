@@ -2,6 +2,9 @@ import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 
 type HeaderTheme = "dark" | "light";
+// 현재 섹션이 dark인지 light인지 전달하는 hook
+// -> 페이지 내에서 섹션별로 배경색 다르면, 어두운 부분에서는 data-header=dark, 밝은 부분에서는 =light로 설정하면됨
+// 자세한 건 home이랑 recruitHome에서만 배경색 변화 있어서 거기 코드 참고
 
 export function useHeaderTheme(headerPx = 80) {
   const [theme, setTheme] = useState<HeaderTheme>("light");

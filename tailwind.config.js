@@ -11,13 +11,14 @@ export default {
         "header-dark":
           "linear-gradient(180deg, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0) 100%)",
         "header-light":
-          "linear-gradient(180deg, rgba(255,255,255,0) 100%, rgba(255,255,255,0.6) 0%)",
+          "linear-gradient(180deg, rgba(255,255,255,0.9) 100%, rgba(255,255,255,0.7) 40%, rgba(255,255,255,0.1) 0%)",
       },
       colors: {
         lightGray: "#F0F0F0",
         black: "#121212",
         white: "#FFFFFF",
         sogang: "#B60005",
+        purple: "#0003AC",
       },
       animation: {
         "infinite-scroll": "infinite-scroll 10s linear infinite",

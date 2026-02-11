@@ -4,7 +4,7 @@ import Header from "../components/common/header";
 const AdminLayout = () => {
   return (
     <div className="flex w-screen">
-      <div className="relative flex h-full w-full flex-col overflow-hidden">
+      <div className="relative flex flex-col w-full h-full overflow-hidden">
         <Header />
         <main className="no-scrollbar flex-1 overflow-y-auto mt-[80px]">
           <Outlet />
