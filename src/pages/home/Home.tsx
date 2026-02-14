@@ -5,13 +5,12 @@ import FAQItem from "../../components/recruit-home/FAQItem";
 import ProgramSection from "../../components/home/ProgramSection";
 import ProjectSection from "../../components/home/ProjectSection";
 import OurValuesSection from "../../components/home/OurValuesSection";
-import { useEffect } from "react";
 import HSection from "../../components/home/HSection";
 import { motion } from "framer-motion";
 import type { Variants } from "framer-motion";
 
 // 1. 부모(Section) 애니메이션 설정
-const containerVariants = {
+const containerVariants: Variants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
@@ -39,20 +38,24 @@ const Home = () => {
     ...ExperiencesData,
   ];
 
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
   return (
-    <div className="overflow-x-hidden w-full max-w-[1440px]" data-header="dark">
+    <div className="overflow-x-hidden w-full " data-header="dark">
       <HHeroSection />
-      <HSection color="light">{<IntroSection />}</HSection>
-      <HSection color="lightGray">{<ProgramSection />}</HSection>
-      <HSection color="light">{<ProjectSection />}</HSection>
-      <HSection color="lightGray">{<OurValuesSection />}</HSection>
+      <HSection color="light">
+        <IntroSection />
+      </HSection>
+      <HSection color="lightGray">
+        <ProgramSection />
+      </HSection>
+      <HSection color="light">
+        <ProjectSection />
+      </HSection>
+      <HSection color="lightGray">
+        <OurValuesSection />
+      </HSection>
       {/********************************************  Experiences  *********************************************/}
 
       <motion.section
-        data-header="light"
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, amount: 0.3 }} // 20% 정도 보일 때 한 번만 실행
@@ -80,7 +83,7 @@ const Home = () => {
           <motion.div
             className="flex w-max gap-[20px] lg:gap-[32px]"
             animate={{
-              x: [0, "-25%"], // 전체 너비의 절반만큼 이동 (데이터가 반복되므로)
+              x: ["-25%", 0],
             }}
             transition={{
               duration: 35, // 속도 조절
@@ -100,7 +103,6 @@ const Home = () => {
       </motion.section>
       {/********************************************  FAQ  *********************************************/}
       <motion.section
-        data-header="light"
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, amount: 0.3 }} // 20% 정도 보일 때 한 번만 실행
@@ -118,7 +120,7 @@ const Home = () => {
           variants={itemVariants}
           className="flex flex-col items-center gap-6 self-stretch"
         >
-          <div className="flex flex-col gap-4 md:gap-6 self-stretch">
+          <div className="flex flex-col gap-[16px] md:gap-[24px] self-stretch">
             {faqList.map((faq, index) => (
               <FAQItem
                 key={index}

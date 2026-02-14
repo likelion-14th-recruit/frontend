@@ -1,4 +1,4 @@
-import { useLocation, useNavigate, NavLink } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import mainLogo from "/main-logo.svg";
 import textLogoLight from "/text-logo.svg";
 import instaIcon from "/instagramIcon.svg";
@@ -18,7 +18,7 @@ const Footer = () => {
   return (
     <footer
       className={cx(
-        "flex w-full bg-white justify-center border-t border-gray-100",
+        "flex w-full bg-white justify-center",
         "flex flex-col w-full max-w-[1440px] justify-between items-center transition-all",
         // 모바일 스타일 (기본)
         "px-[40px] pt-[20px] pb-[40px]",
@@ -102,7 +102,7 @@ const Footer = () => {
         {/* 인스타 아이콘 */}
         <a
           className="hidden md:flex "
-          href="https://instagram.com/..."
+          href="https://www.instagram.com/likelion_sg"
           target="_blank"
           rel="noreferrer"
         >
@@ -113,7 +113,6 @@ const Footer = () => {
           />
         </a>
       </div>
-      {/* </div> */}
     </footer>
   );
 };

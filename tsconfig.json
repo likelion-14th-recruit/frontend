@@ -6,8 +6,7 @@
   ],
   "compilerOptions": {
     "noImplicitAny": false,
-    "suppressImplicitAnyIndexErrors": true,
     "noUnusedLocals": false,
-    "strict": false
+    "strict": true
   }
 }
