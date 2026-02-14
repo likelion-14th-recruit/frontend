@@ -14,17 +14,17 @@ interface Post {
 const CACHE_KEY = "PJT";
 const CACHE_EXPIRY = 24 * 60 * 60 * 1000;
 
-// const getCachedProjects = (): Post[] | null => {
-//   const cached = localStorage.getItem(CACHE_KEY);
-//   if (!cached) return null;
+const getCachedProjects = (): Post[] | null => {
+  const cached = localStorage.getItem(CACHE_KEY);
+  if (!cached) return null;
 
-//   const { data, timestamp } = JSON.parse(cached);
-//   if (Date.now() - timestamp > CACHE_EXPIRY) {
-//     localStorage.removeItem(CACHE_KEY);
-//     return null;
-//   }
-//   return data;
-// };
+  const { data, timestamp } = JSON.parse(cached);
+  if (Date.now() - timestamp > CACHE_EXPIRY) {
+    localStorage.removeItem(CACHE_KEY);
+    return null;
+  }
+  return data;
+};
 
 //mockup data
 const projectsData = [
@@ -75,43 +75,43 @@ const projectsData = [
 const Project = () => {
  const [activeTab, setActiveTab] = useState("all");
 
-  const [projects, setProjects] = useState<Post[]>(projectsData);
+  // const [projects, setProjects] = useState<Post[]>(projectsData);
   const nav = useNavigate();
 
  //api
-  // const [projects, setProjects] = useState<Post[]>([]);
+  const [projects, setProjects] = useState<Post[]>([]);
   const [isLoading, setIsLoading] = useState(true); //api시 true로 변경! 
 
-  // useEffect(() => {
-  //   const fetchProjects = async () => {
-  //     try {
-  //       const cached = getCachedProjects();
-  //       if (cached) {
-  //         setProjects(cached);
-  //         setIsLoading(false);
-  //         return;
-  //       }
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const cached = getCachedProjects();
+        if (cached) {
+          setProjects(cached);
+          setIsLoading(false);
+          return;
+        }
 
-  //       const res = await fetch("/api/projects");
-  //       const result = await res.json();
-  //       const data = Array.isArray(result) ? result : result.data;
+        const res = await fetch("/api/projects");
+        const result = await res.json();
+        const data = Array.isArray(result) ? result : result.data;
 
-  //       if (Array.isArray(data)) {
-  //         setProjects(data);
-  //         localStorage.setItem(
-  //           CACHE_KEY,
-  //           JSON.stringify({ data, timestamp: Date.now() })
-  //         );
-  //       }
-  //     } catch (e) {
-  //       console.error(e);
-  //     } finally {
-  //       setIsLoading(false);
-  //     }
-  //   };
+        if (Array.isArray(data)) {
+          setProjects(data);
+          localStorage.setItem(
+            CACHE_KEY,
+            JSON.stringify({ data, timestamp: Date.now() })
+          );
+        }
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-  //   fetchProjects();
-  // }, []);
+    fetchProjects();
+  }, []);
 
     useEffect(() => {
     setTimeout(() => {

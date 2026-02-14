@@ -54,10 +54,29 @@ const RecruitHome = () => {
       />
 
       <div className="bg-lightGray">
-        <div className="px-[100px] py-[120px] flex flex-col gap-[80px]">
+        <div className="
+          flex 
+          flex-col 
+          gap-[40px]
+
+          px-[40px]
+          py-[60px]
+
+          desktop:gap-[80px]
+          desktop:px-[100px] 
+          desktop:py-[120px] ">
           <Section title="모집 대상">
-            <div className="bg-white flex flex-col justify-center items-center gap-[10px] px-[20px] py-[24px] self-stretch">
-              <p className="text-center text-[20px] font-semibold leading-[140%] text-black">
+            <div className="bg-white flex flex-col justify-center items-center px-[20px] py-[24px] self-stretch">
+              <p className="text-center 
+               leading-[140%] text-black
+               
+               font-regular 
+               text-[16px]
+
+               tablet-lg:font-semibold
+              
+               desktop:text-[20px]
+               ">
                 아이디어를 현실로 만들고 싶은 기획자·디자이너·개발자, 그리고 IT
                 창업에 관심 있는 서강대학교 학생
               </p>
@@ -65,7 +84,16 @@ const RecruitHome = () => {
           </Section>
 
           <Section title="모집 직군">
-            <div className="grid grid-cols-3 gap-[24px]">
+            <div className="
+                  grid
+                  grid-cols-1
+
+                  tablet-lg:grid-cols-2
+                  desktop:grid-cols-3
+
+                  gap-[16px]
+                  tablet-lg:gap-[20px]
+                  desktop:gap-[24px]">
               <PositionCard
                 title="Backend"
                 description="데이터를 처리하고 비즈니스 로직을 설계하며, 서버 환경을 구축하고 관리합니다."
@@ -88,7 +116,13 @@ const RecruitHome = () => {
           </Section>
 
           <Section title="지원 일정">
-            <div className="flex gap-[20px]">
+            <div className="
+            grid
+            grid-cols-2
+            tablet-lg:flex
+
+            gap-[16px]
+            desktop:gap-[20px]">
               {schedules.map((item) => (
                 <ScheduleItem
                   key={item.label}
