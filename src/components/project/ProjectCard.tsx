@@ -24,7 +24,7 @@ const ProjectCard = ({
     >
       <img
         src={imageUrl}
-        className="flex flex-col items-start w-[360px] h-[200px] gap-[10px] aspect-[9/5] bg-zinc-100"
+        className="flex flex-col items-start w-[360px] h-[200px] gap-[10px] aspect-[9/5]"
       />
       <div className="self-stretch px-1 pb-1 rounded-2xl inline-flex flex-col justify-end items-start gap-[12px]">
         <div className="flex justify-center items-center gap-[8px] text-black/100 font-pretendard text-[20px] font-semibold leading-[140%] ">

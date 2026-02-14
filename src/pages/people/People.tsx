@@ -3,6 +3,9 @@ import PageTitle from "../../components/people/PeoplePageTitle";
 import PeopleGrid from "../../components/people/PeopleGrid";
 import { type PeopleType } from "../../types/people";
 
+import { motion } from "framer-motion";
+import type { Variants } from "framer-motion";
+
 type TabValue = "all" | "backend" | "frontend" | "product_design";
 
 const TAB_TO_PART_MAP: Record<Exclude<TabValue, "all">, PeopleType["part"]> = {
@@ -12,6 +15,27 @@ const TAB_TO_PART_MAP: Record<Exclude<TabValue, "all">, PeopleType["part"]> = {
 };
 
 const CACHE_EXPIRY = 24 * 60 * 60 * 1000;
+
+// ✅ RecruitHome에서 사용한 흐름과 동일한 모션
+const containerVariants: Variants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.2,
+      delayChildren: 0.1,
+    },
+  },
+};
+
+const itemVariants: Variants = {
+  hidden: { opacity: 0, y: 30 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.8, ease: "easeOut" },
+  },
+};
 
 const People = () => {
   const [activeTab, setActiveTab] = useState<TabValue>("all");
@@ -23,7 +47,6 @@ const People = () => {
       try {
         setIsLoading(true);
 
-        // ✅ 탭별 캐시
         const cacheKey = `PPL_${activeTab}`;
         const cached = localStorage.getItem(cacheKey);
 
@@ -36,7 +59,6 @@ const People = () => {
           localStorage.removeItem(cacheKey);
         }
 
-        // ✅ part 쿼리 생성
         const query =
           activeTab === "all" ? "" : `?part=${TAB_TO_PART_MAP[activeTab]}`;
 
@@ -44,8 +66,6 @@ const People = () => {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
         const result = await res.json();
-
-        // 응답 구조에 맞게 (필요하면 data/content 조정)
         const data: PeopleType[] = result?.data ?? result ?? [];
 
         setPeople(data);
@@ -65,22 +85,33 @@ const People = () => {
   }, [activeTab]);
 
   return (
-    <>
-      <PageTitle
-        title="People"
-        description="멋쟁이사자처럼 서강대의 14기 운영진을 소개합니다."
-        tabs={[
-          { label: "전체", value: "all" },
-          { label: "BE", value: "backend" },
-          { label: "FE", value: "frontend" },
-          { label: "DE", value: "product_design" },
-        ]}
-        activeTab={activeTab}
-        onTabChange={(value) => setActiveTab(value as TabValue)}
-      />
+    <motion.div
+      variants={containerVariants}
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, amount: 0.3 }}
+    >
+      
+      <motion.div variants={itemVariants}>
+        <PageTitle
+          title="People"
+          description="멋쟁이사자처럼 서강대의 14기 운영진을 소개합니다."
+          tabs={[
+            { label: "전체", value: "all" },
+            { label: "BE", value: "backend" },
+            { label: "FE", value: "frontend" },
+            { label: "DE", value: "product_design" },
+          ]}
+          activeTab={activeTab}
+          onTabChange={(value) => setActiveTab(value as TabValue)}
+        />
+      </motion.div>
 
-      <PeopleGrid people={people} isLoading={isLoading} />
-    </>
+    
+      <motion.div variants={itemVariants}>
+        <PeopleGrid people={people} isLoading={isLoading} />
+      </motion.div>
+    </motion.div>
   );
 };
 

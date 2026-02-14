@@ -1,5 +1,28 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
+import type { Variants } from "framer-motion";
+
+
+const containerVariants: Variants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.2, // 텍스트 -> 버튼 순차 노출 (차분하게)
+      delayChildren: 0.1,
+    },
+  },
+};
+
+const itemVariants: Variants = {
+  hidden: { opacity: 0, y: -18 }, // 상단 -> 하단 방향으로 내려오며 등장
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.8 , ease: "easeOut" }, // 요청한 0.5초 감각
+  },
+};
 
 const HeroSection = () => {
   const navigate = useNavigate();
@@ -32,14 +55,19 @@ const HeroSection = () => {
           object-cover
           pointer-events-none
         "
+        alt=""
       />
 
-      <div
+      {/* ✅ 여기만 motion 컨테이너로 바꿔서 "텍스트 -> 버튼" 순차 등장 */}
+      <motion.div
         className="
           relative
           flex flex-col items-center
           text-center
         "
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
       >
         {/* Ellipse 배경 */}
         <div
@@ -47,11 +75,9 @@ const HeroSection = () => {
             absolute
             left-1/2 top-1/2
             -translate-x-1/2 -translate-y-1/2
-
             w-[800px]
             h-[500px]
             rounded-full
-
             pointer-events-none
           "
           style={{
@@ -61,41 +87,35 @@ const HeroSection = () => {
         />
 
         {/* 타이틀 */}
-        <h1
+        <motion.h1
+          variants={itemVariants}
           className="
             relative z-10
             text-center
-
             font-sogang
             font-regular
-            
             text-[40px]
             desktop:text-[64px]
-      
             leading-[120%]
-
-            
           "
         >
           LikeLion 14th <br />
           Recruit
-        </h1>
+        </motion.h1>
 
         {/* 설명 */}
-        <p
+        <motion.p
+          variants={itemVariants}
           className="
             relative z-10
             text-center
             text-white/80
-
             font-pretendard
             leading-[140%]
-
             mt-[16px]
             mb-[32px]
             text-[16px]
             font-semibold
-
             desktop:mt-[24px]
             desktop:mb-[40px]
             desktop:text-[20px]
@@ -103,44 +123,39 @@ const HeroSection = () => {
           "
         >
           멋쟁이사자처럼에서 꿈을 실현할 아기사자를 모집합니다!
-        </p>
+        </motion.p>
 
         {/* 버튼 */}
-      <button
-        onClick={() => navigate("/recruit/start")}
-        className="
-          relative z-10
-          flex items-center justify-center
-
-          bg-sogang
-          text-white
-
-          font-pretendard
-          leading-[140%]
-
-          text-[14px]
-          px-[16px]
-          py-[10px]
-          rounded-[10px]
-          font-semibold
-
-          tablet-lg:text-[16px]
-
-          desktop:text-[20px]
-          desktop:px-[24px]
-          desktop:rounded-[12px]
-
-          after:content-['']
-          after:absolute after:inset-0
-          after:bg-[#121212]/20
-          after:opacity-0
-          after:transition-opacity after:duration-200
-          hover:after:opacity-100
-        "
-      >
-        14기 지원하기
-      </button>
-      </div>
+        <motion.button
+          variants={itemVariants}
+          onClick={() => navigate("/recruit/start")}
+          className="
+            relative z-10
+            flex items-center justify-center
+            bg-sogang
+            text-white
+            font-pretendard
+            leading-[140%]
+            text-[14px]
+            px-[16px]
+            py-[10px]
+            rounded-[10px]
+            font-semibold
+            tablet-lg:text-[16px]
+            desktop:text-[20px]
+            desktop:px-[24px]
+            desktop:rounded-[12px]
+            after:content-['']
+            after:absolute after:inset-0
+            after:bg-[#121212]/20
+            after:opacity-0
+            after:transition-opacity after:duration-200
+            hover:after:opacity-100
+          "
+        >
+          14기 지원하기
+        </motion.button>
+      </motion.div>
     </section>
   );
 };
