@@ -11,7 +11,7 @@ type PageTitleProps = {
   onTabChange?: (value: string) => void;
 };
 
-const PageTitle = ({
+const PeoplePageTitle = ({
   title,
   description,
   tabs,
@@ -68,4 +68,4 @@ const PageTitle = ({
   );
 };
 
-export default PageTitle;
+export default PeoplePageTitle;
