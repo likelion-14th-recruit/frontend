@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import PageTitle from "../../components/people/PageTitle";
+import PageTitle from "../../components/people/PeoplePageTitle";
 import PeopleGrid from "../../components/people/PeopleGrid";
 import { type PeopleType } from "../../types/people";
 
