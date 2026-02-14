@@ -36,6 +36,12 @@ export default {
         "tablet-lg": "800px",
         lg: "1025px", // 1025px 이상부터 데스크탑
         desktop: "1200px",
+
+        "r-360-599": { min: "360px", max: "599px" },
+        "r-600-768": { min: "600px", max: "768px" },
+        "r-769-819": { min: "769px", max: "819px" },
+        "r-820-1099": { min: "820px", max: "1099px" },
+        "r-1100-up": { min: "1100px" },
       },
     },
   },

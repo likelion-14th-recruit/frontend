@@ -19,7 +19,7 @@ const ProjectPageTitle = ({
   onTabChange,
 }: PageTitleProps) => {
   return (
-    <div className="flex flex-col items-center gap-[16px] 
+    <div className="flex flex-col items-center
         px-[20px]
         mt-[100px]
 
@@ -29,6 +29,7 @@ const ProjectPageTitle = ({
       <h1 className="
         text-[28px]
         md:text-[32px] 
+        mb-[16px]
         text-black font-sogang font-regular leading-[120%] tracking-[-0.64px]">
         {title}
       </h1>

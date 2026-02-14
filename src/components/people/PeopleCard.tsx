@@ -27,7 +27,18 @@ const PeopleCard = ({ person }: PeopleCardProps) => {
   return (
     <div className="flex flex-col items-center gap-[24px]">
       {/* 이미지 */}
-      <div className="w-[240px] h-[240px]">
+      <div className="
+
+      
+        w-[160px]
+        h-[160px]
+        
+        r-820-1099:w-[240px] 
+        r-820-1099:h-[240px]
+
+        r-1100-up:w-[240px] 
+        r-1100-up:h-[240px]
+        ">
         <img
           src={imageUrl}
           alt={name}
@@ -36,22 +47,49 @@ const PeopleCard = ({ person }: PeopleCardProps) => {
       </div>
 
       {/* 텍스트 */}
-      <div className="flex flex-col items-center gap-[4px] text-center">
-        <p className="font-sogang text-[20px] text-black leading-[140%]">
+      <div className="flex flex-col items-center text-center">
+        <p className="font-sogang 
+          text-[20px] 
+
+          mt-[4px]
+          mb-[4px]
+          r-820-1099:mt-[12px]
+          r-820-1099:mb-[8px]
+          r-1100-up:mt-[12px]
+          r-1100-up:mb-[8px]
+          
+          text-black leading-[140%]">
           {name}
         </p>
 
         {isPresident ? (
           <>
-            <p className="font-pretendard text-[16px] text-black leading-[160%]">
+            <p className="font-pretendard 
+              text-[14px]
+              r-820-1099:text-[16px]  
+              r-1100-up:text-[16px] 
+              text-black leading-[160%]">
               {cohort}기 멋쟁이사자처럼 {POSITION_LABEL[position]}
             </p>
-            <p className="font-pretendard text-[16px] text-black leading-[160%]">
+            <p className="font-pretendard 
+              text-[14px]
+              r-820-1099:text-[16px]  
+              r-1100-up:text-[16px] 
+              text-black leading-[160%]
+
+              mb-[4px]
+              r-820-1099:mb-[20px]
+              r-1100-up:mb-[20px]
+              ">
               {PART_LABEL[part]} 운영진
             </p>
           </>
         ) : (
-          <p className="font-pretendard text-[16px] text-black leading-[160%]">
+          <p className="font-pretendard 
+            text-[14px]
+            r-820-1099:text-[16px]  
+            r-1100-up:text-[16px] 
+            text-black leading-[160%]">
             {cohort}기 {PART_LABEL[part]} {POSITION_LABEL[position]}
           </p>
         )}
