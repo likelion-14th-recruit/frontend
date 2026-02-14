@@ -1,3 +1,12 @@
+interface ActivityItemProps {
+  data: Activity;
+  isHovered: boolean;
+  isNothingHovered: boolean;
+  onMouseEnter: () => void;
+  onMouseLeave: () => void;
+  onClick: () => void;
+}
+
 interface Activity {
   id: number;
   title: string;
@@ -6,30 +15,26 @@ interface Activity {
   imageURL: string;
 }
 
-interface ActivityItemProps {
-  data: Activity;
-  isSelected: boolean;
-  isNothingSelected: boolean;
-  onClick: () => void;
-}
-
 const ActivityItem = ({
   data,
-  isSelected,
-  isNothingSelected,
+  isHovered,
+  isNothingHovered,
+  onMouseEnter,
+  onMouseLeave,
   onClick,
 }: ActivityItemProps) => {
   return (
     <div
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
       onClick={onClick}
-      className={`group relative flex flex-col items-start gap-[16px] w-[320px] h-[200px] tablet-lg:w-auto tablet-lg:h-[240px] self-stretch overflow-hidden justify-end cursor-pointer transition-all 
-      ${!isNothingSelected && !isSelected ? "opacity-90" : "opacity-100"}`}
-      /* 선택된 게 있는데 내가 아니면 opacity를 낮춤 (90%보다 더 차이를 두기 위해 40% 예시) */
+      className={`group relative flex flex-col items-start w-[320px] h-[200px] tablet-lg:w-auto tablet-lg:h-[240px] overflow-hidden justify-end cursor-pointer transition-all duration-300
+      ${!isNothingHovered && !isHovered ? "opacity-80" : "opacity-90"}`}
     >
       <div
         className="flex p-[24px_32px] flex-col items-start gap-[16px] self-stretch h-full transition-opacity duration-300"
         style={{
-          background: `linear-gradient(0deg, rgba(18, 18, 18, 0.64) 0%, rgba(18, 18, 18, 0.64) 100%), url(${data.imageURL}) lightgray 50% / cover no-repeat`,
+          background: `${isHovered ? `linear-gradient(0deg, rgba(18, 18, 18, 0.64) 0%, rgba(18, 18, 18, 0.64) 100%), url(${data.imageURL}) lightgray 50% / cover no-repeat` : `url(${data.imageURL}) lightgray 50% / cover no-repeat`}`,
         }}
       >
         <div className="flex justify-between items-center self-stretch">
@@ -41,10 +46,10 @@ const ActivityItem = ({
           </div>
         </div>
 
-        {/* 클릭된 아이템만 설명(description) 노출 */}
+        {/* 호버된 아이템만 설명(description) 노출 */}
         <div
-          className={`self-stretch text-white/100 font-pretendard text-[14px] tablet-lg:text-[16px] leading-[160%] transition-all duration-300 overflow-hidden
-          ${isSelected ? "opacity-100 max-h-[200px] mt-2" : "opacity-0 max-h-0"}`}
+          className={`self-stretch text-white/100 font-pretendard text-[14px] tablet-lg:text-[16px] leading-[160%] transition-all duration-500 ease-in-out overflow-hidden
+          ${isHovered ? "opacity-100 max-h-[150px] mt-2" : "opacity-0 max-h-0 mt-0"}`}
         >
           {data.description}
         </div>
