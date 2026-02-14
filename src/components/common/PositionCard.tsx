@@ -22,7 +22,8 @@ const PositionCard = ({ title, description, imageUrl, link }: Position) => {
       >
         {/* 왼쪽 콘텐츠 */}
         <div className="relative z-10 flex h-full flex-col justify-between">
-          <h3 className="font-sogang text-[32px] font-normal leading-[120%] text-black">
+          <h3 className="font-sogang text-[28px] font-normal leading-[120%] text-black
+          desktop:text-[32px]">
             {title}
           </h3>
 

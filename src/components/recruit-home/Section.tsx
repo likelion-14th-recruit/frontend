@@ -12,13 +12,21 @@ const Section = ({ title, children }: SectionProps) => {
     <section className='
         flex
         flex-col
-        gap-[32px]'>
+        gap-[20px]
+
+        tablet-lg:gap-[24px]
+        
+        desktop:gap-[32px]'>
       <h2
         className={`
-          text-[32px]
+          text-[20px]
           font-semibold
           tracking-[-0.64px]
           text-black/80
+
+          tablet-lg:text-[28px]
+          desktop:text-[32px]
+  
           ${isFAQ ? "font-sogang font-normal" : "font-pretendard"}
         `}
       >

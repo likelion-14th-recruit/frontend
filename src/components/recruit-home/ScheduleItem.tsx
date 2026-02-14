@@ -19,11 +19,13 @@ const ScheduleItem = ({ label, date }: ScheduleItemProps) => {
       <span
         className="
           font-pretendard
-          text-[20px]
           font-semibold
           leading-[140%]
           text-black
           text-center
+
+          text-[16px]
+          tablet:lg:text-[20px]
         "
       >
         {label}
@@ -32,11 +34,13 @@ const ScheduleItem = ({ label, date }: ScheduleItemProps) => {
       <span
         className="
           font-pretendard
-          text-[16px]
           font-regular
           text-black
           leading-[160%]
           text-center
+
+          text-[14px]
+          tablet-lg:text-[16px]
         "
       >
         {date}
