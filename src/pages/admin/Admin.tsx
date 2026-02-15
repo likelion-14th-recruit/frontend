@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
-import FilterBtn from "../../components/admin/filterBtn";
-import FilterLabel from "../../components/admin/filterLabel";
+import FilterBtn from "../../components/admin/FilterBtn";
+import FilterLabel from "../../components/admin/FilterLabel";
 import SearchIcon from "/icons/search.svg";
-import DropDown from "../../components/admin/dropDown";
-import Button from "../../components/admin/button";
-import ApplicantTable from "../../components/admin/applicantTable";
+import DropDown from "../../components/admin/DropDown";
+import Button from "../../components/admin/Button";
+import ApplicantTable from "../../components/admin/ApplicantTable";
 import Pagination from "../../components/admin/Pagination";
-import Modal from "../../components/admin/modal";
+import Modal from "../../components/admin/Modal";
 import {
   PART,
   PASS_STATUS,
@@ -37,6 +37,7 @@ const Admin = () => {
 
   const [modalContent, setModalContent] = useState(""); //모달 내용
   const [open, setOpen] = useState(false); //모달 표시 여부
+  const [sendType, setSendType] = useState<"doc" | "final" | null>(null);
 
   //필터 설정
   const [filters, setFilters] = useState<Filter>({
@@ -91,6 +92,54 @@ const Admin = () => {
     setIsFilterChanged(false);
   };
 
+  // 서류 합격자 문자 발송
+  const sendDocPassMessage = async () => {
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/applications/messages/document-result`,
+        {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Content-type": "application/json",
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("something went wrong");
+      }
+      const data = await response.json();
+    } catch (error) {
+      console.error("Error fetching application detail data:", error);
+    }
+  };
+
+  // 최종 합격자 문자 발송
+  const sendFinalPassMessage = async () => {
+    try {
+      const response = await fetch(
+        `${
+          import.meta.env.VITE_API_URL
+        }/applications/messages/interview-result`,
+        {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Content-type": "application/json",
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("something went wrong");
+      }
+      const data = await response.json();
+    } catch (error) {
+      console.error("Error fetching application detail data:", error);
+    }
+  };
+
   const handleFilter = async () => {
     const nextFilters: Filter = {
       page: page.page,
@@ -137,16 +186,33 @@ const Admin = () => {
     handleFilter();
   }, [page.page]);
 
-  useEffect(() => {}, [filters]);
-
   const handleSendMessage = (type: "doc" | "final") => {
-    const message =
+    setSendType(type);
+
+    setModalContent(
       type === "doc"
         ? "서류 합격자 문자를 발송하시겠습니까?"
-        : "최종 합격자 문자를 발송하시겠습니까?";
+        : "최종 합격자 문자를 발송하시겠습니까?"
+    );
 
-    setModalContent(message);
     setOpen(true);
+  };
+
+  const handleConfirmSend = async () => {
+    if (!sendType) return;
+
+    try {
+      if (sendType === "doc") {
+        await sendDocPassMessage();
+      } else {
+        await sendFinalPassMessage();
+      }
+      setOpen(false);
+      setSendType(null);
+    } catch (e) {
+      console.error(e);
+      // 여기서 실패 모달/토스트 띄우고 싶으면 추가
+    }
   };
 
   return (
@@ -208,6 +274,7 @@ const Admin = () => {
               <DropDown
                 isTime={true}
                 isAll={true}
+                value={timeSelected}
                 data={interviewTime}
                 onChange={setTimeSelected}
               >
@@ -249,15 +316,31 @@ const Admin = () => {
         <div className="w-full border-b border-lightGray"></div>
 
         <div className="flex w-full justify-end gap-[12px] mt-[20px]">
-          <Button styleType="purple" onClick={() => handleSendMessage("doc")}>
+          <Button
+            styleType="purple"
+            isActive={true}
+            onClick={() => handleSendMessage("doc")}
+          >
             서류 합격자 문자 발송
           </Button>
-          <Button styleType="sogang" onClick={() => handleSendMessage("final")}>
+          <Button
+            styleType="sogang"
+            isActive={true}
+            onClick={() => handleSendMessage("final")}
+          >
             최종 합격자 문자 발송
           </Button>
         </div>
 
-        <Modal isTwo={true} isOpen={open} onClose={() => setOpen(false)}>
+        <Modal
+          isTwo={true}
+          isOpen={open}
+          onClose={() => {
+            setOpen(false);
+            setSendType(null);
+          }}
+          onConfirm={handleConfirmSend}
+        >
           <div>
             {modalContent}
             <br />

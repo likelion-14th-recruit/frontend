@@ -106,15 +106,15 @@ export const dateOfWeek = [
 
 export const interviewTime = [
   { label: "전체", value: "ALL" },
-  { label: "18:00 ~ 18:20", value: "18:00:00" },
-  { label: "18:25 ~ 18:45", value: "18:25:00" },
-  { label: "18:50 ~ 19:10", value: "18:50:00" },
-  { label: "19:15 ~ 19:35", value: "19:15:00" },
-  { label: "19:40 ~ 20:00", value: "19:40:00" },
-  { label: "20:05 ~ 20:25", value: "20:05:00" },
-  { label: "20:30 ~ 20:50", value: "20:30:00" },
-  { label: "20:55 ~ 21:15", value: "20:55:00" },
-  { label: "21:20 ~ 21:40", value: "21:20:00" },
+  { label: "18:00 ~ 18:20", value: "18:00" },
+  { label: "18:25 ~ 18:45", value: "18:25" },
+  { label: "18:50 ~ 19:10", value: "18:50" },
+  { label: "19:15 ~ 19:35", value: "19:15" },
+  { label: "19:40 ~ 20:00", value: "19:40" },
+  { label: "20:05 ~ 20:25", value: "20:05" },
+  { label: "20:30 ~ 20:50", value: "20:30" },
+  { label: "20:55 ~ 21:15", value: "20:55" },
+  { label: "21:20 ~ 21:40", value: "21:20" },
 ];
 
 export const academicStatus = [
