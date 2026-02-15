@@ -6,8 +6,16 @@ type Position = {
 };
 
 const PositionCard = ({ title, description, imageUrl, link }: Position) => {
+  const handleClick = () => {
+    if (link) {
+      window.open(link, "_blank", "noopener,noreferrer");
+    }
+  };
+
   return (
-    <article className="flex flex-col gap-[12px]">
+    <article 
+    onClick={handleClick}
+    className={`flex flex-col gap-[12px] ${link ? "cursor-pointer" : ""}`}>
       {/* 카드 영역 */}
       <div
         className="
@@ -29,19 +37,15 @@ const PositionCard = ({ title, description, imageUrl, link }: Position) => {
           </h3>
 
           {link && (
-            <a
-              href={link}
-              target="_blank"
-              rel="noopener noreferrer"
+            <div
               className="
                 w-[36px]
                 h-[36px]
-                flex-shrink-0
                 rounded-full
                 flex
                 items-center
                 justify-center
-                "
+              "
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -55,7 +59,7 @@ const PositionCard = ({ title, description, imageUrl, link }: Position) => {
                   fill="rgba(182, 0, 5, 0.52)"
                 />
               </svg>
-            </a>
+            </div>
           )}
         </div>
 
