@@ -1,5 +1,4 @@
 import type { Dispatch, SetStateAction } from "react";
-import DropDown from "./DropDown";
 import {
   dateOfWeek,
   interviewDates,
@@ -11,6 +10,7 @@ import {
   academicStatus,
   type InterviewSchedule,
 } from "../../constants/adminFilter";
+import DropDown from "./DropDown";
 
 const DetailTable = ({
   data,
