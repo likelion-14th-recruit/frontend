@@ -69,10 +69,10 @@ const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 font-pretendard">
       <div className="absolute inset-0" onClick={onClose} />
 
-      <div className="relative bg-white w-full max-w-[800px] px-[40px] md:px-[100px] py-[60px] rounded-[25px] shadow-2xl flex flex-col items-center gap-[60px]">
+      <div className="relative bg-white w-full max-w-[800px] px-[40px] md:px-[100px] py-[60px] rounded-[40px] flex flex-col items-center gap-[40px]">
         <h2 className="text-[32px] font-semibold text-[#000]">지원자 인증</h2>
 
-        <div className="w-full flex flex-col gap-6">
+        <div className="w-full flex flex-col gap-[32px]">
           <div className="flex flex-col gap-2">
             <label className="text-[20px] font-semibold text-[#000] ml-1">
               전화번호
@@ -92,7 +92,7 @@ const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
             )}
           </div>
 
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-[20px]">
             <label className="text-[20px] font-semibold text-[#000] ml-1">
               비밀번호
             </label>
