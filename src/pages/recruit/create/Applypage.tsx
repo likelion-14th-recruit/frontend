@@ -24,52 +24,47 @@ const ApplyPage = () => {
   const setFormData = context?.setFormData;
 
   useEffect(() => {
-    const fetchQuestions = async () => {
-      // ⚠️ ID가 없으면 바로 리턴
-      if (!applicationId) {
-        console.warn(
-          "⚠️ applicationId가 state에 없습니다. 이전 페이지를 확인하세요.",
-        );
-        return;
-      }
+    const initData = async () => {
+      if (!applicationId) return;
 
       try {
-        console.log(
-          `🔍 질문 요청 시작: /api/applications/${applicationId}/questions`,
-        );
-        const response = await fetch(
+        // 1. 질문 목록 가져오기
+        const qRes = await fetch(
           `/api/applications/${applicationId}/questions`,
-          {
-            method: "GET",
-            headers: { "Content-Type": "application/json" },
-          },
         );
+        const qResult = await qRes.json();
 
-        if (response.ok) {
-          const result = await response.json();
-          console.log("✅ 서버 응답 데이터:", result);
+        if (!qRes.ok || !qResult.data) return;
 
-          // 만약 데이터가 result.data.questions 형태라면:
-          if (result.data && Array.isArray(result.data.questions)) {
-            const sortedQuestions = result.data.questions.sort(
-              (a, b) => a.questionNumber - b.questionNumber,
+        const sortedQuestions = qResult.data.questions.sort(
+          (a, b) => a.questionNumber - b.questionNumber,
+        );
+        setQuestions(sortedQuestions);
+
+        // 2. 이미 작성된 답변 가져오기
+        const aRes = await fetch(`/api/applications/${applicationId}/answers`);
+        const aResult = await aRes.json();
+
+        if (aRes.ok && aResult.data?.answers) {
+          const newAnswers = {};
+          aResult.data.answers.forEach((ans) => {
+            // 서버에서 온 답변을 q1, q2... 형식으로 매핑
+            const targetQ = sortedQuestions.find(
+              (q) => q.questionId === ans.questionId,
             );
-            setQuestions(sortedQuestions);
-          } else {
-            console.error("❌ 질문 데이터 형식이 올바르지 않습니다:", result);
-          }
-        } else {
-          console.error(
-            "❌ 질문 목록 로드 실패 (HTTP status):",
-            response.status,
-          );
+            if (targetQ) {
+              newAnswers[`q${targetQ.questionNumber}`] = ans.content;
+            }
+          });
+          // 기존 formData와 합치기
+          setFormData?.((prev) => ({ ...prev, ...newAnswers }));
         }
       } catch (error) {
-        console.error("❌ 네트워크 에러:", error);
+        console.error("데이터 로드 중 에러:", error);
       }
     };
 
-    fetchQuestions();
+    initData();
   }, [applicationId]);
 
   // 핸들러 및 기타 변수 (LABEL 등) 동일...
@@ -94,9 +89,16 @@ const ApplyPage = () => {
     const checkLength = (text) =>
       (text?.trim().length || 0) >= 1 && (text?.trim().length || 0) <= 500;
 
+    // 🔥 수정: 렌더링되는(GitHub 제외) 질문들만 검사하도록 필터링 추가
+    const displayQuestions = questions.filter(
+      (q) => !q.content.includes("GitHub"),
+    );
+
     const commonValid =
       questions.length > 0 &&
-      questions.every((q) => checkLength(formData[`q${q.questionNumber}`]));
+      displayQuestions.every((q) =>
+        checkLength(formData[`q${q.questionNumber}`]),
+      );
 
     if (isDesign) {
       // 디자인: 자기소개서 완필 + 링크 필수
@@ -106,6 +108,44 @@ const ApplyPage = () => {
       return commonValid;
     }
   })();
+
+  const handleSave = async () => {
+    // 1. 500자 초과 여부 확인
+    const isOverLimit = questions.some(
+      (q) => (formData[`q${q.questionNumber}`]?.length || 0) > 500,
+    );
+
+    if (isOverLimit) {
+      alert("각 문항당 500자를 초과할 수 없습니다.");
+      return;
+    }
+
+    // 2. 서버 형식에 맞게 데이터 가공 (질문 순회하며 답변 매칭)
+    const answersPayload = questions.map((q) => ({
+      questionId: q.questionId,
+      content: formData[`q${q.questionNumber}`] || "", // 작성 안 했으면 빈 문자열
+    }));
+
+    try {
+      const response = await fetch(
+        `/api/applications/${applicationId}/answers`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ answers: answersPayload }),
+        },
+      );
+
+      if (response.ok) {
+        alert("임시 저장되었습니다.");
+      } else {
+        const result = await response.json();
+        alert(`저장 실패: ${result.message}`);
+      }
+    } catch (error) {
+      alert("서버와 통신 중 오류가 발생했습니다.");
+    }
+  };
 
   return (
     <div className="flex flex-col max-w-[800px] mx-auto pb-20 font-pretendard">
@@ -172,8 +212,9 @@ const ApplyPage = () => {
           이전으로
         </button>
         <button
-          onClick={() => alert("임시 저장되었습니다.")}
-          className="flex-1 py-6 border border-[#ccc] rounded-[12px] text-[20px] font-bold"
+          type="button" // form 안에 있을 경우 submit 방지
+          onClick={handleSave}
+          className="flex-1 py-6 border border-[#ccc] rounded-[12px] text-[20px] font-bold hover:bg-gray-50 transition-colors"
         >
           임시 저장
         </button>
