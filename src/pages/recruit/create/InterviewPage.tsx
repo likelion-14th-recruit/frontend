@@ -1,172 +1,186 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import SubmitModal from "../../../components/recruit/SubmitModal";
 
 const InterviewPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const applicationId = location.state?.applicationId;
 
-  const interviewData = [
-    {
-      date: "3월 9일 (월)",
-      times: [
-        "18:00 - 18:20",
-        "18:25 - 18:45",
-        "18:50 - 19:10",
-        "19:15 - 19:35",
-        "19:40 - 20:00",
-        "20:05 - 20:25",
-        "20:30 - 20:50",
-        "20:55 - 21:15",
-        "21:20 - 21:40",
-      ],
-    },
-    {
-      date: "3월 10일 (화)",
-      times: [
-        "18:00 - 18:20",
-        "18:25 - 18:45",
-        "18:50 - 19:10",
-        "19:15 - 19:35",
-        "19:40 - 20:00",
-        "20:05 - 20:25",
-        "20:30 - 20:50",
-        "20:55 - 21:15",
-        "21:20 - 21:40",
-      ],
-    },
-    {
-      date: "3월 11일 (수)",
-      times: [
-        "18:00 - 18:20",
-        "18:25 - 18:45",
-        "18:50 - 19:10",
-        "19:15 - 19:35",
-        "19:40 - 20:00",
-        "20:05 - 20:25",
-        "20:30 - 20:50",
-        "20:55 - 21:15",
-        "21:20 - 21:40",
-      ],
-    },
-    {
-      date: "3월 12일 (목)",
-      times: [
-        "18:00 - 18:20",
-        "18:25 - 18:45",
-        "18:50 - 19:10",
-        "19:15 - 19:35",
-        "19:40 - 20:00",
-        "20:05 - 20:25",
-        "20:30 - 20:50",
-        "20:55 - 21:15",
-        "21:20 - 21:40",
-      ],
-    },
-  ];
-
+  const [interviewData, setInterviewData] = useState([]);
   const [selectedTimes, setSelectedTimes] = useState(new Set());
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
+  // 요일 매핑 객체 추가
+  const DAY_MAP = {
+    MONDAY: "월",
+    TUESDAY: "화",
+    WEDNESDAY: "수",
+    THURSDAY: "목",
+    FRIDAY: "금",
+    SATURDAY: "토",
+    SUNDAY: "일",
+  };
+
+  // 시간 포맷팅 함수 (18:00:00 -> 18:00)
+  const formatTime = (time) => {
+    if (!time) return "";
+    return time.split(":").slice(0, 2).join(":");
+  };
+
+  // 1. 데이터 초기화
+  useEffect(() => {
+    const initInterviewData = async () => {
+      if (!applicationId) return;
+      try {
+        const allTimesRes = await fetch("/api/interview-times");
+        const allTimesResult = await allTimesRes.json();
+
+        if (allTimesRes.ok && allTimesResult.data) {
+          // 🔥 날짜 오름차순 정렬 (서버에서 역순으로 올 경우 대비)
+          const sortedData = [...allTimesResult.data].sort(
+            (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
+          );
+          setInterviewData(sortedData);
+        } else {
+          console.error("서버 에러 메시지:", allTimesResult.message);
+        }
+
+        const myAvailableRes = await fetch(
+          `/api/applications/${applicationId}/interview-available`,
+        );
+        const myResult = await myAvailableRes.json();
+        if (myAvailableRes.ok && myResult.data?.interviewTimeIds) {
+          setSelectedTimes(new Set(myResult.data.interviewTimeIds));
+        }
+      } catch (error) {
+        console.error("로딩 에러:", error);
+      }
+    };
+    initInterviewData();
+  }, [applicationId]);
+
+  // 2. 토글 핸들러 (ID 기준)
   const toggleTime = (timeId) => {
     const newSelection = new Set(selectedTimes);
-    if (newSelection.has(timeId)) {
-      newSelection.delete(timeId);
-    } else {
-      newSelection.add(timeId);
-    }
+    newSelection.has(timeId)
+      ? newSelection.delete(timeId)
+      : newSelection.add(timeId);
     setSelectedTimes(newSelection);
   };
 
-  const toggleDateAll = (date, times) => {
+  const toggleDateAll = (times) => {
     const newSelection = new Set(selectedTimes);
-    const allOfDateSelected = times.every((t) =>
-      newSelection.has(`${date}-${t}`),
-    );
+    const timeIds = times.map((t) => t.interviewTimeId);
+    const allSelected = timeIds.every((id) => newSelection.has(id));
 
-    times.forEach((t) => {
-      const id = `${date}-${t}`;
-      if (allOfDateSelected) newSelection.delete(id);
-      else newSelection.add(id);
+    timeIds.forEach((id) => {
+      allSelected ? newSelection.delete(id) : newSelection.add(id);
     });
     setSelectedTimes(newSelection);
   };
 
-  const handleSubmit = () => {
-    if (window.confirm("정말로 제출하시겠습니까?")) {
-      navigate("/recruit", { state: { showCompleteModal: true } });
+  // InterviewPage.tsx 내부의 handleSave 함수
+
+  const handleSave = async (isFinal = false) => {
+    const token = localStorage.getItem("accessToken");
+    const headers = {
+      "Content-Type": "application/json",
+      Authorization: token ? `Bearer ${token}` : "",
+    };
+
+    try {
+      // 1. 먼저 현재 선택된 면접 시간을 저장합니다 (POST /interview-available)
+      const saveResponse = await fetch(
+        `/api/applications/${applicationId}/interview-available`,
+        {
+          method: "POST",
+          headers: headers,
+          body: JSON.stringify({
+            interviewTimeIds: Array.from(selectedTimes),
+          }),
+        },
+      );
+
+      if (!saveResponse.ok) {
+        alert("면접 시간 저장 중 오류가 발생했습니다.");
+        return;
+      }
+
+      // 2. 🔥 최종 제출인 경우에만 제출 API 호출 (POST /submit)
+      if (isFinal) {
+        const submitResponse = await fetch(
+          `/api/applications/${applicationId}/submit`,
+          {
+            method: "POST", // 명세하신 대로 POST
+            headers: headers,
+          },
+        );
+
+        if (submitResponse.ok) {
+          setIsModalOpen(false);
+          // 제출 완료 후 성공 모달을 띄우기 위해 리다이렉트
+          navigate("/recruit", { state: { showCompleteModal: true } });
+        } else {
+          const errorData = await submitResponse.json();
+          alert(
+            `제출 실패: ${errorData.message || "이미 제출되었거나 오류가 발생했습니다."}`,
+          );
+        }
+      } else {
+        // 최종 제출이 아닌 일반 임시 저장일 때
+        alert("임시 저장되었습니다.");
+      }
+    } catch (error) {
+      console.error("제출 에러:", error);
+      alert("서버 연결 오류가 발생했습니다.");
     }
   };
 
-  // ✅ 공통 체크박스 스타일 (서정님이 주신 수치 유지)
-  const checkboxStyle = `
-    appearance-none min-w-[24px] min-h-[24px] w-[24px] h-[24px] aspect-square border border-[#000] rounded-[4px] 
-    cursor-pointer flex items-center justify-center transition-all
-    checked:bg-[#000] checked:bg-[url('https://upload.wikimedia.org/wikipedia/commons/thumb/2/27/White_check.svg/1200px-White_check.svg.png')] 
-    checked:bg-[length:14px_14px] checked:bg-no-repeat checked:bg-center
-  `;
-
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
-  const handleSubmitClick = () => {
-    setIsModalOpen(true); // 버튼 클릭 시 모달 열기
-  };
-
-  const handleFinalSubmit = () => {
-    // 실제 제출 로직
-    setIsModalOpen(false);
-    navigate("/recruit", { state: { showCompleteModal: true } });
-  };
+  const checkboxStyle = `appearance-none min-w-[24px] min-h-[24px] w-[24px] h-[24px] border border-[#000] rounded-[4px] cursor-pointer flex items-center justify-center transition-all checked:bg-[#000] checked:bg-[url('https://upload.wikimedia.org/wikipedia/commons/thumb/2/27/White_check.svg/1200px-White_check.svg.png')] checked:bg-[length:14px_14px] checked:bg-no-repeat checked:bg-center`;
 
   return (
     <div className="flex flex-col max-w-[800px] mx-auto pb-20 font-pretendard">
-      <p className="text-center font-normal text-[19px] mb-12">
-        가능한 면접 시간을 모두 선택해주세요. 중복 선택 가능하며, 선택한 시간 중
-        하나로 면접이 진행됩니다.
+      <p className="text-center text-[19px] mb-12">
+        가능한 면접 시간을 모두 선택해주세요.
       </p>
-
       <div className="flex flex-col gap-14">
         {interviewData.map((item) => (
           <section key={item.date} className="flex flex-col gap-6">
-            <h3 className="text-[20px] font-bold text-[#000]">{item.date}</h3>
-
-            {/* ✅ 행 간격(gap-y-5 = 20px) 설정 */}
+            <h3 className="text-[20px] font-bold">
+              {item.date} ({DAY_MAP[item.dayOfWeek] || item.dayOfWeek})
+            </h3>
             <div className="grid grid-cols-2 gap-y-5 gap-x-10 px-2">
-              {/* 전체 선택 */}
-              <label className="flex items-start gap-6 cursor-pointer group">
+              <label className="flex items-start gap-6 cursor-pointer">
                 <input
                   type="checkbox"
-                  checked={item.times.every((t) =>
-                    selectedTimes.has(`${item.date}-${t}`),
+                  // 🔥 item.times 대신 item.interviewTimes 사용
+                  checked={item.interviewTimes.every((t) =>
+                    selectedTimes.has(t.interviewTimeId),
                   )}
-                  onChange={() => toggleDateAll(item.date, item.times)}
+                  onChange={() => toggleDateAll(item.interviewTimes)}
                   className={checkboxStyle}
                 />
-                {/* ✅ gap-4 (16px)로 체크박스와 글자 사이를 띄웠습니다. 필요하면 gap-5(20px)로 늘려보세요! */}
-                <span className="font-normal text-[#000] text-[16px] leading-[24px]">
-                  전체 선택
-                </span>
+                <span className="text-[16px]">전체 선택</span>
               </label>
 
-              {/* 시간별 선택 */}
-              {item.times.map((time, idx) => {
-                const id = `${item.date}-${time}`;
-                return (
-                  <label
-                    key={id}
-                    className="flex items-start gap-6 cursor-pointer"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={selectedTimes.has(id)}
-                      onChange={() => toggleTime(id)}
-                      className={checkboxStyle}
-                    />
-                    <span className="text-[16px] text-[#000] leading-[24px]">
-                      타임 {idx + 1}{" "}
-                      <span className="mx-2 text-gray-300">|</span> {time}
-                    </span>
-                  </label>
-                );
-              })}
+              {item.interviewTimes.map((time, idx) => (
+                <label
+                  key={time.interviewTimeId}
+                  className="flex items-start gap-6 cursor-pointer"
+                >
+                  <input
+                    type="checkbox"
+                    checked={selectedTimes.has(time.interviewTimeId)}
+                    onChange={() => toggleTime(time.interviewTimeId)}
+                    className={checkboxStyle}
+                  />
+                  <span className="text-[16px]">
+                    타임 {idx + 1} <span className="mx-2 text-gray-300">|</span>{" "}
+                    {formatTime(time.startTime)} - {formatTime(time.endTime)}
+                  </span>
+                </label>
+              ))}
             </div>
           </section>
         ))}
@@ -175,31 +189,29 @@ const InterviewPage = () => {
       <footer className="mt-20 flex gap-4 w-full">
         <button
           onClick={() => navigate(-1)}
-          className="flex-1 py-5 border border-[#ccc] text-[#666] rounded-[15px] text-lg font-bold hover:bg-gray-50 transition-all"
+          className="flex-1 py-5 border border-[#ccc] rounded-[15px] font-bold"
         >
           이전으로
         </button>
         <button
-          onClick={() => alert("임시 저장되었습니다.")}
-          className="flex-1 py-5 border border-[#ccc] text-[#666] rounded-[15px] text-lg font-bold hover:bg-gray-50 transition-all"
+          onClick={() => handleSave(false)}
+          className="flex-1 py-5 border border-[#ccc] rounded-[15px] font-bold"
         >
           임시 저장
         </button>
         <button
           disabled={selectedTimes.size === 0}
-          onClick={handleSubmitClick} // 🔥 수정
-          className={`flex-1 py-5 rounded-[15px] text-lg font-bold transition-all
-            ${selectedTimes.size > 0 ? "bg-[#000] text-white cursor-pointer" : "bg-gray-300 text-white cursor-not-allowed"}`}
+          onClick={() => setIsModalOpen(true)}
+          className={`flex-1 py-5 rounded-[15px] font-bold transition-all ${selectedTimes.size > 0 ? "bg-black text-white" : "bg-gray-300 text-white cursor-not-allowed"}`}
         >
           제출하기
         </button>
       </footer>
 
-      {/* 🔥 모달 컴포넌트 추가 */}
       <SubmitModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        onConfirm={handleFinalSubmit}
+        onConfirm={() => handleSave(true)}
       />
     </div>
   );
