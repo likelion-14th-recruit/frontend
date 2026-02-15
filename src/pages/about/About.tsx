@@ -3,6 +3,8 @@ import ArchiveList from "../../components/about/ArchiveList";
 import PositionCard from "../../components/common/PositionCard";
 import { motion } from "framer-motion";
 import type { Variants } from "framer-motion";
+import { useEffect } from "react";
+import { useLocation } from "react-router-dom";
 
 // 1. 부모(Section) 애니메이션 설정
 const containerVariants = {
@@ -26,6 +28,33 @@ const itemVariants: Variants = {
 };
 
 const About = () => {
+  const location = useLocation();
+
+  useEffect(() => {
+    // 1. state 안에 scrollTo 값이 있는지 확인
+    if (location.state?.scrollTo) {
+      const targetId = location.state.scrollTo;
+      const element = document.getElementById(targetId);
+
+      if (element) {
+        // 2. 해당 요소로 부드럽게 이동
+        // 약간의 지연(100ms)을 주면 DOM 렌더링 후 더 안정적으로 작동합니다.
+        const timer = setTimeout(() => {
+          element.scrollIntoView({ behavior: "smooth", block: "start" });
+
+          // 3. (선택사항) 스크롤 후 state를 초기화하여
+          // 새로고침 시 다시 스크롤되는 것을 방지하고 싶다면 아래 로직 추가
+          window.history.replaceState({}, document.title);
+        }, 100);
+
+        return () => clearTimeout(timer);
+      }
+    } else {
+      // 4. 특정 목적지가 없다면 페이지 최상단으로 이동
+      window.scrollTo(0, 0);
+    }
+  }, [location]);
+
   return (
     <div className="overflow-x-hidden w-full">
       {/********************************************  Intro  *********************************************/}
@@ -98,6 +127,7 @@ const About = () => {
 
       {/********************************************  Activities  *********************************************/}
       <motion.section
+        id="activities"
         data-header="light"
         initial="hidden"
         whileInView="visible"
@@ -142,21 +172,19 @@ const About = () => {
             title="Backend"
             description="데이터를 처리하고 비즈니스 로직을 설계하며, 서버 환경을 구축하고 관리합니다."
             imageUrl="https://likrlion.s3.us-east-1.amazonaws.com/14th+web/Recruit/BE.png"
-            link="https://example.com/BEnotion"
+            link="https://inquisitive-glider-d28.notion.site/14-2faac3ee3cde80018b9ef7940f6ba946?source=copy_link"
           />
-
           <PositionCard
             title="Frontend"
             description="사용자와 직접 상호작용하는 인터페이스를 구현하고, 서버와 연동해 동적 웹사이트를 개발합니다."
             imageUrl="https://likrlion.s3.us-east-1.amazonaws.com/14th+web/Recruit/FE.png"
-            link="https://example.com/FEnotion"
+            link="https://inquisitive-glider-d28.notion.site/14-2faac3ee3cde80859892c0d1e524bc1a?source=copy_link"
           />
-
           <PositionCard
             title="Product Design"
             description="사용자의 문제를 정의하고 서비스 전략부터 구조와 UI를 설계해 실제 시장에서 작동하는 제품으로 시각화합니다."
             imageUrl="https://likrlion.s3.us-east-1.amazonaws.com/14th+web/Recruit/DE.png"
-            link="https://example.com/DEnotion"
+            link="https://inquisitive-glider-d28.notion.site/14-2faac3ee3cde80418ad8d14a0d5ae963?source=copy_link"
           />
         </motion.div>
       </motion.section>

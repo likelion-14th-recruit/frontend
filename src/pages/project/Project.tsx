@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react'
-import PageTitle from '../../components/people/PageTitle';
-import ProjectGrid from '../../components/project/ProjectGrid';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from "react";
+import ProjectGrid from "../../components/project/ProjectGrid";
+import ProjectPageTitle from "../../components/project/ProjectPageTitle";
 
+import { motion } from "framer-motion";
+import type { Variants } from "framer-motion";
 
 interface Post {
   imageUrl: string;
@@ -11,142 +12,129 @@ interface Post {
   instagramUrl: string;
 }
 
-const CACHE_KEY = "PJT";
 const CACHE_EXPIRY = 24 * 60 * 60 * 1000;
 
-// const getCachedProjects = (): Post[] | null => {
-//   const cached = localStorage.getItem(CACHE_KEY);
-//   if (!cached) return null;
+// ✅ 이전 페이지들과 동일한 모션 프리셋
+const containerVariants: Variants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.2,
+      delayChildren: 0.1,
+    },
+  },
+};
 
-//   const { data, timestamp } = JSON.parse(cached);
-//   if (Date.now() - timestamp > CACHE_EXPIRY) {
-//     localStorage.removeItem(CACHE_KEY);
-//     return null;
-//   }
-//   return data;
-// };
-
-//mockup data
-const projectsData = [
-  {
-    imageUrl: "https://www.instagram.com/",
-    name: "RunCord | 13기",
-    description:
-      "기존 러닝 기록에 아카이빙을 더해 러닝의 의미와 재미를 확장하는 서비스",
-    instagramUrl: "https://www.instagram.com/",
+const itemVariants: Variants = {
+  hidden: { opacity: 0, y: 30 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.8, ease: "easeOut" },
   },
-  {
-    imageUrl: "https://www.instagram.com/",
-    name: "RunCord | 13기",
-    description:
-      "기존 러닝 기록에 아카이빙을 더해 러닝의 의미와 재미를 확장하는 서비스",
-    instagramUrl: "https://www.instagram.com/",
-  },
-  {
-    imageUrl: "https://www.instagram.com/",
-    name: "RunCord | 13기",
-    description:
-      "기존 러닝 기록에 아카이빙을 더해 러닝의 의미와 재미를 확장하는 서비스",
-    instagramUrl: "https://www.instagram.com/",
-  },
-  {
-    imageUrl: "https://www.instagram.com/",
-    name: "RunCord | 13기",
-    description:
-      "기존 러닝 기록에 아카이빙을 더해 러닝의 의미와 재미를 확장하는 서비스",
-    instagramUrl: "https://www.instagram.com/",
-  },
-  {
-    imageUrl: "https://www.instagram.com/",
-    name: "RunCord | 13기",
-    description:
-      "기존 러닝 기록에 아카이빙을 더해 러닝의 의미와 재미를 확장하는 서비스",
-    instagramUrl: "https://www.instagram.com/",
-  },
-  {
-    imageUrl: "https://www.instagram.com/",
-    name: "RunCord | 13기",
-    description:
-      "기존 러닝 기록에 아카이빙을 더해 러닝의 의미와 재미를 확장하는 서비스",
-    instagramUrl: "https://www.instagram.com/",
-  },
-];
+};
 
 const Project = () => {
- const [activeTab, setActiveTab] = useState("all");
+  const [activeTab, setActiveTab] = useState("all");
 
-  const [projects, setProjects] = useState<Post[]>(projectsData);
-  const nav = useNavigate();
+  const [projects, setProjects] = useState<Post[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
- //api
-  // const [projects, setProjects] = useState<Post[]>([]);
-  const [isLoading, setIsLoading] = useState(true); //api시 true로 변경! 
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        setIsLoading(true);
 
-  // useEffect(() => {
-  //   const fetchProjects = async () => {
-  //     try {
-  //       const cached = getCachedProjects();
-  //       if (cached) {
-  //         setProjects(cached);
-  //         setIsLoading(false);
-  //         return;
-  //       }
+        const cacheKey = `PJT_${activeTab}`;
+        const cached = localStorage.getItem(cacheKey);
 
-  //       const res = await fetch("/api/projects");
-  //       const result = await res.json();
-  //       const data = Array.isArray(result) ? result : result.data;
+        if (cached) {
+          const { data, timestamp } = JSON.parse(cached);
+          if (Date.now() - timestamp < CACHE_EXPIRY) {
+            setProjects(data);
+            return;
+          }
+          localStorage.removeItem(cacheKey);
+        }
 
-  //       if (Array.isArray(data)) {
-  //         setProjects(data);
-  //         localStorage.setItem(
-  //           CACHE_KEY,
-  //           JSON.stringify({ data, timestamp: Date.now() })
-  //         );
-  //       }
-  //     } catch (e) {
-  //       console.error(e);
-  //     } finally {
-  //       setIsLoading(false);
-  //     }
-  //   };
+        const cohortQuery = activeTab === "all" ? "" : `&cohort=${activeTab}`;
 
-  //   fetchProjects();
-  // }, []);
+        let page = 0;
+        let hasNext = true;
+        const all: Post[] = [];
 
-    useEffect(() => {
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 1500);
-  }, []);
+        while (hasNext) {
+          const res = await fetch(
+            `/api/projects?page=${page}&size=15${cohortQuery}`
+          );
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+          const result = await res.json();
+
+          const content: Post[] = result?.data?.content ?? [];
+          hasNext = result?.data?.hasNext ?? false;
+
+          all.push(...content);
+          page += 1;
+        }
+
+        setProjects(all);
+        
+
+        localStorage.setItem(
+          cacheKey,
+          JSON.stringify({ data: all, timestamp: Date.now() })
+        );
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchProjects();
+  }, [activeTab]);
+
+  console.log(projects);
+
   return (
-    <>
-    <PageTitle
-      title="Project"
-      description="멋쟁이사자처럼 서강대가 만들어온 역대 프로젝트를 소개합니다."
-      tabs={[
-        { label: "전체", value: "all" },
-        { label: "13기", value: "13th" },
-        { label: "12기", value: "12th" },
-        { label: "11기", value: "11th" },
-        { label: "10기", value: "10th" },
-        { label: "9기", value: "9th" },
-        { label: "8기", value: "8th" },
-        { label: "7기", value: "7th" },
-        { label: "6기", value: "6th" },
-        { label: "5기", value: "5th" },
-        { label: "4기", value: "4th" },
-        { label: "3기", value: "3th" }
-      ]}
-      activeTab={activeTab}
-      onTabChange={setActiveTab}
-    />
-
-        
-    <ProjectGrid projects={projects} isLoading={isLoading}/>
-        
+    <motion.div
+      variants={containerVariants}
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, amount: 0.3 }}
+    >
       
-    </>
-  );
-}
+      <motion.div variants={itemVariants}>
+        <ProjectPageTitle
+          title="Project"
+          description="멋쟁이사자처럼 서강대가 만들어온 역대 프로젝트를 소개합니다."
+          tabs={[
+            { label: "전체", value: "all" },
+            { label: "13기", value: "13" },
+            { label: "12기", value: "12" },
+            { label: "11기", value: "11" },
+            { label: "10기", value: "10" },
+            { label: "9기", value: "9" },
+            { label: "8기", value: "8" },
+            { label: "7기", value: "7" },
+            { label: "6기", value: "6" },
+          ]}
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+        />
+      </motion.div>
 
-export default Project
+      
+      <motion.div
+        variants={itemVariants}
+         //key={activeTab}// ✅ 탭 바뀔 때도 그리드가 살짝 다시 등장 (원치 않으면 삭제)
+      >
+        <ProjectGrid projects={projects} isLoading={isLoading} />
+      </motion.div>
+    </motion.div>
+  );
+};
+
+export default Project;

@@ -1,4 +1,4 @@
-import { useLocation, useNavigate, NavLink } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import mainLogo from "/main-logo.svg";
 import textLogoLight from "/text-logo.svg";
 import instaIcon from "/instagramIcon.svg";
@@ -18,12 +18,12 @@ const Footer = () => {
   return (
     <footer
       className={cx(
-        "flex w-full bg-white justify-center border-t border-gray-100",
-        "flex flex-col w-full max-w-[1440px] justify-between items-center transition-all",
+        "flex w-full bg-white justify-center",
+        "flex flex-col w-full justify-between items-center transition-all",
         // 모바일 스타일 (기본)
         "px-[40px] pt-[20px] pb-[40px]",
         // 데스크탑 스타일 (md 이상)
-        "md:flex-row md:px-[60px] md:pt-[30px] md:pb-[60px] md:gap-0",
+        "md:flex-row md:px-[60px] md:pt-[30px] md:pb-[60px] md:gap-0"
       )}
     >
       {/* <div
@@ -78,7 +78,7 @@ const Footer = () => {
           // 모바일: 인스타 아이콘과 글자만 남는 구조
           "gap-[20px]",
           // 데스크탑: 가로로 긴 구조
-          "md:w-[317px] md:items-end md:gap-[38px] md:pt-[20px]",
+          "md:w-[317px] md:items-end md:gap-[38px] md:pt-[20px]"
         )}
       >
         {/* 메뉴 Nav: 모바일에서는 숨기거나 작게 배치 (요청하신 대로 글자만 남김) */}
@@ -90,7 +90,7 @@ const Footer = () => {
               className={({ isActive }) =>
                 cx(
                   "font-sogang text-[16px] font-black-80 transition-colors",
-                  isActive ? "text-sogang" : "text-black",
+                  isActive ? "text-sogang" : "text-black"
                 )
               }
             >
@@ -102,7 +102,7 @@ const Footer = () => {
         {/* 인스타 아이콘 */}
         <a
           className="hidden md:flex "
-          href="https://instagram.com/..."
+          href="https://www.instagram.com/likelion_sg"
           target="_blank"
           rel="noreferrer"
         >
@@ -113,7 +113,6 @@ const Footer = () => {
           />
         </a>
       </div>
-      {/* </div> */}
     </footer>
   );
 };

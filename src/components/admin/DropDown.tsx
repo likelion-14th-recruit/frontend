@@ -35,7 +35,7 @@ const DropDown = <T extends string>({
   value = "",
   data,
   onChange,
-  placeholder = "검토 전",
+  placeholder = "전체",
   inactive,
   isTime,
   isAll,
@@ -119,31 +119,27 @@ const DropDown = <T extends string>({
           shadow-[0_2px_8px_rgba(0,0,0,0.25)] border border-solid border-lightGray`}
         >
           {data.map((d, index) => {
-            if (cut && d.value === "PENDING") {
-              return "";
-            } else {
-              return (
-                <button
-                  type="button"
-                  key={d.value}
-                  className="text-left z-0 flex border-b border-b-solid border-b-lightGray px-[12px] py-[8px] font-[400]
+            return (
+              <button
+                type="button"
+                key={d.value}
+                className="text-left z-0 flex border-b border-b-solid border-b-lightGray px-[12px] py-[8px] font-[400]
                 hover:bg-lightGray"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleSelect(d.value);
-                  }}
-                >
-                  {isTime
-                    ? isAll
-                      ? index !== 0
-                        ? `타임 ${index} |  `
-                        : ""
-                      : `타임 ${index + 1} |  `
-                    : ""}
-                  {d.label}
-                </button>
-              );
-            }
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleSelect(d.value);
+                }}
+              >
+                {isTime
+                  ? isAll
+                    ? index !== 0
+                      ? `타임 ${index} |  `
+                      : ""
+                    : `타임 ${index + 1} |  `
+                  : ""}
+                {d.label}
+              </button>
+            );
           })}
         </div>
       )}

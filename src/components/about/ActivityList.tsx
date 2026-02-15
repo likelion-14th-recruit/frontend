@@ -1,4 +1,4 @@
-import { React, useState } from "react";
+import { useState } from "react";
 import ActivityItem from "./ActivityItem";
 
 interface Activity {
@@ -66,8 +66,8 @@ const activitiesData: Activity[] = [
   },
 ];
 const ActivityList = () => {
-  const [selectedId, setSelectedId] = useState(null);
-
+  // 마우스 호버 상태 추가
+  const [hoveredId, setHoveredId] = useState<number | null>(null);
   return (
     <div
       className="inline-grid 
@@ -78,12 +78,14 @@ const ActivityList = () => {
         <ActivityItem
           key={data.id}
           data={data}
-          // 현재 내가 선택되었는지 여부 전달
-          isSelected={selectedId === data.id}
-          // 아무것도 선택되지 않았는지 여부 전달 (모두 100% 유지를 위해)
-          isNothingSelected={selectedId === null}
-          // 클릭 시 상태 업데이트
-          onClick={() => setSelectedId(data.id)}
+          // 내가 호버되었는가?
+          isHovered={hoveredId === data.id}
+          // 현재 아무것도 호버되지 않았는가? (모두 100% 유지를 위해)
+          isNothingHovered={hoveredId === null}
+          // 이벤트 핸들러
+          onMouseEnter={() => setHoveredId(data.id)}
+          onMouseLeave={() => setHoveredId(null)}
+          onClick={() => setHoveredId(data.id)}
         />
       ))}
     </div>

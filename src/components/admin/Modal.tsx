@@ -6,14 +6,19 @@ type modalProps = {
   isOpen: boolean;
   isTwo: boolean;
   children: ReactNode;
-  onClose?: () => void;
+  onDoc?: () => void;
+  onConfirm?: () => void;
 };
 
-const Modal = ({ isOpen, isTwo, onClose, children }: modalProps) => {
+const Modal = ({ isOpen, isTwo, onClose, onConfirm, children }: modalProps) => {
   const navigate = useNavigate();
   const handleAccept = () => {
     onClose;
     navigate("/admin");
+  };
+  const handleConfirm = () => {
+    if (onConfirm) onConfirm();
+    else onClose();
   };
   if (!isOpen) return null;
   return createPortal(
@@ -24,7 +29,7 @@ const Modal = ({ isOpen, isTwo, onClose, children }: modalProps) => {
           <div className="flex justify-end text-[16px] font-[600] gap-[16px]">
             <button
               className="flex px-[24px] py-[10px] justify-center items-center rounded-[12px] bg-black/80 text-white"
-              onClick={onClose}
+              onClick={handleConfirm}
             >
               문자 발송
             </button>

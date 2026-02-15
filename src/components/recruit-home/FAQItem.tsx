@@ -25,7 +25,15 @@ const FAQItem = ({ question, answer }: FAQItemProps) => {
     ${open ? "bg-lightGray border border-black/40" : "bg-white"}
   `}
       >
-        <span className="font-pretendard text-[14px] md:text-[20px] font-semibold leading-[140%] text-black/80">
+        <span className="
+        font-pretendard 
+        font-semibold 
+        text-[14px] 
+
+        tablet-lg:text-[20px] 
+        
+        leading-[140%] 
+        text-black/80">
           Q. {question}
         </span>
 
@@ -44,11 +52,17 @@ const FAQItem = ({ question, answer }: FAQItemProps) => {
 
       {/* 답변 영역 (완전히 분리) */}
       {open && (
-        <div className="px-[16px] py-[12px] md:px-[40px] md:py-[24px] lg:px-[60px]">
+        <div className="
+        px-[16px] 
+        py-[12px] 
+        tablet-lg:px-[40px] 
+        tablet-lg:py-[24px] 
+        desktop:px-[60px]
+        ">
           <div
             className="
             text-[14px]
-            md:text-[16px]
+            tablet-lg:text-[16px]
             font-pretendard
             font-regular
             leading-[160%]

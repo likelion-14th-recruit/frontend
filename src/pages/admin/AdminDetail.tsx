@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import ArticleBlock from "../../components/admin/articleBlock";
-import Button from "../../components/admin/button";
-import DetailTable from "../../components/admin/detailTable";
-import Modal from "../../components/admin/modal";
+import ArticleBlock from "../../components/admin/ArticleBlock";
+import Button from "../../components/admin/Button";
+import DetailTable from "../../components/admin/DetailTable";
+import Modal from "../../components/admin/Modal";
 import { useParams } from "react-router-dom";
 import {
   type AvailTime,
@@ -18,6 +18,7 @@ const AdminDetail = () => {
   // const [interviewTime, setInterviewTime] = useState();
   // const [interviewPlace, setInterviewPlace] = useState();
   const { applicationPublicId } = useParams();
+  const [saveActive, setSaveActive] = useState(false);
 
   const [applyData, setApplyData] = useState<ApplyDetail>();
   const [availTime, setAvailTime] = useState<AvailTime[]>();
@@ -167,6 +168,11 @@ const AdminDetail = () => {
   // 면접 일정(날짜/시간/장소) 변경
   const changeInterviewSchedule = async () => {
     try {
+      const endTime = getEndTime(
+        interviewSchedule.date,
+        interviewSchedule.startTime
+      );
+
       const response = await fetch(
         `${
           import.meta.env.VITE_API_URL
@@ -180,6 +186,7 @@ const AdminDetail = () => {
           body: JSON.stringify({
             date: interviewSchedule.date,
             startTime: interviewSchedule.startTime,
+            endTime,
             place: interviewSchedule.place,
           }),
         }
@@ -194,6 +201,34 @@ const AdminDetail = () => {
     }
   };
 
+  const getEndTime = (
+    dateStr: string,
+    startTimeStr: string,
+    minutesToAdd = 20
+  ) => {
+    if (!dateStr || !startTimeStr) return ""; // 값 없으면 계산 X
+
+    // 만약 "2026.02.12" / "2026/02/12" 이런 게 오면 -로 통일
+    const normalizedDate = dateStr.replaceAll(".", "-").replaceAll("/", "-");
+    const [y, m, d] = normalizedDate.split("-").map(Number);
+
+    // startTimeStr: "14:20" or "14:20:00"
+    const [hh, mm, ss = "0"] = startTimeStr.split(":");
+    const hour = Number(hh);
+    const minute = Number(mm);
+    const second = Number(ss);
+
+    // 숫자 파싱 실패 방지
+    if ([y, m, d, hour, minute, second].some((v) => Number.isNaN(v))) return "";
+
+    const start = new Date(y, m - 1, d, hour, minute, second);
+    start.setMinutes(start.getMinutes() + minutesToAdd);
+
+    const endHH = String(start.getHours()).padStart(2, "0");
+    const endMM = String(start.getMinutes()).padStart(2, "0");
+    return `${endHH}:${endMM}`;
+  };
+
   const handleSaveBtn = () => {
     if (applyData?.passStatus !== applyState) {
       changePassStatus();
@@ -203,6 +238,28 @@ const AdminDetail = () => {
     }
     setOpen(true);
   };
+
+  // 디버깅용 - 면접 스케줄 확인
+  useEffect(() => {
+    console.log(saveActive);
+    if (applyState === "DOCUMENT_PASSED") {
+      if (
+        interviewSchedule.date !== "" &&
+        interviewSchedule.startTime !== "" &&
+        interviewSchedule.place !== ""
+      ) {
+        setSaveActive(true);
+      } else {
+        setSaveActive(false);
+      }
+    } else if (
+      applyState === "DOCUMENT_FAILED" ||
+      applyState === "INTERVIEW_FAILED" ||
+      applyState === "INTERVIEW_PASSED"
+    ) {
+      setSaveActive(true);
+    }
+  }, [interviewSchedule, applyState]);
 
   useEffect(() => {
     fetchApplyData();
@@ -216,11 +273,6 @@ const AdminDetail = () => {
   // useEffect(() => {
   //   console.log(applyState);
   // }, [applyState]);
-
-  // 디버깅용 - 면접 스케줄 확인
-  useEffect(() => {
-    console.log(interviewSchedule);
-  }, [interviewSchedule]);
 
   return (
     <div className="w-[100%] flex flex-col justify-center items-center m-0 py-[50px]">
@@ -249,7 +301,12 @@ const AdminDetail = () => {
             answer={answers?.[index]}
           />
         ))}
-        <Button block={true} styleType="active" onClick={handleSaveBtn}>
+        <Button
+          block={true}
+          isActive={saveActive}
+          styleType={`${saveActive ? "active" : "inactive"}`}
+          onClick={handleSaveBtn}
+        >
           저장하기
         </Button>
         <Modal isTwo={false} isOpen={open} onClose={() => setOpen(false)}>

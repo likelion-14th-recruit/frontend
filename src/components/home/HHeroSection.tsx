@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 
 const HeroSection = () => {
   const homeIntrobg =
@@ -9,6 +10,7 @@ const HeroSection = () => {
     "https://likrlion.s3.us-east-1.amazonaws.com/14th+web/Home/title_1.png";
   const homeIntroDesktop =
     "https://likrlion.s3.us-east-1.amazonaws.com/14th+web/Home/title.png";
+  const nav = useNavigate();
   return (
     <section
       className="relative overflow-hidden w-full bg-black
@@ -46,6 +48,9 @@ const HeroSection = () => {
           initial={{ opacity: 0, y: -30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1.2, delay: 0.6, ease: "easeOut" }}
+          onClick={() => {
+            nav("/recruit/start");
+          }}
           className="
            relative z-10
     flex items-center justify-center gap-[10px]

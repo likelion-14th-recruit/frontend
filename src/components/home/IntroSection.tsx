@@ -45,9 +45,9 @@ const IntroSection = () => {
           nav("/about");
           window.scrollTo(0, 0);
         }}
-        className="h-10 inline-flex justify-center items-center gap-1 cursor-pointer hover:opacity-70 transition-opacity"
+        className="h-10 inline-flex justify-center items-center gap-1 cursor-pointer"
       >
-        <div className="justify-start text-neutral-900 text-[14px] lg:text-[16px] font-semibold font-['Pretendard'] leading-6">
+        <div className="justify-start text-black text-[14px] lg:text-[16px] font-semibold leading-6">
           더 알아보기
         </div>
         <ChevronRight size={18} />

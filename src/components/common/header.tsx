@@ -2,10 +2,10 @@ import { useLocation, useNavigate, NavLink } from "react-router-dom";
 import mainLogo from "/main-logo.svg";
 import textLogoLight from "/text-logo.svg";
 import textLogoDark from "/text-logo-dark.svg";
-import { useHeaderTheme } from "../../hooks/useHeaderTheme";
+// import { useHeaderTheme } from "../../hooks/useHeaderTheme";
 
 interface HeaderProps {
-  onOpenMenu: () => void;
+  onOpenMenu?: () => void;
 }
 
 const Nav = [
@@ -22,8 +22,8 @@ function cx(...arr: (string | false | null | undefined)[]) {
 const Header = ({ onOpenMenu }: HeaderProps) => {
   const { pathname } = useLocation();
   const navigate = useNavigate();
-  const theme = useHeaderTheme(80); // "dark" | "light"
-  const isDark = theme === "dark";
+  // const theme = useHeaderTheme(80); // "dark" | "light"
+  const isDark = pathname === "/" || pathname === "/recruit";
   const textLogo = isDark ? textLogoDark : textLogoLight; // dark일 때 light일 때 로고 다르게
   const isAdmin = pathname.startsWith("/admin");
   const logoTo = isAdmin ? "/admin" : "/"; //admin일 때 아닐 때 로고 navigate 루트 다르게
@@ -47,8 +47,8 @@ const Header = ({ onOpenMenu }: HeaderProps) => {
     <>
       <header
         className={cx(
-          "fixed top-0 left-0 z-[100] w-full transition-colors duration-350 max-w-[1440px]",
-          isDark ? "bg-header-dark" : "bg-header-light"
+          "fixed top-0 left-0 z-[100] w-full transition-colors duration-350 ",
+          isDark ? "bg-header-dark" : "bg-header-light",
         )}
       >
         {/* logo 부분 */}
@@ -70,7 +70,7 @@ const Header = ({ onOpenMenu }: HeaderProps) => {
               {isAdmin ? (
                 <div className="flex items-center">
                   <h2
-                    className="font-sogang text-[16px] font-black cursor-pointer hover:underline"
+                    className="font-sogang text-[16px] font-normal cursor-pointer hover:underline"
                     onClick={() => navigate("/admin")}
                   >
                     HOME
@@ -84,12 +84,12 @@ const Header = ({ onOpenMenu }: HeaderProps) => {
                     to={item.to}
                     className={({ isActive }) =>
                       cx(
-                        "font-sogang text-[16px] font-black-80 transition-colors",
+                        "font-sogang text-[16px] transition-colors",
                         isActive
                           ? "text-sogang" //현재 탭 활성화면 색상 변경
                           : isDark
-                          ? "text-white" //배경 dark일 때 텍스트
-                          : "text-black" //배경 light일 때 텍스트
+                            ? "text-white/80" //배경 dark일 때 텍스트
+                            : "text-black", //배경 light일 때 텍스트
                       )
                     }
                   >
