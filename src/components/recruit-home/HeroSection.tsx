@@ -86,8 +86,12 @@ const HeroSection = () => {
             absolute
             left-1/2 top-1/2
             -translate-x-1/2 -translate-y-1/2
-            w-[800px]
-            h-[500px]
+            w-[200px]
+            h-[100px]
+            tablet-lg:w-[550px]
+            tablet-lg:h-[345px]
+            desktop:w-[800px]
+            desktop:h-[500px]
             rounded-full
             pointer-events-none
           "
