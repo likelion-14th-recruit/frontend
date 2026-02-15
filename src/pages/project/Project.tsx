@@ -80,6 +80,7 @@ const Project = () => {
         }
 
         setProjects(all);
+        
 
         localStorage.setItem(
           cacheKey,
@@ -94,6 +95,8 @@ const Project = () => {
 
     fetchProjects();
   }, [activeTab]);
+
+  console.log(projects);
 
   return (
     <motion.div
@@ -126,7 +129,7 @@ const Project = () => {
       
       <motion.div
         variants={itemVariants}
-        key={activeTab} // ✅ 탭 바뀔 때도 그리드가 살짝 다시 등장 (원치 않으면 삭제)
+         //key={activeTab}// ✅ 탭 바뀔 때도 그리드가 살짝 다시 등장 (원치 않으면 삭제)
       >
         <ProjectGrid projects={projects} isLoading={isLoading} />
       </motion.div>

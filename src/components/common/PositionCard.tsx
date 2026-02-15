@@ -16,6 +16,7 @@ const PositionCard = ({ title, description, imageUrl, link }: Position) => {
           bg-white
           p-[32px]
           overflow-hidden
+          cursor-pointer
         "
       >
         {/* 왼쪽 콘텐츠 */}

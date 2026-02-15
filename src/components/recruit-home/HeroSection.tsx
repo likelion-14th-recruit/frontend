@@ -24,6 +24,10 @@ const itemVariants: Variants = {
   },
 };
 
+// 버튼 위쪽 아무데나 추가
+const deadline = new Date("2026-03-05T23:59:59");
+const isClosed = new Date() > deadline;
+
 const HeroSection = () => {
   const navigate = useNavigate();
 
@@ -33,7 +37,10 @@ const HeroSection = () => {
       className="
         relative z-0
         flex items-center justify-center
-        h-[680px]
+        h-[480px]
+          tablet-lg:h-[520px]
+          desktop:h-[680px]
+      
         text-white
       "
     >
@@ -51,7 +58,11 @@ const HeroSection = () => {
         src="https://likrlion.s3.us-east-1.amazonaws.com/14th+web/Recruit/1.png"
         className="
           absolute inset-0
-          w-full h-full
+          w-full
+          h-[480px]
+          tablet-lg:h-[520px]
+          
+          desktop:h-full
           object-cover
           pointer-events-none
         "
@@ -128,12 +139,13 @@ const HeroSection = () => {
         {/* 버튼 */}
         <motion.button
           variants={itemVariants}
-          onClick={() => navigate("/recruit/start")}
-          className="
+          onClick={() => {
+            if (!isClosed) navigate("/recruit/start");
+          }}
+          disabled={isClosed}
+          className={`
             relative z-10
             flex items-center justify-center
-            bg-sogang
-            text-white
             font-pretendard
             leading-[140%]
             text-[14px]
@@ -145,15 +157,22 @@ const HeroSection = () => {
             desktop:text-[20px]
             desktop:px-[24px]
             desktop:rounded-[12px]
+
+            ${
+              isClosed
+                ? "bg-[#9C9C9C] text-white/80 cursor-not-allowed"
+                : "bg-sogang text-white"
+            }
+
             after:content-['']
             after:absolute after:inset-0
             after:bg-[#121212]/20
             after:opacity-0
             after:transition-opacity after:duration-200
             hover:after:opacity-100
-          "
+          `}
         >
-          14기 지원하기
+          {isClosed ? "14기 모집 마감" : "14기 지원하기"}
         </motion.button>
       </motion.div>
     </section>
