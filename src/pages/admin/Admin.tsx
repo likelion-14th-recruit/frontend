@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import FilterBtn from "../../components/admin/FilterBtn";
 import FilterLabel from "../../components/admin/FilterLabel";
 import SearchIcon from "/icons/search.svg";
 import DropDown from "../../components/admin/DropDown";
@@ -7,6 +6,7 @@ import Button from "../../components/admin/Button";
 import ApplicantTable from "../../components/admin/ApplicantTable";
 import Pagination from "../../components/admin/Pagination";
 import Modal from "../../components/admin/Modal";
+import FilterBtn from "../../components/admin/FilterBtn.tsx";
 import {
   PART,
   PASS_STATUS,
@@ -277,6 +277,7 @@ const Admin = () => {
                 value={timeSelected}
                 data={interviewTime}
                 onChange={setTimeSelected}
+                placeholder={"전체"}
               >
                 전체
               </DropDown>
