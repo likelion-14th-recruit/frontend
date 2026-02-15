@@ -29,7 +29,7 @@ const IntroSection = () => {
       >
         <div className="px-3 py-1 bg-red-700/60 inline-flex justify-center items-center gap-2.5">
           <div className="text-white font-pretendard text-[20px] md:text-[28px] lg:text-[32px] font-regular md:font-semibold leading-[120%] tracking-[-0.64px]">
-            서강대학교 멋쟁이사자처럼은
+            멋쟁이사자처럼 서강대학교는
           </div>
         </div>
         <div className="self-stretch text-black/80 font-pretendard text-[16px] lg:text-[20px] font-regular md:font-semibold leading-[140%]">

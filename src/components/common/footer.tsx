@@ -23,18 +23,9 @@ const Footer = () => {
         // 모바일 스타일 (기본)
         "px-[40px] pt-[20px] pb-[40px]",
         // 데스크탑 스타일 (md 이상)
-        "md:flex-row md:px-[60px] md:pt-[30px] md:pb-[60px] md:gap-0"
+        "md:flex-row md:px-[60px] md:pt-[30px] md:pb-[60px] md:gap-0",
       )}
     >
-      {/* <div
-        className={cx(
-          "flex flex-col w-full max-w-[1440px] justify-between items-center transition-all",
-          // 모바일 스타일 (기본)
-          "px-[40px] pt-[20px] pb-[40px] gap-[20px]",
-          // 데스크탑 스타일 (md 이상)
-          "md:flex-row md:px-[60px] md:pt-[30px] md:pb-[60px] md:gap-0",
-        )}
-      > */}
       {/* 1. 로고 및 저작권 영역 */}
       <div className="flex flex-col items-center md:items-start gap-[20px] tablet-lg:gap-[16px]">
         <div className="hidden md:flex items-center gap-[12px] cursor-pointer">
@@ -51,7 +42,7 @@ const Footer = () => {
         </div>
         <a
           className="block md:hidden"
-          href="https://instagram.com/..."
+          href="https://www.instagram.com/likelion_sg"
           target="_blank"
           rel="noreferrer"
         >
@@ -78,7 +69,7 @@ const Footer = () => {
           // 모바일: 인스타 아이콘과 글자만 남는 구조
           "gap-[20px]",
           // 데스크탑: 가로로 긴 구조
-          "md:w-[317px] md:items-end md:gap-[38px] md:pt-[20px]"
+          "md:w-[317px] md:items-end md:gap-[38px] md:pt-[20px]",
         )}
       >
         {/* 메뉴 Nav: 모바일에서는 숨기거나 작게 배치 (요청하신 대로 글자만 남김) */}
@@ -90,7 +81,7 @@ const Footer = () => {
               className={({ isActive }) =>
                 cx(
                   "font-sogang text-[16px] font-black-80 transition-colors",
-                  isActive ? "text-sogang" : "text-black"
+                  isActive ? "text-sogang" : "text-black",
                 )
               }
             >
