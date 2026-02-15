@@ -1,5 +1,4 @@
 import type { Dispatch, SetStateAction } from "react";
-import DropDown from "./dropDown";
 import {
   dateOfWeek,
   interviewDates,
@@ -11,6 +10,7 @@ import {
   academicStatus,
   type InterviewSchedule,
 } from "../../constants/adminFilter";
+import DropDown from "./DropDown";
 
 const DetailTable = ({
   data,
@@ -141,7 +141,9 @@ const DetailTable = ({
             data={interviewTime.slice(1)}
             value={interviewSchedule.startTime}
             isTime={true}
-            inactive={!interviewSchedule?.date}
+            inactive={
+              ApplyState !== "DOCUMENT_PASSED" || !interviewSchedule?.date
+            }
             placeholder="면접 시간"
             onChange={(v) =>
               setInterviewSchedule({
@@ -155,13 +157,16 @@ const DetailTable = ({
         <div className={`${labelStyle} border-b`}>면접 장소</div>
         <input
           type="text"
+          value={interviewSchedule.place}
           placeholder="면접 장소를 입력해주세요."
           className={`${contentStyle} border-b focus:outline-none font-[400] text-black ${
-            !interviewSchedule?.startTime
-              ? " placeholder:text-black/30"
-              : " placeholder:text-black/60"
+            ApplyState !== "DOCUMENT_PASSED" || !interviewSchedule?.startTime
+              ? " placeholder:text-black/30 text-black/30"
+              : " placeholder:text-black/60 text-black"
           }`}
-          disabled={!interviewSchedule?.startTime}
+          disabled={
+            ApplyState !== "DOCUMENT_PASSED" || !interviewSchedule?.startTime
+          }
           onChange={(v) =>
             setInterviewSchedule({
               date: interviewSchedule.date,
