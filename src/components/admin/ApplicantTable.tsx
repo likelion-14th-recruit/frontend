@@ -77,7 +77,11 @@ const ApplicantTable = ({ data = [], isLoading }: TableProps) => {
                 <tr
                   key={item.applicationPublicId}
                   className="border-b border-lightGray text-[15px] cursor-pointer hover:bg-lightGray/50 duration-200"
-                  onClick={() => navigate(`/admin/${item.applicationPublicId}`)}
+                  onClick={() =>
+                    navigate(
+                      `/admin79182e7i8-jd8h229jdkfj37r8x90/${item.applicationPublicId}`
+                    )
+                  }
                 >
                   <td className="py-[10px] font-[400] text-center text-black">
                     {item.name}
