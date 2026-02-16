@@ -2,9 +2,12 @@ import React from "react";
 
 interface ConfirmModalProps {
   isOpen: boolean;
-  onClose: () => void; // 취소 (모달 닫기)
-  onConfirm: () => void; // 확인 (이전 단계로 이동)
+  onClose: () => void;
+  onConfirm: () => void;
   message: React.ReactNode;
+  confirmText?: string; // "계속 진행" 등 (흰색 버튼)
+  cancelText?: string; // "취소" 등 (검정색 버튼)
+  isSingleButton?: boolean;
 }
 
 const ConfirmModal = ({
@@ -12,65 +15,43 @@ const ConfirmModal = ({
   onClose,
   onConfirm,
   message,
+  confirmText = "계속 진행",
+  cancelText = "취소",
+  isSingleButton = false,
 }: ConfirmModalProps) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[110] flex items-center justify-center font-pretendard">
-      {/* 오버레이 */}
+    <div className="fixed inset-0 z-[110] flex items-center justify-center font-pretendard p-4">
       <div className="absolute inset-0 bg-black/50" onClick={onClose} />
 
-      {/* 모달 본체: width 560 고정 및 주신 수치 반영 */}
       <div
-        className="relative bg-white rounded-[30px] shadow-xl flex flex-col transition-all"
-        style={{
-          width: "560px",
-          padding: "24px 40px",
-          gap: "40px",
-        }}
+        className="relative bg-white rounded-[30px] shadow-xl flex flex-col transition-all w-full max-w-[560px]"
+        style={{ padding: "24px 40px", gap: "40px" }}
       >
-        {/* 메시지: 왼쪽 정렬 */}
-        <div className="w-full text-left">
-          <div className="text-[20px] font-normal leading-[150%] text-[#000]">
-            {message}
-          </div>
+        <div className="w-full text-left text-[20px] font-normal leading-[150%] text-[#000] whitespace-pre-line">
+          {message}
         </div>
 
-        {/* 버튼 영역: 오른쪽 정렬 */}
         <div className="flex justify-end gap-3 w-full">
-          {/* 취소 (Black-80) */}
-          <button
-            onClick={onClose}
-            style={{
-              height: "50px",
-              padding: "10px 24px",
-              borderRadius: "12px",
-              background: "rgba(18, 18, 18, 0.80)",
-              color: "#FFF",
-              fontWeight: "semibold",
-              fontSize: "16px",
-            }}
-            className="cursor-pointer hover:bg-black transition-all"
-          >
-            취소
-          </button>
-
-          {/* 계속 진행 (흰색/테두리) */}
+          {!isSingleButton && (
+            /* 🔥 취소 버튼: 검은색 배경 (사용자를 머무르게 유도) */
+            <button
+              onClick={onClose}
+              className="cursor-pointer transition-all font-semibold text-[16px] h-[50px] px-6 rounded-[12px] bg-[rgba(18,18,18,0.80)] text-white hover:bg-black"
+            >
+              {cancelText}
+            </button>
+          )}
           <button
             onClick={onConfirm}
-            style={{
-              height: "50px",
-              padding: "10px 24px",
-              borderRadius: "12px",
-              border: "1px solid #ccc",
-              background: "#FFF",
-              color: "#333",
-              fontWeight: "semibold",
-              fontSize: "16px",
-            }}
-            className="cursor-pointer hover:bg-gray-50 transition-all"
+            className={`cursor-pointer transition-all font-semibold text-[16px] h-[50px] px-6 rounded-[12px] border ${
+              isSingleButton
+                ? "bg-[rgba(18,18,18,0.80)] text-white hover:bg-black" // 버튼 하나일 땐 검은색
+                : "bg-white border-[#ccc] text-[#333] hover:bg-gray-50" // 버튼 두 개일 땐 흰색
+            }`}
           >
-            계속 진행
+            {isSingleButton ? "확인" : confirmText}
           </button>
         </div>
       </div>

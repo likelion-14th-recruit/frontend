@@ -9,6 +9,7 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   onButtonClick?: () => void;
   buttonDisabled?: boolean;
   buttonActive?: boolean;
+  errorText?: string;
 }
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
@@ -24,6 +25,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
       buttonActive,
       type, // type 추출
       value,
+      errorText,
       ...props
     },
     ref,
@@ -80,16 +82,21 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           )}
         </div>
 
-        {guideText && (
+        {/* 하단 텍스트 영역 (에러/가이드) */}
+        {(isError || guideText) && (
           <div className="flex flex-col mt-1 px-1">
             {isError && (
               <span className="font-pretendard text-[16px] font-normal leading-[160%] text-[#b90000] mb-1">
-                올바른 형식을 입력해주세요.
+                {errorText || "올바른 형식을 입력해주세요."}{" "}
+                {/* 🔥 가공된 멘트 출력 */}
               </span>
             )}
-            <span className="font-pretendard text-[16px] font-normal leading-[160%] text-black">
-              {guideText}
-            </span>
+            {/* 인증 완료 문구 등이 나올 곳 */}
+            {guideText && (
+              <span className="font-pretendard text-[16px] font-normal leading-[160%] text-black">
+                {guideText}
+              </span>
+            )}
           </div>
         )}
       </div>
