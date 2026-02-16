@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { useNavigate } from "react-router-dom";
+import ApplyBtn from "../common/ApplyBtn";
 
 const HeroSection = () => {
   const homeIntrobg =
@@ -10,7 +10,6 @@ const HeroSection = () => {
     "https://likrlion.s3.us-east-1.amazonaws.com/14th+web/Home/title_1.png";
   const homeIntroDesktop =
     "https://likrlion.s3.us-east-1.amazonaws.com/14th+web/Home/title.png";
-  const nav = useNavigate();
   return (
     <section
       className="relative overflow-hidden w-full bg-black
@@ -44,36 +43,7 @@ const HeroSection = () => {
           ></img>
         </motion.div>
         {/* 4. 버튼 */}
-        <motion.button
-          initial={{ opacity: 0, y: -30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1.2, delay: 0.6, ease: "easeOut" }}
-          onClick={() => {
-            nav("/recruit/start");
-          }}
-          className="
-           relative z-10
-    flex items-center justify-center gap-[10px]
-    px-[16px] md:px-[24px] py-[10px]
-    rounded-[10px] md:rounded-[12px]
-    bg-sogang
-    text-white
-    text-center
-    font-pretendard
-    text-[14px] md:text-[16px] lg:text-[20px]
-    font-semibold
-    leading-[140%]
-
-    after:content-['']
-    after:absolute after:inset-0
-    after:bg-[#121212]/20
-    after:opacity-0
-    after:transition-opacity after:duration-200
-    hover:after:opacity-100
-        "
-        >
-          14기 지원하기
-        </motion.button>
+        <ApplyBtn />
       </div>
     </section>
   );

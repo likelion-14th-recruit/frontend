@@ -5,7 +5,7 @@ type answerType = {
 
 type articleProps = {
   question: string;
-  answer: answerType;
+  answer?: answerType;
   num: number;
 };
 
@@ -37,7 +37,7 @@ const ArticleBlock = ({ question, answer, num }: articleProps) => {
           {answer?.content}
         </div>
         <div className="w-full flex justify-end text-[16px] text-black/60 mt-[4px]">
-          {answer?.content?.length | 0}/500
+          {answer?.content?.length ?? 0}/500
         </div>
       </div>
     );

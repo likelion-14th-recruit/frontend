@@ -102,8 +102,8 @@ const Project = () => {
     <motion.div
       variants={containerVariants}
       initial="hidden"
-      whileInView="visible"
-      viewport={{ once: true, amount: 0.3 }}
+      animate="visible"
+      
     >
       
       <motion.div variants={itemVariants}>

@@ -1,4 +1,6 @@
 import "./index.css";
+import { useEffect } from "react";
+import ReactGA from "react-ga4";
 import { Routes, Route, BrowserRouter } from "react-router-dom";
 import Admin from "./pages/admin/Admin";
 import AdminLayout from "./layouts/adminLayout";
@@ -20,7 +22,16 @@ import FindPasswordPage from "./pages/recruit/FindPasswordPage";
 import ScrollToTop from "./components/common/ScrollToTop";
 import AdminDetail from "./pages/admin/AdminDetail";
 
+const GA_ID = import.meta.env.VITE_GA_ID;
+
 function App() {
+  useEffect(() => {
+    // 1. 초기화 (한 번만 실행됨)
+    ReactGA.initialize(GA_ID);
+    // 2. 현재 페이지 뷰 전송
+    ReactGA.send("pageview");
+  }, []);
+
   return (
     <BrowserRouter>
       <ScrollToTop />
@@ -44,8 +55,14 @@ function App() {
         </Route>
 
         <Route element={<AdminLayout />}>
-          <Route path="/admin" element={<Admin />} />
-          <Route path="/admin/:applicationPublicId" element={<AdminDetail />} />
+          <Route
+            path="/admin79182e7i8-jd8h229jdkfj37r8x90"
+            element={<Admin />}
+          />
+          <Route
+            path="/admin79182e7i8-jd8h229jdkfj37r8x90/:applicationPublicId"
+            element={<AdminDetail />}
+          />
         </Route>
       </Routes>
     </BrowserRouter>
