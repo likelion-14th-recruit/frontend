@@ -2,14 +2,19 @@ import { useEffect, useState } from "react";
 import { useNavigate, useLocation, useOutletContext } from "react-router-dom";
 import TextArea from "../../../components/recruit/TextArea";
 import Input from "../../../components/recruit/Input";
+import ConfirmModal from "../../../components/recruit/ConfirmModal";
 
 const ApplyPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // 1. applicationId가 잘 넘어왔는지 확인
-  const applicationId = location.state?.applicationId;
-  const userField = location.state?.field || "프론트엔드";
+  // 🔥 안내 모달 상태 관리
+  const [infoModal, setInfoModal] = useState({
+    isOpen: false,
+    message: "",
+    onConfirm: () => {},
+    isSingleButton: true,
+  });
 
   const [questions, setQuestions] = useState([]);
 
@@ -22,6 +27,38 @@ const ApplyPage = () => {
     link: "",
   };
   const setFormData = context?.setFormData;
+
+  // 상단에 상태 추가
+  const [isSaved, setIsSaved] = useState(false);
+
+  // handleAnswerChange에서 글을 쓰면 다시 '저장 안됨' 상태로 변경
+  const handleAnswerChange = (e) => {
+    const { name, value } = e.target;
+    setFormData?.((prev) => ({ ...prev, [name]: value }));
+    setIsSaved(false); // 🔥 무언가 수정되면 다시 경고를 띄워야 함
+  };
+
+  // 수정한 isDirty (저장된 상태라면 더티하지 않은 것으로 간주)
+  const isDirty =
+    !isSaved &&
+    (Object.keys(formData).some((key) => formData[key]?.trim() !== "") ||
+      formData.link?.trim() !== "");
+
+  // 브라우저 닫기/새로고침 방지
+  useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      if (isDirty) {
+        e.preventDefault();
+        e.returnValue = "";
+      }
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [isDirty]);
+
+  // 1. applicationId가 잘 넘어왔는지 확인
+  const applicationId = location.state?.applicationId;
+  const userField = location.state?.field || "프론트엔드";
 
   useEffect(() => {
     const initData = async () => {
@@ -67,12 +104,6 @@ const ApplyPage = () => {
     initData();
   }, [applicationId]);
 
-  // 핸들러 및 기타 변수 (LABEL 등) 동일...
-  const handleAnswerChange = (e) => {
-    const { name, value } = e.target;
-    setFormData?.((prev) => ({ ...prev, [name]: value }));
-  };
-
   const isDesign = userField === "기획·디자인";
 
   // 1. 라벨과 가이드 텍스트 설정
@@ -110,23 +141,50 @@ const ApplyPage = () => {
   })();
 
   const handleSave = async () => {
-    // 1. 500자 초과 여부 확인
-    const isOverLimit = questions.some(
+    const realQuestions = questions.filter(
+      (q) => !q.content.includes("GitHub"),
+    );
+
+    const hasTextAnswer = realQuestions.some(
+      (q) => formData[`q${q.questionNumber}`]?.trim().length > 0,
+    );
+    const hasLink = formData.link?.trim().length > 0;
+
+    // 1. 필수 입력 검사
+    if (!hasTextAnswer && !hasLink) {
+      setInfoModal({
+        isOpen: true,
+        message: "필수 항목을 입력해주세요.",
+        onConfirm: () => setInfoModal((prev) => ({ ...prev, isOpen: false })),
+        isSingleButton: true,
+      });
+      return;
+    }
+
+    // 🔥 2. 글자 수 제한 검사 (추가된 부분)
+    // 500자가 넘는 문항이 하나라도 있는지 확인합니다.
+    const isOverLimit = realQuestions.some(
       (q) => (formData[`q${q.questionNumber}`]?.length || 0) > 500,
     );
 
     if (isOverLimit) {
-      alert("각 문항당 500자를 초과할 수 없습니다.");
-      return;
+      setInfoModal({
+        isOpen: true,
+        message:
+          "글자 수가 500자를 초과했습니다.\n 임시 저장을 위해 내용을 500자 이내로 줄여 주세요.",
+        onConfirm: () => setInfoModal((prev) => ({ ...prev, isOpen: false })),
+        isSingleButton: true,
+      });
+      return; // 🛑 여기서 중단해서 서버로 안 보내게 막습니다.
     }
 
-    // 2. 서버 형식에 맞게 데이터 가공 (질문 순회하며 답변 매칭)
-    const answersPayload = questions.map((q) => ({
-      questionId: q.questionId,
-      content: formData[`q${q.questionNumber}`] || "", // 작성 안 했으면 빈 문자열
-    }));
-
+    // 3. 저장 로직 진행
     try {
+      const answersPayload = questions.map((q) => ({
+        questionId: q.questionId,
+        content: formData[`q${q.questionNumber}`] || "",
+      }));
+
       const response = await fetch(
         `/api/applications/${applicationId}/answers`,
         {
@@ -137,25 +195,69 @@ const ApplyPage = () => {
       );
 
       if (response.ok) {
-        alert("임시 저장되었습니다.");
+        setIsSaved(true);
+        setInfoModal({
+          isOpen: true,
+          message:
+            "임시 저장이 완료되었습니다.\n작성 내용은 저장되었으며, 제출하기 버튼을 눌러야 최종 제출됩니다.",
+          onConfirm: () => setInfoModal((prev) => ({ ...prev, isOpen: false })),
+          isSingleButton: true,
+        });
       } else {
-        const result = await response.json();
-        alert(`저장 실패: ${result.message}`);
+        // 4. 만약 서버에서 에러가 났을 때도 사용자에게 모달을 띄워주는 것이 친절합니다.
+        setInfoModal({
+          isOpen: true,
+          message: "저장 중 오류가 발생했습니다.\n잠시 후 다시 시도해주세요.",
+          onConfirm: () => setInfoModal((prev) => ({ ...prev, isOpen: false })),
+          isSingleButton: true,
+        });
       }
     } catch (error) {
-      alert("서버와 통신 중 오류가 발생했습니다.");
+      alert("네트워크 서버 오류");
+    }
+  };
+
+  // --- handleMoveBack 수정본 ---
+  const handleMoveBack = () => {
+    const realQuestions = questions.filter(
+      (q) => !q.content.includes("GitHub"),
+    );
+
+    const hasAnyContent =
+      realQuestions.some(
+        (q) => (formData[`q${q.questionNumber}`]?.trim().length || 0) > 0,
+      ) || (formData.link?.trim().length || 0) > 0;
+
+    // 공통으로 넘어갈 state 정의 (비밀번호 등 기존 location.state 포함)
+    const backState = {
+      ...location.state, // 🔥 이게 핵심! 기존에 받은 모든 정보(비밀번호 등)를 그대로 넘김
+      applicationId,
+    };
+
+    // 🔥 저장된 상태이거나, 아예 쓴 내용이 없으면 바로 이동!
+    if (isSaved || !hasAnyContent) {
+      navigate("/recruit/info", { state: backState });
+    } else {
+      setInfoModal({
+        isOpen: true,
+        message:
+          "임시저장하지 않고 나가면 지금까지 입력한 내용이 모두 사라집니다.\n계속 진행하시겠습니까?",
+        onConfirm: () =>
+          navigate("/recruit/info", {
+            state: backState, // 🔥 수정된 state 전달
+          }),
+        isSingleButton: false,
+      });
     }
   };
 
   return (
     <div className="flex flex-col max-w-[800px] mx-auto pb-20 font-pretendard">
       <div className="flex flex-col gap-12 w-full">
-        {/* 🚀 1. 질문 리스트 렌더링 (GitHub 관련 질문은 제외) */}
         {questions
-          .filter((q) => !q.content.includes("GitHub")) // 질문 내용에 GitHub이 포함되면 리스트에서 제외
+          .filter((q) => !q.content.includes("GitHub"))
           .map((q, index, filteredArray) => {
             const isLastQuestion = index === filteredArray.length - 1;
-
             return (
               <TextArea
                 key={q.questionId}
@@ -167,18 +269,15 @@ const ApplyPage = () => {
                 placeholder="내용을 입력해주세요."
                 onChange={handleAnswerChange}
                 value={formData[`q${q.questionNumber}`] || ""}
-                // 🔥 마지막 질문(4번)일 때만 높이를 낮게 설정 (rows나 custom height)
                 rows={isLastQuestion ? 4 : 10}
                 className={isLastQuestion ? "min-h-[120px]" : "min-h-[280px]"}
               />
             );
           })}
 
-        {/* 🚀 2. 하단 링크 입력 (Input 컴포넌트) */}
         <Input
           label={linkLabel}
           name="link"
-          // 디자인 직군일 때만 true가 되어 빨간 별(*)이 표시됨
           required={isDesign}
           placeholder={linkPlaceholder}
           guideText={linkGuide}
@@ -190,31 +289,15 @@ const ApplyPage = () => {
       <footer className="mt-20 flex gap-4 w-full">
         <button
           type="button"
-          onClick={() => {
-            // 🔍 데이터가 잘 있는지 확인용 로그
-            console.log(
-              "이전으로 이동 시 데이터 체크:",
-              applicationId,
-              formData.password?.length,
-            );
-
-            navigate("/recruit/info", {
-              state: {
-                applicationId: applicationId,
-                // 비밀번호 길이는 보통 로그인 응답이나 formData에 저장된 값을 씁니다.
-                passwordLength:
-                  location.state?.passwordLength || formData.password?.length,
-              },
-            });
-          }}
+          onClick={handleMoveBack}
           className="flex-1 px-[10px] py-[24px] border border-[#ccc] text-[rgba(18,18,18,0.8)] rounded-[12px] text-[20px] font-bold"
         >
           이전으로
         </button>
         <button
-          type="button" // form 안에 있을 경우 submit 방지
+          type="button"
           onClick={handleSave}
-          className="flex-1 py-6 border border-[#ccc] rounded-[12px] text-[20px] font-bold hover:bg-gray-50 transition-colors"
+          className="flex-1 py-6 border border-[#ccc] rounded-[12px] text-[20px] font-bold hover:bg-gray-50"
         >
           임시 저장
         </button>
@@ -229,6 +312,21 @@ const ApplyPage = () => {
           다음으로
         </button>
       </footer>
+
+      {/* 🚀 중요: 모달은 footer 바깥으로! */}
+      <ConfirmModal
+        isOpen={infoModal.isOpen}
+        onClose={() => setInfoModal((prev) => ({ ...prev, isOpen: false }))}
+        onConfirm={infoModal.onConfirm}
+        message={
+          <div className="whitespace-pre-line text-center">
+            {infoModal.message}
+          </div>
+        }
+        isSingleButton={infoModal.isSingleButton}
+        confirmText={infoModal.isSingleButton ? "확인" : "나가기"}
+        cancelText="취소"
+      />
     </div>
   );
 };

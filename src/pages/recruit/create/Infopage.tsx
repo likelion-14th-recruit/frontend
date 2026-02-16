@@ -3,6 +3,19 @@ import { useNavigate, useOutletContext, useLocation } from "react-router-dom";
 import Input from "../../../components/recruit/Input";
 import ConfirmModal from "../../../components/recruit/ConfirmModal";
 
+// 숫자만 추출해서 010-0000-0000 형식으로 변환하는 함수
+const formatPhoneNumber = (value: string) => {
+  if (!value) return "";
+  const phoneNumber = value.replace(/[^\d]/g, ""); // 숫자 외 제거
+  const cp = phoneNumber.length;
+
+  if (cp < 4) return phoneNumber;
+  if (cp < 8) return `${phoneNumber.slice(0, 3)}-${phoneNumber.slice(3)}`;
+  if (cp < 12)
+    return `${phoneNumber.slice(0, 3)}-${phoneNumber.slice(3, 7)}-${phoneNumber.slice(7)}`;
+  return `${phoneNumber.slice(0, 3)}-${phoneNumber.slice(3, 7)}-${phoneNumber.slice(7, 11)}`;
+};
+
 const ACADEMIC_STATUS_MAP = {
   재학: "ENROLLED",
   휴학: "ON_LEAVE",
@@ -38,6 +51,14 @@ const InfoPage = () => {
   const { applicationId, passwordLength } = location.state || {};
   const navigate = useNavigate();
   const [isBackModalOpen, setIsBackModalOpen] = useState(false);
+
+  const [authError, setAuthError] = useState("");
+
+  const [infoModal, setInfoModal] = useState({
+    isOpen: false,
+    message: "",
+    onConfirm: () => {},
+  });
 
   const {
     formData,
@@ -134,7 +155,21 @@ const InfoPage = () => {
       formData.term.length > 0 && !isTermValid ? "숫자만 입력" : "숫자만 입력",
   };
 
-  // InfoPage.tsx
+  // 폼에 입력된 내용이 있는지 확인하는 변수
+  const isDirty = Object.values(formData).some(
+    (val) => val !== "" && val !== "VERIFIED",
+  );
+
+  useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      if (isDirty) {
+        e.preventDefault();
+        e.returnValue = ""; // 브라우저 기본 경고창 유도
+      }
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [isDirty]);
 
   // 수정 모드인지 확인 (ID가 있으면 수정 모드)
   const isEditMode = !!applicationId;
@@ -152,9 +187,24 @@ const InfoPage = () => {
     isTermValid &&
     formData.field !== "";
 
-  const handleChange = (e) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+
+    if (name === "phone") {
+      // 하이픈이 포함된 시각적 값
+      const formattedValue = formatPhoneNumber(value);
+      // 실제 상태에는 숫자만 저장 (백엔드 전송용)
+      const rawDigits = value.replace(/[^\d]/g, "").slice(0, 11);
+
+      setFormData((prev) => ({
+        ...prev,
+        [name]: rawDigits, // 👈 숫지만 저장 (isPhoneValid 검사 등은 여기서 수행됨)
+      }));
+
+      // input 태그의 시각적 값 강제 업데이트는 아래 Input 컴포넌트 호출에서 처리
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    }
   };
 
   const handleSelect = (name, value) => {
@@ -188,6 +238,8 @@ const InfoPage = () => {
 
   const handleVerifyAuth = async () => {
     if (!formData.authCode) return;
+    setAuthError("");
+
     const API_URL = "/api/verification/confirm";
     try {
       const response = await fetch(API_URL, {
@@ -201,10 +253,12 @@ const InfoPage = () => {
       if (response.ok) {
         setAuthStatus("verified");
       } else {
-        alert("인증번호가 일치하지 않거나 만료되었습니다.");
+        setAuthError("인증번호가 올바르지 않습니다. 다시 입력해 주세요.");
       }
     } catch (error) {
-      alert("인증 확인 중 오류가 발생했습니다.");
+      setAuthError(
+        "서버와의 연결이 원활하지 않습니다. 잠시 후 다시 시도해 주세요.",
+      );
     }
   };
 
@@ -283,8 +337,9 @@ const InfoPage = () => {
           body: JSON.stringify(requestData),
         });
 
+        const result = await response.json();
+
         if (response.ok) {
-          const result = await response.json();
           const publicId = result.data?.publicId || applicationId;
 
           // 🔥 [핵심] 수정사항을 Context에 즉시 반영
@@ -309,6 +364,25 @@ const InfoPage = () => {
               passwordLength: passwordLength,
             },
           });
+          // 🔥 1. 이미 최종 제출을 완료한 경우
+        } else if (result.code === "APPLICATION_ALREADY_SUBMITTED") {
+          setInfoModal({
+            isOpen: true,
+            message: "이미 제출된 지원서가 있어 추가 제출이 불가합니다.",
+            onConfirm: () => navigate("/recruit"),
+          });
+        }
+        // 🔥 2. 임시 저장된 지원서가 있는 경우 (APPLICATION_ALREADY_EXISTS)
+        else if (
+          result.code === "APPLICATION_ALREADY_EXISTS" ||
+          response.status === 409
+        ) {
+          setInfoModal({
+            isOpen: true,
+            message:
+              "이미 임시 저장된 지원서가 있어, 새로 생성할 수 없습니다.\n기존 지원서를 수정해 주세요.",
+            onConfirm: () => navigate("/recruit/start"), // 혹은 로그인/조회 페이지로 이동
+          });
         } else {
           const errorData = await response.json();
           alert(`저장 실패: ${errorData.message}`);
@@ -321,7 +395,11 @@ const InfoPage = () => {
   };
 
   const handleBackClick = () => {
-    setIsBackModalOpen(true);
+    if (isDirty) {
+      setIsBackModalOpen(true);
+    } else {
+      navigate("/recruit/terms"); // 입력한 게 없으면 바로 이동
+    }
   };
 
   return (
@@ -360,7 +438,8 @@ const InfoPage = () => {
           onChange={handleChange}
           guideText={authGuide || "숫자 11자리"}
           isError={formData.phone.length > 0 && !isPhoneValid}
-          value={formData.phone}
+          value={formatPhoneNumber(formData.phone)}
+          maxLength={13}
         />
         <Input
           label="인증번호"
@@ -372,9 +451,15 @@ const InfoPage = () => {
           buttonActive={authStatus === "sent" && formData.authCode.length > 0}
           buttonDisabled={authStatus === "verified" || !formData.authCode}
           onButtonClick={handleVerifyAuth}
-          onChange={handleChange}
-          guideText={authStatus === "verified" ? "인증이 완료되었습니다." : ""}
+          onChange={(e) => {
+            handleChange(e);
+            if (authError) setAuthError(""); // 입력 시작하면 에러 삭제
+          }}
+          isError={!!authError} // 🔥 에러 상태 연결
+          errorText={authError} // 🔥 가공된 멘트 전달
           value={formData.authCode}
+          // 🔥 인증 완료 시 가이드 텍스트
+          guideText={authStatus === "verified" ? "인증이 완료되었습니다." : ""}
         />
         <Input
           label="비밀번호"
@@ -399,13 +484,16 @@ const InfoPage = () => {
           required
           ref={inputRefs.passwordConfirm}
           placeholder="비밀번호를 재입력해주세요."
-          guideText={errors.passwordConfirm}
+          // guideText={errors.passwordConfirm}  <- 기존 guideText는 가독성을 위해 제거하거나 비워둡니다.
+          onChange={handleChange}
+          value={formData.passwordConfirm}
+          // 🔥 에러 상태 연결: 값이 입력되었는데 비밀번호와 다를 경우
           isError={
             formData.passwordConfirm.length > 0 &&
             formData.password !== formData.passwordConfirm
           }
-          onChange={handleChange}
-          value={formData.passwordConfirm}
+          // 🔥 빨간색으로 띄울 멘트 전달
+          errorText="비밀번호가 일치하지 않습니다."
         />
         <Input
           label="주전공"
@@ -493,7 +581,10 @@ const InfoPage = () => {
       <ConfirmModal
         isOpen={isBackModalOpen}
         onClose={() => setIsBackModalOpen(false)}
-        onConfirm={() => navigate("/recruit/terms")}
+        onConfirm={() => {
+          setIsBackModalOpen(false);
+          navigate("/recruit/terms");
+        }}
         message={
           <>
             이전 단계로 이동하게 되면 지금까지 입력한 내용이
@@ -501,6 +592,15 @@ const InfoPage = () => {
             모두 사라집니다. 계속 진행하시겠습니까?
           </>
         }
+        confirmText="계속 진행"
+      />
+
+      <ConfirmModal
+        isOpen={infoModal.isOpen}
+        onClose={() => setInfoModal({ ...infoModal, isOpen: false })}
+        onConfirm={infoModal.onConfirm}
+        message={infoModal.message}
+        isSingleButton={true}
       />
     </div>
   );

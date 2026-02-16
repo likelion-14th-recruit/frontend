@@ -2,6 +2,18 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Input from "../../components/recruit/Input";
 
+// 헬퍼 함수: 하이픈 자동 포맷 (InfoPage와 동일)
+const formatPhoneNumber = (value: string) => {
+  if (!value) return "";
+  const phoneNumber = value.replace(/[^\d]/g, "");
+  const cp = phoneNumber.length;
+  if (cp < 4) return phoneNumber;
+  if (cp < 8) return `${phoneNumber.slice(0, 3)}-${phoneNumber.slice(3)}`;
+  if (cp < 12)
+    return `${phoneNumber.slice(0, 3)}-${phoneNumber.slice(3, 7)}-${phoneNumber.slice(7)}`;
+  return `${phoneNumber.slice(0, 3)}-${phoneNumber.slice(3, 7)}-${phoneNumber.slice(7, 11)}`;
+};
+
 const FindPasswordPage = () => {
   const navigate = useNavigate();
 
@@ -14,10 +26,17 @@ const FindPasswordPage = () => {
 
   const [authStatus, setAuthStatus] = useState("idle");
   const [authGuide, setAuthGuide] = useState("");
+  const [authError, setAuthError] = useState(""); // 🔥 커스텀 에러 상태 추가
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+
+    if (name === "phone") {
+      const rawDigits = value.replace(/[^\d]/g, "").slice(0, 11);
+      setFormData((prev) => ({ ...prev, [name]: rawDigits }));
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    }
   };
 
   const isPhoneValid = /^[0-9]{11}$/.test(formData.phone);
@@ -33,10 +52,8 @@ const FindPasswordPage = () => {
     isPasswordValid &&
     isPasswordMatch;
 
-  // 🔥 1. 인증번호 전송/재전송 핸들러
   const handleSendAuth = async () => {
     if (!isPhoneValid) return;
-
     try {
       const response = await fetch("/api/verification", {
         method: "POST",
@@ -50,8 +67,8 @@ const FindPasswordPage = () => {
             ? "인증번호가 전송되었습니다."
             : "인증번호가 재전송되었습니다.",
         );
-        // 재전송 시 기존 인증번호 입력란 초기화
         setFormData((prev) => ({ ...prev, authCode: "" }));
+        setAuthError(""); // 전송 시 에러 초기화
       } else {
         setAuthGuide("전송에 실패했습니다. 번호를 확인해 주세요.");
       }
@@ -62,6 +79,7 @@ const FindPasswordPage = () => {
 
   const handleVerifyAuth = async () => {
     if (!formData.authCode) return;
+    setAuthError(""); // 클릭 시 초기화
 
     try {
       const response = await fetch("/api/verification/confirm", {
@@ -75,17 +93,18 @@ const FindPasswordPage = () => {
 
       if (response.ok) {
         setAuthStatus("verified");
+        setAuthError("");
       } else {
-        alert("인증번호가 일치하지 않거나 만료되었습니다.");
+        // 🔥 alert 대신 InfoPage처럼 빨간 글씨 세팅
+        setAuthError("인증번호가 올바르지 않습니다. 다시 입력해 주세요.");
       }
     } catch (error) {
-      alert("인증 확인 중 오류가 발생했습니다.");
+      setAuthError("인증 확인 중 오류가 발생했습니다.");
     }
   };
 
   const handleSubmit = async () => {
     if (!isFormValid) return;
-
     try {
       const response = await fetch("/api/password/reset", {
         method: "POST",
@@ -98,41 +117,38 @@ const FindPasswordPage = () => {
 
       if (response.ok) {
         alert("비밀번호가 성공적으로 변경되었습니다.");
-        navigate("/recruit"); // 로그인 페이지나 적절한 경로로 이동
+        navigate("/recruit");
       } else {
         const errorData = await response.json();
         alert(`변경 실패: ${errorData.message || "다시 시도해 주세요."}`);
       }
     } catch (error) {
-      console.error("네트워크 에러:", error);
       alert("서버 연결 오류가 발생했습니다.");
     }
   };
 
   return (
-    <div className="flex flex-col max-w-[800px] mx-auto pt-[100px] pb-20 font-pretendard">
+    <div className="flex flex-col max-w-[800px] mx-auto pt-[100px] pb-20 font-pretendard px-4">
       <h1 className="text-[32px] font-semibold mb-[60px]">비밀번호 찾기</h1>
 
       <div className="flex flex-col gap-10 w-full">
-        {/* 전화번호 입력 */}
+        {/* 전화번호 */}
         <Input
           label="전화번호"
           name="phone"
           required
           placeholder="전화번호를 입력해 주세요."
-          // 🔥 3. 인증 완료 후에도 재전송 버튼은 활성화 유지
           buttonText={authStatus === "idle" ? "인증번호 전송" : "재전송"}
           buttonActive={isPhoneValid}
           buttonDisabled={!isPhoneValid}
           onButtonClick={handleSendAuth}
           onChange={handleChange}
-          value={formData.phone}
-          // 🔥 2. 형식 에러(빨간색)와 가이드 문구 분리 표시
+          value={formatPhoneNumber(formData.phone)} // 🔥 하이픈 포맷 적용
           isError={formData.phone.length > 0 && !isPhoneValid}
           guideText={authGuide || "숫자 11자리"}
         />
 
-        {/* 인증번호 입력 */}
+        {/* 인증번호 */}
         <Input
           label="인증번호"
           name="authCode"
@@ -144,25 +160,31 @@ const FindPasswordPage = () => {
             formData.authCode.length > 0 && authStatus !== "verified"
           }
           onButtonClick={handleVerifyAuth}
-          onChange={handleChange}
+          onChange={(e) => {
+            handleChange(e);
+            if (authError) setAuthError(""); // 다시 입력하면 빨간 글씨 삭제
+          }}
           value={formData.authCode}
+          isError={!!authError} // 🔥 에러 상태 연결
+          errorText={authError} // 🔥 가공된 멘트
           guideText={authStatus === "verified" ? "인증이 완료되었습니다." : ""}
         />
 
-        {/* 새 비밀번호 입력 */}
+        {/* 새 비밀번호 */}
         <Input
           label="비밀번호"
           name="password"
           type="password"
           required
           placeholder="비밀번호를 입력해 주세요."
-          guideText="영문·숫자 조합 8~20자"
           onChange={handleChange}
           value={formData.password}
           isError={formData.password.length > 0 && !isPasswordValid}
+          errorText="영문·숫자 조합 8~20자로 입력해주세요." // 🔥 빨간 글씨 통일
+          guideText="영문·숫자 조합 8~20자"
         />
 
-        {/* 비밀번호 확인 입력 */}
+        {/* 비밀번호 확인 */}
         <Input
           label="비밀번호 확인"
           name="passwordConfirm"
@@ -172,11 +194,7 @@ const FindPasswordPage = () => {
           onChange={handleChange}
           value={formData.passwordConfirm}
           isError={formData.passwordConfirm.length > 0 && !isPasswordMatch}
-          guideText={
-            formData.passwordConfirm.length > 0 && !isPasswordMatch
-              ? "비밀번호가 일치하지 않습니다."
-              : ""
-          }
+          errorText="비밀번호가 일치하지 않습니다." // 🔥 빨간 글씨 통일
         />
       </div>
 
@@ -184,11 +202,7 @@ const FindPasswordPage = () => {
         onClick={handleSubmit}
         disabled={!isFormValid}
         className={`w-full h-[60px] mt-[60px] rounded-[12px] text-[20px] font-semibold transition-all
-          ${
-            isFormValid
-              ? "bg-black text-white cursor-pointer opacity-100"
-              : "bg-black text-white cursor-not-allowed opacity-20"
-          }`}
+          ${isFormValid ? "bg-black text-white cursor-pointer" : "bg-black text-white cursor-not-allowed opacity-20"}`}
       >
         확인하기
       </button>

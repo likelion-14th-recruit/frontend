@@ -16,6 +16,15 @@ const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
   const [phoneError, setPhoneError] = useState("");
   const [passwordError, setPasswordError] = useState("");
 
+  // 1. 하이픈 포맷 함수 (컴포넌트 밖 혹은 내부에 추가)
+  const formatPhoneNumber = (value: string) => {
+    const phoneNumber = value.replace(/[^\d]/g, "");
+    if (phoneNumber.length < 4) return phoneNumber;
+    if (phoneNumber.length < 8)
+      return `${phoneNumber.slice(0, 3)}-${phoneNumber.slice(3)}`;
+    return `${phoneNumber.slice(0, 3)}-${phoneNumber.slice(3, 7)}-${phoneNumber.slice(7, 11)}`;
+  };
+
   if (!isOpen) return null;
 
   const isFormValid = phone.trim() !== "" && password.trim() !== "";
@@ -29,7 +38,7 @@ const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          phoneNumber: phone,
+          phoneNumber: phone.replace(/[^\d]/g, ""), // 숫지만 추출해서 전송
           password: password,
         }),
       });
@@ -37,27 +46,26 @@ const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
       const result = await response.json();
 
       if (response.ok && result.success) {
-        // 🔥 서버 응답 데이터에서 정확한 키값 추출
         const { applicationPublicId, passwordLength } = result.data;
-
-        console.log(
-          "✅ 로그인 데이터 확인:",
-          applicationPublicId,
-          passwordLength,
-        );
-
-        // 🚀 ApplyPage로 이동하면서 필요한 모든 열쇠(state)를 전달
         navigate("/recruit/apply", {
           state: {
-            applicationId: applicationPublicId, // ApplyPage에서 질문 조회 시 사용
-            passwordLength: passwordLength, // 나중에 InfoPage로 돌아올 때 사용
-            field: "BACKEND", // 파트 정보는 기획상 필요하다면 추가 (없으면 기본값)
+            applicationId: applicationPublicId,
+            passwordLength: passwordLength,
           },
         });
         onClose();
-      } else {
-        // 서버 에러 메시지 처리 (400, 401 등)
-        setPasswordError(result.message || "비밀번호가 올바르지 않습니다.");
+      }
+      // ❌ 에러 처리 분기
+      else {
+        // 🔥 서버 에러 코드에 따라 메시지 가공 (백엔드 코드 확인 필요)
+        // 만약 에러 코드가 APPLICATION_NOT_FOUND 이거나 메시지에 "존재하지"가 포함된 경우
+        if (result.code === "APPLICATION_NOT_EXISTS") {
+          setPhoneError("등록되지 않은 전화번호입니다.");
+        }
+        // 그 외엔 비밀번호 에러로 처리
+        else {
+          setPasswordError(result.message || "비밀번호가 올바르지 않습니다.");
+        }
       }
     } catch (error) {
       console.error("❌ 처리 중 에러 발생:", error);
@@ -79,11 +87,15 @@ const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
             </label>
             <input
               type="text"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
+              value={formatPhoneNumber(phone)} // 시각적으로 하이픈 포함
+              onChange={(e) => {
+                setPhone(e.target.value);
+                if (phoneError) setPhoneError(""); // 입력 시작하면 에러 삭제
+              }}
               placeholder="숫자만 입력해 주세요."
+              maxLength={13}
               className={`w-full p-4 bg-[#f2f2f2] rounded-[12px] outline-none text-[15px] transition-all
-                ${phoneError ? "ring-1 ring-[#b90000]" : "focus:ring-1 focus:ring-gray-300"}`}
+    ${phoneError ? "ring-1 ring-[#b90000]" : "focus:ring-1 focus:ring-gray-300"}`}
             />
             {phoneError && (
               <span className="text-[#b90000] text-[14px] ml-1">

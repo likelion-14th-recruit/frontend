@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import SubmitModal from "../../../components/recruit/SubmitModal";
+import ConfirmModal from "../../../components/recruit/ConfirmModal";
 
 const InterviewPage = () => {
   const navigate = useNavigate();
@@ -10,6 +11,31 @@ const InterviewPage = () => {
   const [interviewData, setInterviewData] = useState([]);
   const [selectedTimes, setSelectedTimes] = useState(new Set());
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // 🔥 안내 모달 통합 상태 관리
+  const [infoModal, setInfoModal] = useState({
+    isOpen: false,
+    message: "",
+    onConfirm: () => {},
+    isSingleButton: false,
+    confirmText: "확인",
+    cancelText: "취소",
+  });
+
+  // 변경 사항이 있는지 확인 (선택된 시간이 있으면 dirty)
+  const isDirty = selectedTimes.size > 0;
+
+  // 브라우저 닫기 방지
+  useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      if (isDirty) {
+        e.preventDefault();
+        e.returnValue = "";
+      }
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [isDirty]);
 
   // 요일 매핑 객체 추가
   const DAY_MAP = {
@@ -117,14 +143,25 @@ const InterviewPage = () => {
           },
         );
 
+        const result = await submitResponse.json();
+
         if (submitResponse.ok) {
           setIsModalOpen(false);
           // 제출 완료 후 성공 모달을 띄우기 위해 리다이렉트
           navigate("/recruit", { state: { showCompleteModal: true } });
+        }
+        // ❌ [이미지 반영] 지원 기간 종료 에러 대응
+        else if (result.code === "APPLICATION_SUBMISSION_EXPIRED") {
+          setInfoModal({
+            isOpen: true,
+            message: "지원 기간이 종료되었습니다.",
+            onConfirm: () => navigate("/"), // 메인으로 이동
+            isSingleButton: true, // 확인 버튼 하나만
+            confirmText: "확인",
+          });
         } else {
-          const errorData = await submitResponse.json();
           alert(
-            `제출 실패: ${errorData.message || "이미 제출되었거나 오류가 발생했습니다."}`,
+            `제출 실패: ${result.message || "이미 제출되었거나 오류가 발생했습니다."}`,
           );
         }
       } else {
@@ -135,6 +172,35 @@ const InterviewPage = () => {
       console.error("제출 에러:", error);
       alert("서버 연결 오류가 발생했습니다.");
     }
+  };
+
+  // 🚀 케이스 2: 이전으로 버튼 클릭 시 이탈 방지
+  const handleMoveBack = () => {
+    if (isDirty) {
+      setInfoModal({
+        isOpen: true,
+        message:
+          "임시저장하지 않고 나가면 지금까지 입력한 내용이 모두 사라집니다.\n계속 진행하시겠습니까?",
+        onConfirm: () => navigate(-1),
+        isSingleButton: false,
+        confirmText: "나가기",
+        cancelText: "취소",
+      });
+    } else {
+      navigate(-1);
+    }
+  };
+
+  const onClickSubmit = () => {
+    setInfoModal({
+      isOpen: true,
+      message:
+        "지원서를 제출하면 이후에는 수정할 수 없습니다.\n제출하시겠습니까?",
+      onConfirm: () => handleSave(true), // 확인 누르면 진짜 제출 실행
+      isSingleButton: false, // 취소 버튼 필요
+      confirmText: "제출",
+      cancelText: "계속 진행",
+    });
   };
 
   const checkboxStyle = `appearance-none min-w-[24px] min-h-[24px] w-[24px] h-[24px] border border-[#000] rounded-[4px] cursor-pointer flex items-center justify-center transition-all checked:bg-[#000] checked:bg-[url('https://upload.wikimedia.org/wikipedia/commons/thumb/2/27/White_check.svg/1200px-White_check.svg.png')] checked:bg-[length:14px_14px] checked:bg-no-repeat checked:bg-center`;
@@ -188,7 +254,7 @@ const InterviewPage = () => {
 
       <footer className="mt-20 flex gap-4 w-full">
         <button
-          onClick={() => navigate(-1)}
+          onClick={handleMoveBack} // 🔥 수정됨
           className="flex-1 py-5 border border-[#ccc] rounded-[15px] font-bold"
         >
           이전으로
@@ -201,17 +267,30 @@ const InterviewPage = () => {
         </button>
         <button
           disabled={selectedTimes.size === 0}
-          onClick={() => setIsModalOpen(true)}
-          className={`flex-1 py-5 rounded-[15px] font-bold transition-all ${selectedTimes.size > 0 ? "bg-black text-white" : "bg-gray-300 text-white cursor-not-allowed"}`}
+          onClick={onClickSubmit} // 🔥 수정됨
+          className={`flex-1 py-5 rounded-[15px] font-bold transition-all ${
+            selectedTimes.size > 0
+              ? "bg-black text-white"
+              : "bg-gray-300 text-white cursor-not-allowed"
+          }`}
         >
           제출하기
         </button>
       </footer>
 
-      <SubmitModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onConfirm={() => handleSave(true)}
+      {/* 🔥 모든 상황을 처리하는 만능 모달 */}
+      <ConfirmModal
+        isOpen={infoModal.isOpen}
+        onClose={() => setInfoModal((prev) => ({ ...prev, isOpen: false }))}
+        onConfirm={infoModal.onConfirm}
+        message={
+          <div className="whitespace-pre-line text-center">
+            {infoModal.message}
+          </div>
+        }
+        isSingleButton={infoModal.isSingleButton}
+        confirmText={infoModal.confirmText}
+        cancelText={infoModal.cancelText}
       />
     </div>
   );
