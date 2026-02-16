@@ -1,12 +1,11 @@
 import { useEffect, useState } from "react";
-import FilterLabel from "../../components/admin/FilterLabel";
 import SearchIcon from "/icons/search.svg";
 import DropDown from "../../components/admin/DropDown";
 import Button from "../../components/admin/Button";
-import ApplicantTable from "../../components/admin/ApplicantTable";
 import Pagination from "../../components/admin/Pagination";
 import Modal from "../../components/admin/Modal";
-import FilterBtn from "../../components/admin/FilterBtn.tsx";
+import FilterLabel from "../../components/admin/FilterLabel";
+import FilterBtn from "../../components/admin/FilterBtn";
 import {
   PART,
   PASS_STATUS,
@@ -19,6 +18,11 @@ import {
   type Pages,
   passStates,
 } from "../../constants/adminFilter";
+import ApplicantTable from "../../components/admin/ApplicantTable";
+
+type ConfirmResult =
+  | { ok: true; message?: string }
+  | { ok: false; message?: string };
 
 const Admin = () => {
   const [partSelected, setPartSelected] = useState<PartValue>("ALL"); //지원 분야
@@ -34,6 +38,8 @@ const Admin = () => {
     search: "",
   }); //(검색된) 마지막 필터 설정
   const [isFilterChanged, setIsFilterChanged] = useState(false); //필터변화 여부
+  const [isLoading, setIsLoading] = useState(true);
+  const [showLoading, setShowLoading] = useState(false);
 
   const [modalContent, setModalContent] = useState(""); //모달 내용
   const [open, setOpen] = useState(false); //모달 표시 여부
@@ -80,8 +86,6 @@ const Admin = () => {
   };
 
   const handleSearch = () => {
-    setPage({ page: 0, totalPages: 0 });
-    handleFilter();
     setLastSearched({
       part: partSelected,
       passStatus: stateSelected,
@@ -90,6 +94,7 @@ const Admin = () => {
       search: search.trim(),
     });
     setIsFilterChanged(false);
+    setPage((prev) => ({ ...prev, page: 0 }));
   };
 
   // 서류 합격자 문자 발송
@@ -107,11 +112,24 @@ const Admin = () => {
       );
 
       if (!response.ok) {
-        throw new Error("something went wrong");
+        return {
+          ok: false,
+          message: "서류 합격자 문자 발송에 실패했습니다.",
+        };
       }
-      const data = await response.json();
+
+      return {
+        ok: true,
+        message: "서류 합격자 문자 발송이 완료되었습니다.",
+      };
     } catch (error) {
-      console.error("Error fetching application detail data:", error);
+      return {
+        ok: false,
+        message:
+          error instanceof Error
+            ? error.message
+            : "서류 합격자 문자 발송에 실패했습니다.",
+      };
     }
   };
 
@@ -132,11 +150,24 @@ const Admin = () => {
       );
 
       if (!response.ok) {
-        throw new Error("something went wrong");
+        return {
+          ok: false,
+          message: "최종 합격자 문자 발송에 실패했습니다.",
+        };
       }
-      const data = await response.json();
+
+      return {
+        ok: true,
+        message: "최종 합격자 문자 발송이 완료되었습니다.",
+      };
     } catch (error) {
-      console.error("Error fetching application detail data:", error);
+      return {
+        ok: false,
+        message:
+          error instanceof Error
+            ? error.message
+            : "최종 합격자 문자 발송에 실패했습니다.",
+      };
     }
   };
 
@@ -183,8 +214,34 @@ const Admin = () => {
   };
 
   useEffect(() => {
-    handleFilter();
-  }, [page.page]);
+    let t: number | undefined;
+
+    if (isLoading) {
+      t = window.setTimeout(() => setShowLoading(true), 150); // 150ms 후에만 표시
+    } else {
+      setShowLoading(false);
+    }
+
+    return () => {
+      if (t) window.clearTimeout(t);
+    };
+  }, [isLoading]);
+
+  useEffect(() => {
+    let cancelled = false;
+    const run = async () => {
+      setIsLoading(true);
+      try {
+        await handleFilter();
+      } finally {
+        if (!cancelled) setIsLoading(false);
+      }
+    };
+    run();
+    return () => {
+      cancelled = true;
+    };
+  }, [page.page, lastSearched]);
 
   const handleSendMessage = (type: "doc" | "final") => {
     setSendType(type);
@@ -198,21 +255,17 @@ const Admin = () => {
     setOpen(true);
   };
 
-  const handleConfirmSend = async () => {
-    if (!sendType) return;
-
-    try {
-      if (sendType === "doc") {
-        await sendDocPassMessage();
-      } else {
-        await sendFinalPassMessage();
-      }
-      setOpen(false);
-      setSendType(null);
-    } catch (e) {
-      console.error(e);
-      // 여기서 실패 모달/토스트 띄우고 싶으면 추가
+  const handleConfirmSend = async (): Promise<ConfirmResult> => {
+    if (!sendType) {
+      return { ok: false, message: "발송 타입이 선택되지 않았습니다." };
     }
+
+    const result =
+      sendType === "doc"
+        ? await sendDocPassMessage()
+        : await sendFinalPassMessage();
+
+    return result;
   };
 
   return (
@@ -278,9 +331,7 @@ const Admin = () => {
                 data={interviewTime}
                 onChange={setTimeSelected}
                 placeholder={"전체"}
-              >
-                전체
-              </DropDown>
+              />
             </div>
           </FilterLabel>
         </div>
@@ -349,7 +400,7 @@ const Admin = () => {
           </div>
         </Modal>
 
-        <ApplicantTable data={filteredList} />
+        <ApplicantTable data={filteredList} isLoading={showLoading} />
         <Pagination
           currentPage={page.page}
           totalPages={page.totalPages}

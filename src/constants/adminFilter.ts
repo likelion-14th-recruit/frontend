@@ -88,10 +88,10 @@ export const passStates = [
 ];
 
 export const interviewDates = [
-  { label: "3/9", value: "2026-03-09" },
-  { label: "3/10", value: "2026-03-10" },
-  { label: "3/11", value: "2026-03-11" },
-  { label: "3/12", value: "2026-03-12" },
+  { label: "3/9", value: "2026-03-09", dayOfWeek: "월" },
+  { label: "3/10", value: "2026-03-10", dayOfWeek: "화" },
+  { label: "3/11", value: "2026-03-11", dayOfWeek: "수" },
+  { label: "3/12", value: "2026-03-12", dayOfWeek: "목" },
 ];
 
 export const dateOfWeek = [

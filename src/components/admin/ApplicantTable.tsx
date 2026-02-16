@@ -12,9 +12,10 @@ interface Applicant {
 
 interface TableProps {
   data?: Applicant[];
+  isLoading: boolean;
 }
 
-const ApplicantTable = ({ data = [] }: TableProps) => {
+const ApplicantTable = ({ data = [], isLoading }: TableProps) => {
   const navigate = useNavigate();
   const getStatusStyle = (status: string) => {
     switch (status) {
@@ -34,27 +35,37 @@ const ApplicantTable = ({ data = [] }: TableProps) => {
     <div className="w-full">
       <table className="w-full border-collapse">
         <thead>
-          <tr className="bg-lightGray text-black/80 text-[14px]">
-            <th className="py-3 px-6 text-center font-medium w-[15%]">이름</th>
-            <th className="py-3 px-2 text-center font-medium w-[15%]">학번</th>
-            <th className="py-3 px-2 text-center font-medium w-[15%]">
+          <tr className="bg-lightGray text-black/80 text-[14px] font-[600]">
+            <th className="py-[8px] text-center font-medium w-[15%]">이름</th>
+            <th className="py-[8px] text-center font-medium w-[15%]">학번</th>
+            <th className="py-[8px] text-center font-medium w-[15%]">
               학적 상태
             </th>
-            <th className="py-3 px-4 text-center font-medium w-[25%]">
+            <th className="py-[8px] text-center font-medium w-[25%]">
               전화 번호
             </th>
-            <th className="py-3 px-4 text-center font-medium w-[15%]">
+            <th className="py-[8px] text-center font-medium w-[15%]">
               지원 분야
             </th>
-            <th className="py-3 px-6 text-center font-medium w-[15%]">
+            <th className="py-[8px] text-center font-medium w-[15%]">
               지원 결과
             </th>
           </tr>
         </thead>
 
-        {data.length > 0 ? (
+        {isLoading ? (
           <tbody>
-            {data.map((item, index) => {
+            <tr>
+              <td colSpan={6}>
+                <div className="flex w-full py-[200px] items-center justify-center text-[16px] font-[400] text-center border-b border-b-lightGray">
+                  불러오는 중...
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        ) : data.length > 0 ? (
+          <tbody>
+            {data.map((item) => {
               const partLabel =
                 applyParts.find((i) => i.value === item.part)?.label ?? "-";
 
@@ -64,28 +75,34 @@ const ApplicantTable = ({ data = [] }: TableProps) => {
 
               return (
                 <tr
-                  key={index}
+                  key={item.applicationPublicId}
                   className="border-b border-lightGray text-[15px] cursor-pointer hover:bg-lightGray/50 duration-200"
-                  onClick={() => navigate(`/admin/${item.applicationPublicId}`)}
+                  onClick={() =>
+                    navigate(
+                      `/admin79182e7i8-jd8h229jdkfj37r8x90/${item.applicationPublicId}`
+                    )
+                  }
                 >
-                  <td className="px-6 py-4 font-medium text-center text-black">
+                  <td className="py-[10px] font-[400] text-center text-black">
                     {item.name}
                   </td>
-                  <td className="px-2 py-4 text-center text-black">
+                  <td className="py-[10px] font-[400] text-center text-black">
                     {item.studentNumber}
                   </td>
-                  <td className="px-2 py-4 text-center text-black">재학</td>
-                  <td className="px-4 py-4 text-center text-black">
+                  <td className="py-[10px] font-[400] text-center text-black">
+                    재학
+                  </td>
+                  <td className="py-[10px] font-[400] text-center text-black">
                     {item.phoneNumber.replace(
                       /^(\d{2,3})(\d{3,4})(\d{4})$/,
                       `$1-$2-$3`
                     )}
                   </td>
-                  <td className="px-4 py-4 text-center text-black">
+                  <td className="py-[10px] font-[400] text-center text-black">
                     {partLabel}
                   </td>
                   <td
-                    className={`py-4 px-6 text-center ${getStatusStyle(
+                    className={`py-[10px] font-[400] text-center ${getStatusStyle(
                       item.passStatus
                     )}`}
                   >

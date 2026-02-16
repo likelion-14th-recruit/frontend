@@ -14,11 +14,10 @@ import {
 const AdminDetail = () => {
   const [open, setOpen] = useState(false);
   const [applyState, setApplyState] = useState<PassStatus | "">("");
-  // const [interviewDate, setInterviewDate] = useState();
-  // const [interviewTime, setInterviewTime] = useState();
-  // const [interviewPlace, setInterviewPlace] = useState();
   const { applicationPublicId } = useParams();
   const [saveActive, setSaveActive] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [modalMessage, setModalMessage] = useState<string>("");
 
   const [applyData, setApplyData] = useState<ApplyDetail>();
   const [availTime, setAvailTime] = useState<AvailTime[]>();
@@ -29,6 +28,7 @@ const AdminDetail = () => {
       place: "",
     }
   ); //면접 확정 날/시간/장소
+
   const [answers, setAnswers] = useState();
   const [isLoading, setIsLoading] = useState(true);
 
@@ -157,91 +157,140 @@ const AdminDetail = () => {
       );
 
       if (!response.ok) {
-        throw new Error("something went wrong");
+        throw new Error("지원 결과 변경 중에 문제가 발생했습니다.");
       }
       const data = await response.json();
     } catch (error) {
       console.error("Error fetching application detail data:", error);
     }
+  };
+
+  // 면접일정 저장 에러 매핑...
+  const getErrorMessage = (status: number, code?: string) => {
+    if (status === 400 && code === "VALIDATION_ERROR") {
+      return "날짜 또는 시작 시간이 누락되었습니다.";
+    }
+
+    if (status === 404 && code === "APPLICATION_NOT_FOUND") {
+      return "존재하지 않는 지원서입니다.";
+    }
+
+    if (status === 404 && code === "INTERVIEW_TIME_NOT_EXISTS") {
+      return "선택한 면접 시간은 유효하지 않습니다.";
+    }
+
+    return "저장에 실패했습니다. 다시 시도해주세요.";
   };
 
   // 면접 일정(날짜/시간/장소) 변경
   const changeInterviewSchedule = async () => {
-    try {
-      const endTime = getEndTime(
-        interviewSchedule.date,
-        interviewSchedule.startTime
-      );
+    // const endTime = getEndTime(
+    //   interviewSchedule.date,
+    //   interviewSchedule.startTime
+    // );
 
-      const response = await fetch(
-        `${
-          import.meta.env.VITE_API_URL
-        }/applications/${applicationPublicId}/interview-schedule/select`,
-        {
-          method: "POST",
-          credentials: "include",
-          headers: {
-            "Content-type": "application/json",
-          },
-          body: JSON.stringify({
-            date: interviewSchedule.date,
-            startTime: interviewSchedule.startTime,
-            endTime,
-            place: interviewSchedule.place,
-          }),
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("something went wrong");
+    const response = await fetch(
+      `${
+        import.meta.env.VITE_API_URL
+      }/applications/${applicationPublicId}/interview-schedule/select`,
+      {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-type": "application/json",
+        },
+        body: JSON.stringify({
+          date: interviewSchedule.date,
+          startTime: interviewSchedule.startTime,
+          place: interviewSchedule.place,
+        }),
       }
-      const data = await response.json();
-    } catch (error) {
-      console.error("Error fetching application detail data:", error);
+    );
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => null);
+      const message = getErrorMessage(response.status, errorData?.code);
+      throw new Error(message);
+    }
+
+    return response.json();
+  };
+
+  // const getEndTime = (
+  //   dateStr?: string,
+  //   startTimeStr?: string,
+  //   minutesToAdd = 20
+  // ) => {
+  //   if (!dateStr || !startTimeStr) return ""; // 값 없으면 계산 X
+
+  //   // 만약 "2026.02.12" / "2026/02/12" 이런 게 오면 -로 통일
+  //   const normalizedDate = dateStr.replaceAll(".", "-").replaceAll("/", "-");
+  //   const [y, m, d] = normalizedDate.split("-").map(Number);
+
+  //   // startTimeStr: "14:20" or "14:20:00"
+  //   const [hh, mm, ss = "0"] = startTimeStr.split(":");
+  //   const hour = Number(hh);
+  //   const minute = Number(mm);
+  //   const second = Number(ss);
+
+  //   // 숫자 파싱 실패 방지
+  //   if ([y, m, d, hour, minute, second].some((v) => Number.isNaN(v))) return "";
+
+  //   const start = new Date(y, m - 1, d, hour, minute, second);
+  //   start.setMinutes(start.getMinutes() + minutesToAdd);
+
+  //   const endHH = String(start.getHours()).padStart(2, "0");
+  //   const endMM = String(start.getMinutes()).padStart(2, "0");
+  //   return `${endHH}:${endMM}`;
+  // };
+
+  const handleSaveBtn = async () => {
+    if (!applicationPublicId) return;
+
+    setIsSaving(true);
+
+    try {
+      const tasks: Promise<unknown>[] = [];
+
+      // passStatus가 바뀐 경우만 passStatus 변경 호출
+      if (applyData?.passStatus !== applyState) {
+        tasks.push(changePassStatus());
+      }
+
+      // 서류합격 상태면 3개 다 있어야 스케줄 저장
+      const shouldSaveSchedule =
+        applyState === "DOCUMENT_PASSED" &&
+        !!interviewSchedule.date &&
+        !!interviewSchedule.startTime &&
+        !!interviewSchedule.place;
+
+      if (shouldSaveSchedule) {
+        tasks.push(changeInterviewSchedule());
+      }
+
+      // 바뀐 게 없는 경우
+      if (tasks.length === 0) {
+        setModalMessage("변경된 내용이 없습니다.");
+        setOpen(true);
+        return;
+      }
+
+      await Promise.all(tasks);
+      setModalMessage("저장이 완료되었습니다.");
+      setOpen(true);
+    } catch (e) {
+      const msg =
+        e instanceof Error
+          ? e.message
+          : "저장에 실패했습니다. 잠시 후 다시 시도해주세요.";
+      setModalMessage(msg);
+      setOpen(true);
+    } finally {
+      setIsSaving(false);
     }
   };
 
-  const getEndTime = (
-    dateStr: string,
-    startTimeStr: string,
-    minutesToAdd = 20
-  ) => {
-    if (!dateStr || !startTimeStr) return ""; // 값 없으면 계산 X
-
-    // 만약 "2026.02.12" / "2026/02/12" 이런 게 오면 -로 통일
-    const normalizedDate = dateStr.replaceAll(".", "-").replaceAll("/", "-");
-    const [y, m, d] = normalizedDate.split("-").map(Number);
-
-    // startTimeStr: "14:20" or "14:20:00"
-    const [hh, mm, ss = "0"] = startTimeStr.split(":");
-    const hour = Number(hh);
-    const minute = Number(mm);
-    const second = Number(ss);
-
-    // 숫자 파싱 실패 방지
-    if ([y, m, d, hour, minute, second].some((v) => Number.isNaN(v))) return "";
-
-    const start = new Date(y, m - 1, d, hour, minute, second);
-    start.setMinutes(start.getMinutes() + minutesToAdd);
-
-    const endHH = String(start.getHours()).padStart(2, "0");
-    const endMM = String(start.getMinutes()).padStart(2, "0");
-    return `${endHH}:${endMM}`;
-  };
-
-  const handleSaveBtn = () => {
-    if (applyData?.passStatus !== applyState) {
-      changePassStatus();
-    }
-    if (interviewSchedule.place !== "") {
-      changeInterviewSchedule();
-    }
-    setOpen(true);
-  };
-
-  // 디버깅용 - 면접 스케줄 확인
   useEffect(() => {
-    console.log(saveActive);
     if (applyState === "DOCUMENT_PASSED") {
       if (
         interviewSchedule.date !== "" &&
@@ -255,18 +304,37 @@ const AdminDetail = () => {
     } else if (
       applyState === "DOCUMENT_FAILED" ||
       applyState === "INTERVIEW_FAILED" ||
-      applyState === "INTERVIEW_PASSED"
+      applyState === "INTERVIEW_PASSED" ||
+      applyState === "PENDING"
     ) {
       setSaveActive(true);
     }
   }, [interviewSchedule, applyState]);
 
   useEffect(() => {
-    fetchApplyData();
-    fetchAvailTime();
-    fetchAnswers();
-    fetchInterviewTime();
-    setIsLoading(false);
+    if (!applicationPublicId) return;
+
+    let cancelled = false;
+
+    const run = async () => {
+      setIsLoading(true);
+      try {
+        await Promise.all([
+          fetchApplyData(),
+          fetchAvailTime(),
+          fetchAnswers(),
+          fetchInterviewTime(),
+        ]);
+      } finally {
+        if (!cancelled) setIsLoading(false);
+      }
+    };
+
+    run();
+
+    return () => {
+      cancelled = true;
+    };
   }, [applicationPublicId]);
 
   // 디버깅용 - 면접 상태 확인
@@ -282,6 +350,7 @@ const AdminDetail = () => {
             data={applyData}
             ApplyState={applyState}
             setApplyState={setApplyState}
+            isLoading={isLoading}
             availTime={availTime}
             interviewSchedule={interviewSchedule}
             setInterviewSchedule={setInterviewSchedule}
@@ -304,13 +373,13 @@ const AdminDetail = () => {
         <Button
           block={true}
           isActive={saveActive}
-          styleType={`${saveActive ? "active" : "inactive"}`}
+          styleType={`${saveActive && !isSaving ? "active" : "inactive"}`}
           onClick={handleSaveBtn}
         >
-          저장하기
+          {isSaving ? "저장중..." : "저장하기"}
         </Button>
         <Modal isTwo={false} isOpen={open} onClose={() => setOpen(false)}>
-          <div>저장이 완료되었습니다.</div>
+          <div>{modalMessage}</div>
         </Modal>
       </div>
     </div>

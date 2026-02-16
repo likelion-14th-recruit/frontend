@@ -1,12 +1,4 @@
-import {
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type Dispatch,
-  type ReactNode,
-  type SetStateAction,
-} from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import dropdown_icon from "/icons/dropDown.svg";
 
 export type DropDownOption<T = string> = {
@@ -28,7 +20,6 @@ type dropDownProps<T extends string> = {
   inactive?: boolean;
   isTime?: boolean;
   isAll?: boolean;
-  cut?: boolean;
 };
 
 const DropDown = <T extends string>({
@@ -39,7 +30,6 @@ const DropDown = <T extends string>({
   inactive,
   isTime,
   isAll,
-  cut,
 }: dropDownProps<T>) => {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement | null>(null);

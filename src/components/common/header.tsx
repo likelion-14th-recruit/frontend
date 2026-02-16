@@ -26,7 +26,7 @@ const Header = ({ onOpenMenu }: HeaderProps) => {
   const isDark = pathname === "/" || pathname === "/recruit";
   const textLogo = isDark ? textLogoDark : textLogoLight; // dark일 때 light일 때 로고 다르게
   const isAdmin = pathname.startsWith("/admin");
-  const logoTo = isAdmin ? "/admin" : "/"; //admin일 때 아닐 때 로고 navigate 루트 다르게
+  const logoTo = isAdmin ? "/admin79182e7i8-jd8h229jdkfj37r8x90" : "/"; //admin일 때 아닐 때 로고 navigate 루트 다르게
   // 공통 네비게이션 & 스크롤 함수
   const handleNavClick = (to: string) => {
     // 1. 스크롤 주체인 <main> 요소를 찾아 상단으로 이동
@@ -48,7 +48,7 @@ const Header = ({ onOpenMenu }: HeaderProps) => {
       <header
         className={cx(
           "fixed top-0 left-0 z-[100] w-full transition-colors duration-350 ",
-          isDark ? "bg-header-dark" : "bg-header-light",
+          isDark ? "bg-header-dark" : "bg-header-light"
         )}
       >
         {/* logo 부분 */}
@@ -71,7 +71,9 @@ const Header = ({ onOpenMenu }: HeaderProps) => {
                 <div className="flex items-center">
                   <h2
                     className="font-sogang text-[16px] font-normal cursor-pointer hover:underline"
-                    onClick={() => navigate("/admin")}
+                    onClick={() =>
+                      navigate("/admin79182e7i8-jd8h229jdkfj37r8x90")
+                    }
                   >
                     HOME
                   </h2>
@@ -88,8 +90,8 @@ const Header = ({ onOpenMenu }: HeaderProps) => {
                         isActive
                           ? "text-sogang" //현재 탭 활성화면 색상 변경
                           : isDark
-                            ? "text-white/80" //배경 dark일 때 텍스트
-                            : "text-black", //배경 light일 때 텍스트
+                          ? "text-white/80" //배경 dark일 때 텍스트
+                          : "text-black" //배경 light일 때 텍스트
                       )
                     }
                   >
