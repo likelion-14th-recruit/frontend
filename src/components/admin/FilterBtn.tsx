@@ -15,7 +15,6 @@ const FilterBtn = ({
   hasClose,
   selected,
   onClick,
-  onChange,
 }: FilterBtnProps) => {
   return (
     <button

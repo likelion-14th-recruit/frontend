@@ -9,12 +9,14 @@ import {
   applyParts,
   academicStatus,
   type InterviewSchedule,
+  type PassStatus,
 } from "../../constants/adminFilter";
 import DropDown from "./DropDown";
 
 const DetailTable = ({
   data,
   availTime,
+  isLoading,
   ApplyState,
   setApplyState,
   interviewSchedule,
@@ -22,8 +24,9 @@ const DetailTable = ({
 }: {
   data: ApplyDetail | undefined;
   availTime?: AvailTime[];
-  ApplyState: string;
-  setApplyState: Dispatch<SetStateAction<string>>;
+  isLoading: boolean;
+  ApplyState: PassStatus | "";
+  setApplyState: Dispatch<SetStateAction<PassStatus | "">>;
   interviewSchedule: InterviewSchedule;
   setInterviewSchedule: Dispatch<SetStateAction<InterviewSchedule>>;
 }) => {
@@ -80,28 +83,39 @@ const DetailTable = ({
           <br /> 면접 시간
         </div>
         <div className={contentStyle}>
-          <div className="grid grid-cols-[1fr_1fr_1fr_1fr]">
-            {availTime?.map((day) => {
-              const dateLabel =
-                interviewDates.find((i) => i.value === day.date)?.label ?? "-";
-              const dateOfWeekLabel =
-                dateOfWeek.find((i) => i.value === day.dayOfWeek)?.label ?? "-";
+          {isLoading ? (
+            <div className="flex items-center justify-center h-[250px]">
+              불러오는 중..
+            </div>
+          ) : (
+            <div className="grid grid-cols-[1fr_1fr_1fr_1fr]">
+              {interviewDates.map((day) => {
+                const matchedDate = availTime?.find(
+                  (i) => i.date === day.value
+                );
+                const times = matchedDate?.times ?? [];
+                const hasAvailTime = times.length > 0;
 
-              return (
-                <div key={day.date} className={timetableStyle}>
-                  <span className="font-[600] pb-[8px]">
-                    {dateLabel}({dateOfWeekLabel})
-                  </span>
+                return (
+                  <div key={day.value} className={timetableStyle}>
+                    <span className="font-[600] pb-[8px]">
+                      {day.label}({day.dayOfWeek})
+                    </span>
 
-                  {day?.times?.map((time, index) => (
-                    <div key={index}>
-                      {time.startTime}~{time.endTime}
-                    </div>
-                  ))}
-                </div>
-              );
-            })}
-          </div>
+                    {hasAvailTime ? (
+                      times?.map((time, index) => (
+                        <div key={index}>
+                          {time.startTime}~{time.endTime}
+                        </div>
+                      ))
+                    ) : (
+                      <div>가능 시간 없음</div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
       {/* 행 6 */}
@@ -111,9 +125,8 @@ const DetailTable = ({
           <DropDown
             data={passStates.slice(1)}
             value={ApplyState}
-            onChange={(v) => setApplyState(v)}
+            onChange={(v) => setApplyState(v as PassStatus)}
             placeholder="검토 전"
-            cut={true}
           />
         </div>
         <div className={labelStyle}>면접일</div>

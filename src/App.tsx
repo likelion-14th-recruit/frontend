@@ -44,8 +44,14 @@ function App() {
         </Route>
 
         <Route element={<AdminLayout />}>
-          <Route path="/admin" element={<Admin />} />
-          <Route path="/admin/:applicationPublicId" element={<AdminDetail />} />
+          <Route
+            path="/admin79182e7i8-jd8h229jdkfj37r8x90"
+            element={<Admin />}
+          />
+          <Route
+            path="/admin79182e7i8-jd8h229jdkfj37r8x90/:applicationPublicId"
+            element={<AdminDetail />}
+          />
         </Route>
       </Routes>
     </BrowserRouter>
