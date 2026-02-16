@@ -34,26 +34,78 @@ const FindPasswordPage = () => {
     isPasswordMatch;
 
   // 🔥 1. 인증번호 전송/재전송 핸들러
-  const handleSendAuth = () => {
-    if (authStatus === "idle") {
-      setAuthStatus("sent");
-      setAuthGuide("인증번호가 전송되었습니다.");
-    } else {
-      // 이미 보낸 적이 있다면 '재전송' 문구로 업데이트
-      setAuthGuide("인증번호가 재전송되었습니다.");
+  const handleSendAuth = async () => {
+    if (!isPhoneValid) return;
+
+    try {
+      const response = await fetch("/api/verification", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phoneNumber: formData.phone }),
+      });
+      if (response.ok) {
+        setAuthStatus("sent");
+        setAuthGuide(
+          authStatus === "idle"
+            ? "인증번호가 전송되었습니다."
+            : "인증번호가 재전송되었습니다.",
+        );
+        // 재전송 시 기존 인증번호 입력란 초기화
+        setFormData((prev) => ({ ...prev, authCode: "" }));
+      } else {
+        setAuthGuide("전송에 실패했습니다. 번호를 확인해 주세요.");
+      }
+    } catch (error) {
+      setAuthGuide("서버와 통신 중 오류가 발생했습니다.");
     }
   };
 
-  const handleVerifyAuth = () => {
-    if (formData.authCode.length > 0) {
-      setAuthStatus("verified");
+  const handleVerifyAuth = async () => {
+    if (!formData.authCode) return;
+
+    try {
+      const response = await fetch("/api/verification/confirm", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          phoneNumber: formData.phone,
+          code: Number(formData.authCode),
+        }),
+      });
+
+      if (response.ok) {
+        setAuthStatus("verified");
+      } else {
+        alert("인증번호가 일치하지 않거나 만료되었습니다.");
+      }
+    } catch (error) {
+      alert("인증 확인 중 오류가 발생했습니다.");
     }
   };
 
-  const handleSubmit = () => {
-    if (isFormValid) {
-      alert("비밀번호가 성공적으로 변경되었습니다.");
-      navigate("/recruit");
+  const handleSubmit = async () => {
+    if (!isFormValid) return;
+
+    try {
+      const response = await fetch("/api/password/reset", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          phoneNumber: formData.phone,
+          password: formData.password,
+        }),
+      });
+
+      if (response.ok) {
+        alert("비밀번호가 성공적으로 변경되었습니다.");
+        navigate("/recruit"); // 로그인 페이지나 적절한 경로로 이동
+      } else {
+        const errorData = await response.json();
+        alert(`변경 실패: ${errorData.message || "다시 시도해 주세요."}`);
+      }
+    } catch (error) {
+      console.error("네트워크 에러:", error);
+      alert("서버 연결 오류가 발생했습니다.");
     }
   };
 

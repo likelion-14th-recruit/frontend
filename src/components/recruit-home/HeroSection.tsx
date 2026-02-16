@@ -1,8 +1,6 @@
-import React from "react";
-import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import type { Variants } from "framer-motion";
-
+import ApplyBtn from "../common/ApplyBtn";
 
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
@@ -20,17 +18,11 @@ const itemVariants: Variants = {
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.8 , ease: "easeOut" }, // 요청한 0.5초 감각
+    transition: { duration: 0.8, ease: "easeOut" }, // 요청한 0.5초 감각
   },
 };
 
-// 버튼 위쪽 아무데나 추가
-const deadline = new Date("2026-03-05T23:59:59");
-const isClosed = new Date() > deadline;
-
 const HeroSection = () => {
-  const navigate = useNavigate();
-
   return (
     <section
       data-header="dark"
@@ -86,8 +78,12 @@ const HeroSection = () => {
             absolute
             left-1/2 top-1/2
             -translate-x-1/2 -translate-y-1/2
-            w-[800px]
-            h-[500px]
+            w-[200px]
+            h-[100px]
+            tablet-lg:w-[550px]
+            tablet-lg:h-[345px]
+            desktop:w-[800px]
+            desktop:h-[500px]
             rounded-full
             pointer-events-none
           "
@@ -137,43 +133,7 @@ const HeroSection = () => {
         </motion.p>
 
         {/* 버튼 */}
-        <motion.button
-          variants={itemVariants}
-          onClick={() => {
-            if (!isClosed) navigate("/recruit/start");
-          }}
-          disabled={isClosed}
-          className={`
-            relative z-10
-            flex items-center justify-center
-            font-pretendard
-            leading-[140%]
-            text-[14px]
-            px-[16px]
-            py-[10px]
-            rounded-[10px]
-            font-semibold
-            tablet-lg:text-[16px]
-            desktop:text-[20px]
-            desktop:px-[24px]
-            desktop:rounded-[12px]
-
-            ${
-              isClosed
-                ? "bg-[#9C9C9C] text-white/80 cursor-not-allowed"
-                : "bg-sogang text-white"
-            }
-
-            after:content-['']
-            after:absolute after:inset-0
-            after:bg-[#121212]/20
-            after:opacity-0
-            after:transition-opacity after:duration-200
-            hover:after:opacity-100
-          `}
-        >
-          {isClosed ? "14기 모집 마감" : "14기 지원하기"}
-        </motion.button>
+        <ApplyBtn />
       </motion.div>
     </section>
   );
