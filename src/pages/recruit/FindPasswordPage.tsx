@@ -70,7 +70,9 @@ const FindPasswordPage = () => {
         setFormData((prev) => ({ ...prev, authCode: "" }));
         setAuthError(""); // 전송 시 에러 초기화
       } else {
-        setAuthGuide("전송에 실패했습니다. 번호를 확인해 주세요.");
+        setAuthGuide(
+          "해당 전화번호로 등록된 지원서를 찾을 수 없습니다. 번호를 다시 확인해주세요.",
+        );
       }
     } catch (error) {
       setAuthGuide("서버와 통신 중 오류가 발생했습니다.");
@@ -78,8 +80,14 @@ const FindPasswordPage = () => {
   };
 
   const handleVerifyAuth = async () => {
+    // 💡 방어 코드: 번호를 보낸 적이 없는데(idle) 확인을 누르려고 하면 차단
+    if (authStatus === "idle") {
+      setAuthError("먼저 인증번호 전송 버튼을 눌러주세요.");
+      return;
+    }
+
     if (!formData.authCode) return;
-    setAuthError(""); // 클릭 시 초기화
+    setAuthError("");
 
     try {
       const response = await fetch("/api/verification/confirm", {
@@ -91,12 +99,14 @@ const FindPasswordPage = () => {
         }),
       });
 
-      if (response.ok) {
+      const result = await response.json(); // 응답 데이터 확인
+
+      if (response.ok && result.success) {
         setAuthStatus("verified");
         setAuthError("");
       } else {
-        // 🔥 alert 대신 InfoPage처럼 빨간 글씨 세팅
-        setAuthError("인증번호가 올바르지 않습니다. 다시 입력해 주세요.");
+        // 서버에서 success: false를 주거나 HTTP 에러가 날 때
+        setAuthError(result.message || "인증번호가 올바르지 않습니다.");
       }
     } catch (error) {
       setAuthError("인증 확인 중 오류가 발생했습니다.");
@@ -105,6 +115,7 @@ const FindPasswordPage = () => {
 
   const handleSubmit = async () => {
     if (!isFormValid) return;
+
     try {
       const response = await fetch("/api/password/reset", {
         method: "POST",
@@ -115,14 +126,41 @@ const FindPasswordPage = () => {
         }),
       });
 
-      if (response.ok) {
-        alert("비밀번호가 성공적으로 변경되었습니다.");
-        navigate("/recruit");
+      const result = await response.json();
+      console.log("재설정 응답 데이터:", result); // 🔥 여기서 실제 데이터 구조를 꼭 확인해보세요!
+
+      // 💡 조건 수정: result.success가 true라면 일단 진행
+      if (response.ok && result.success) {
+        // 서버마다 data.applicationPublicId 일 수도 있고, result.applicationPublicId 일 수도 있음
+        const appId =
+          result.data?.applicationPublicId || result.applicationPublicId;
+
+        if (appId) {
+          // 1. 브라우저 저장소 저장
+          localStorage.setItem("applicationId", appId);
+          alert("비밀번호가 변경되었습니다. 작성 페이지로 이동합니다.");
+
+          // 2. 이동
+          navigate("/recruit/apply", {
+            state: {
+              ...location.state,
+              applicationId: appId,
+            },
+            replace: true,
+          });
+        } else {
+          // 만약 ID가 안 왔다면? (백엔드에 따라 성공만 주고 ID는 안 줄 수도 있음)
+          console.warn(
+            "ID를 찾을 수 없습니다. 기존 ID를 사용하거나 다시 로그인해야 합니다.",
+          );
+          alert("비밀번호는 변경되었습니다. 다시 로그인해 주세요.");
+          navigate("/recruit");
+        }
       } else {
-        const errorData = await response.json();
-        alert(`변경 실패: ${errorData.message || "다시 시도해 주세요."}`);
+        alert(`변경 실패: ${result.message || "다시 시도해 주세요."}`);
       }
     } catch (error) {
+      console.error("비밀번호 재설정 중 오류:", error);
       alert("서버 연결 오류가 발생했습니다.");
     }
   };
@@ -155,18 +193,22 @@ const FindPasswordPage = () => {
           required
           placeholder="인증번호를 입력해 주세요."
           buttonText={authStatus === "verified" ? "인증완료" : "인증번호 확인"}
-          buttonDisabled={authStatus === "verified" || !formData.authCode}
-          buttonActive={
-            formData.authCode.length > 0 && authStatus !== "verified"
+          // 1. 비활성화 상태 (회색): 전송 전(idle), 인증 완료(verified), 혹은 입력값이 없을 때
+          buttonDisabled={
+            authStatus === "idle" ||
+            authStatus === "verified" ||
+            !formData.authCode
           }
+          // 2. 활성화 상태 (검은색): 반드시 "전송됨(sent)" 상태이면서 입력값이 있을 때만!
+          buttonActive={authStatus === "sent" && formData.authCode.length > 0}
           onButtonClick={handleVerifyAuth}
           onChange={(e) => {
             handleChange(e);
-            if (authError) setAuthError(""); // 다시 입력하면 빨간 글씨 삭제
+            if (authError) setAuthError("");
           }}
           value={formData.authCode}
-          isError={!!authError} // 🔥 에러 상태 연결
-          errorText={authError} // 🔥 가공된 멘트
+          isError={!!authError}
+          errorText={authError}
           guideText={authStatus === "verified" ? "인증이 완료되었습니다." : ""}
         />
 
@@ -180,7 +222,7 @@ const FindPasswordPage = () => {
           onChange={handleChange}
           value={formData.password}
           isError={formData.password.length > 0 && !isPasswordValid}
-          errorText="영문·숫자 조합 8~20자로 입력해주세요." // 🔥 빨간 글씨 통일
+          errorText="올바른 형식을 입력해주세요." // 🔥 빨간 글씨 통일
           guideText="영문·숫자 조합 8~20자"
         />
 
@@ -190,11 +232,11 @@ const FindPasswordPage = () => {
           name="passwordConfirm"
           type="password"
           required
-          placeholder="비밀번호를 재확인해 주세요."
+          placeholder="비밀번호를 재입력해 주세요."
           onChange={handleChange}
           value={formData.passwordConfirm}
           isError={formData.passwordConfirm.length > 0 && !isPasswordMatch}
-          errorText="비밀번호가 일치하지 않습니다." // 🔥 빨간 글씨 통일
+          errorText="비밀번호가 올바르지 않습니다. 다시 입력해 주세요." // 🔥 빨간 글씨 통일
         />
       </div>
 
