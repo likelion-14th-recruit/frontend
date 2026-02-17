@@ -1,10 +1,9 @@
 import { Outlet, useLocation } from "react-router-dom";
-import { useState } from "react"; // 1. useState 추가
+import { useState } from "react";
 
 const RecruitLayout = () => {
   const location = useLocation();
 
-  // 🔥 2. 자식 페이지(InfoPage 등)의 데이터를 보관할 공통 상태 생성
   const [formData, setFormData] = useState({
     name: "",
     studentId: "",
@@ -24,9 +23,15 @@ const RecruitLayout = () => {
     link: "",
   });
 
-  // 인증 관련 상태도 부모가 들고 있어야 페이지 이동 시 초기화되지 않습니다.
   const [authStatus, setAuthStatus] = useState("idle");
   const [authGuide, setAuthGuide] = useState("");
+
+  const steps = [
+    { id: 1, label: "약관 동의" },
+    { id: 2, label: "인적사항 작성" },
+    { id: 3, label: "지원서 작성" },
+    { id: 4, label: "지원서 제출" },
+  ];
 
   const getStep = () => {
     if (location.pathname.includes("terms")) return 1;
@@ -41,18 +46,34 @@ const RecruitLayout = () => {
   };
 
   const currentStep = getStep();
-
-  const steps = [
-    { id: 1, label: "약관 동의" },
-    { id: 2, label: "인적사항 작성" },
-    { id: 3, label: "지원서 작성" },
-    { id: 4, label: "지원서 제출" },
-  ];
+  const totalSteps = steps.length;
+  // 현재 단계의 라벨(이름) 가져오기
+  const currentLabel = steps.find((s) => s.id === currentStep)?.label || "";
 
   return (
-    <div className="flex flex-col w-full pt-[80px] font-pretendard">
-      {/* 상단 진행바 영역 (기존 디자인 유지) */}
-      <div className="w-full py-16 bg-white">
+    <div className="flex flex-col w-full pt-[60px] md:pt-[80px] font-pretendard">
+      {/* 📱 모바일 전용 스텝 표시 (360px ~ 768px 구간) */}
+      <div className="flex flex-col items-center md:hidden py-8 min-w-[360px]">
+        {/* 숫자 캡슐 */}
+        <div className="flex items-center justify-center px-[12px] py-[4px] border border-[#121212] rounded-[20px] bg-white mb-[8px]">
+          <span className="text-[16px] font-normal text-[#121212] leading-none">
+            {currentStep}
+          </span>
+          <span className="text-[16px] font-normal text-[#767676] mx-1 leading-none">
+            /
+          </span>
+          <span className="text-[16px] font-normal text-[#767676] leading-none">
+            {totalSteps}
+          </span>
+        </div>
+        {/* 단계별 라벨 텍스트 */}
+        <span className="text-[20px] font-semibold text-[#121212]">
+          {currentLabel}
+        </span>
+      </div>
+
+      {/* 💻 데스크탑 진행바 영역 (768px 이상) */}
+      <div className="hidden md:block w-full py-16 bg-white">
         <div className="max-w-[800px] mx-auto px-4 flex items-center justify-between">
           {steps.map((step, index) => (
             <div
@@ -89,7 +110,6 @@ const RecruitLayout = () => {
 
       {/* 중앙 컨텐츠 영역 */}
       <main className="w-full max-w-[800px] mx-auto px-4">
-        {/* 🔥 3. Outlet의 context 속성을 통해 자식들에게 데이터와 수정 함수를 전달합니다. */}
         <Outlet
           context={{
             formData,

@@ -126,7 +126,7 @@ const TermsPage = () => {
             <span className="font-bold shrink-0 w-5">5.</span>
             <div className="flex flex-col gap-2">
               <h3 className="font-bold">회비 안내</h3>
-              <p className="text-[#121212]">1년 활동비 8만원</p>
+              <p className="text-[#121212]">1년 활동비 6만원</p>
             </div>
           </div>
 
