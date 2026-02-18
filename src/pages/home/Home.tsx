@@ -126,6 +126,7 @@ const Home = () => {
             {faqList.map((faq, index) => (
               <FAQItem
                 key={index}
+                variant="home"
                 question={faq.question}
                 answer={faq.answer}
               />
