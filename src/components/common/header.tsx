@@ -8,6 +8,8 @@ interface HeaderProps {
   onOpenMenu?: () => void;
 }
 
+const ADMIN_PATH = import.meta.env.VITE_ADMIN_PATH;
+
 const Nav = [
   { to: "/about", label: "ABOUT" },
   { to: "/project", label: "PROJECT" },
@@ -23,12 +25,12 @@ const Header = ({ onOpenMenu }: HeaderProps) => {
   const { pathname } = useLocation();
   const navigate = useNavigate();
 
-  const isAdmin = pathname.startsWith("/admin");
+  const isAdmin = pathname.startsWith(`/${ADMIN_PATH}`);
   const theme = useHeaderTheme(80); // "dark" | "light"
   const isDark = theme === "dark";
 
   const textLogo = isDark ? textLogoDark : textLogoLight; // dark일 때 light일 때 로고 다르게
-  const logoTo = isAdmin ? "/admin" : "/"; //admin일 때 아닐 때 로고 navigate 루트 다르게
+  const logoTo = isAdmin ? `/${ADMIN_PATH}` : "/"; //admin일 때 아닐 때 로고 navigate 루트 다르게
   // 공통 네비게이션 & 스크롤 함수
   const handleNavClick = (to: string) => {
     // 1. 스크롤 주체인 <main> 요소를 찾아 상단으로 이동
@@ -53,7 +55,7 @@ const Header = ({ onOpenMenu }: HeaderProps) => {
           className={cx(
             "absolute inset-0 transition-opacity duration-100 ease-in-out z-0",
             isDark ? "opacity-0" : "opacity-100",
-            "bg-header-light"
+            "bg-header-light",
           )}
         />
 
@@ -62,7 +64,7 @@ const Header = ({ onOpenMenu }: HeaderProps) => {
           className={cx(
             "absolute inset-0 transition-opacity duration-100 ease-in-out z-0",
             isDark ? "opacity-100" : "opacity-0",
-            "bg-header-dark"
+            "bg-header-dark",
           )}
         />
         {/* logo 부분 */}
@@ -102,8 +104,8 @@ const Header = ({ onOpenMenu }: HeaderProps) => {
                         isActive
                           ? "text-sogang" //현재 탭 활성화면 색상 변경
                           : isDark
-                          ? "text-white/80" //배경 dark일 때 텍스트
-                          : "text-black" //배경 light일 때 텍스트
+                            ? "text-white/80" //배경 dark일 때 텍스트
+                            : "text-black", //배경 light일 때 텍스트
                       )
                     }
                   >
