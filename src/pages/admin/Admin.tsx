@@ -339,7 +339,7 @@ const Admin = () => {
         {/* ------- 서치바 ------- */}
         <div className="flex w-full px-[4px] relative items-center">
           <input
-            className="pl-[60px] text-[16px] font-[400] focus:outline-none text-black placeholder::text-black/60 bg-no flex items-center gap-[10px] w-full bg-lightGray rounded-[16px] px-[12px] py-[8px]"
+            className="pl-[63px] text-[16px] font-[350] focus:outline-none text-black placeholder:text-black/60 bg-no flex items-center gap-[10px] w-full bg-lightGray rounded-[16px] px-[12px] py-[10px]"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             type="text"
@@ -356,7 +356,7 @@ const Admin = () => {
         <button
           onClick={handleSearch}
           disabled={!isFilterChanged}
-          className={`flex px-[20px] py-[8px] text-[14px] font-[600] text-white rounded-[12px]  ${
+          className={`flex ml-[4px] px-[20px] py-[8px] text-[14px] font-[550] text-white rounded-[12px]  ${
             isFilterChanged
               ? "bg-black/80 hover:bg-black ease-in-out duration-200"
               : "bg-black/20 cursor-default"
@@ -365,7 +365,7 @@ const Admin = () => {
           목록 조회
         </button>
 
-        <div className="w-full border-b border-lightGray"></div>
+        <div className="w-[792px] mx-[4px] border-b border-lightGray"></div>
 
         <div className="flex w-full justify-end gap-[12px] mt-[20px]">
           <Button

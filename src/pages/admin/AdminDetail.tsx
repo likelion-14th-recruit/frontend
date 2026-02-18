@@ -10,6 +10,7 @@ import {
   type InterviewSchedule,
   type PassStatus,
 } from "../../constants/adminFilter";
+import star from "/icons/star.svg";
 
 const AdminDetail = () => {
   const [open, setOpen] = useState(false);
@@ -344,7 +345,7 @@ const AdminDetail = () => {
 
   return (
     <div className="w-[100%] flex flex-col justify-center items-center m-0 py-[50px]">
-      <div className="w-[800px] flex flex-col justify-center items-center gap-[40px]">
+      <div className="w-[800px] mb-[40px] flex flex-col justify-center items-center gap-[40px]">
         <div className="w-full">
           <DetailTable
             data={applyData}
@@ -355,10 +356,15 @@ const AdminDetail = () => {
             interviewSchedule={interviewSchedule}
             setInterviewSchedule={setInterviewSchedule}
           />
-          <div className="w-full flex justify-start items-start text-[16px] text-sogang font-[400] mt-[10px]">
-            *면접일과 면접 시간은 서류 합격자에 한해 선택 가능하며, 선택 후 면접
-            장소 입력이 가능합니다. <br />
-            또한 세 항목을 모두 입력해야 저장됩니다.
+          <div className="w-full flex justify-start items-start text-[16px] text-sogang font-[350] mt-[10px]">
+            <div className="flex justify-center px-[4px] py-[8px] gap-[4px]">
+              <img src={star} alt="" />
+            </div>
+            <div className="flex leading-[160%]">
+              면접일과 면접 시간은 서류 합격자에 한해 선택 가능하며, 선택 후
+              면접 장소 입력이 가능합니다. <br />
+              또한 세 항목을 모두 입력해야 저장됩니다.
+            </div>
           </div>
         </div>
 
@@ -370,6 +376,7 @@ const AdminDetail = () => {
             answer={answers?.[index]}
           />
         ))}
+        <div className="h-[6px]"></div>
         <Button
           block={true}
           isActive={saveActive}

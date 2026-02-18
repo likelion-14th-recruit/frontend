@@ -6,7 +6,7 @@ const AdminLayout = () => {
     <div className="flex w-full h-screen overflow-hidden no-scrollbar">
       <div className="relative flex flex-col w-full h-full overflow-hidden">
         <Header />
-        <main className="no-scrollbar flex-1 overflow-auto mt-[80px]">
+        <main className="no-scrollbar flex-1 overflow-auto mt-[96px]">
           <Outlet />
         </main>
       </div>

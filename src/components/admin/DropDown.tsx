@@ -70,6 +70,8 @@ const DropDown = <T extends string>({
         return "text-black";
       case "PENDING":
         return "text-black/60";
+      case "ALL":
+      case "전체":
       case "면접일":
       case "면접 시간":
         return "text-black/60";
@@ -105,7 +107,7 @@ const DropDown = <T extends string>({
 
       {open && !inactive && (
         <div
-          className={`absolute top-[42px] left-0 flex flex-col w-full overflow-y-auto rounded-[12px] z-50 bg-white
+          className={`absolute top-[42px] left-0 flex flex-col w-full overflow-hidden overflow-y-auto rounded-[12px] z-50 bg-white
           shadow-[0_2px_8px_rgba(0,0,0,0.25)]`}
         >
           {data.map((d, index) => {
@@ -113,8 +115,14 @@ const DropDown = <T extends string>({
               <button
                 type="button"
                 key={d.value}
-                className="text-left z-0 flex border-b border-b-solid border-b-lightGray px-[12px] py-[8px] font-[400]
-                hover:bg-lightGray"
+                className={`text-left z-0 flex  ${
+                  index === data.length - 1
+                    ? "border-none"
+                    : "border-b border-b-solid border-b-lightGray"
+                }  px-[12px] py-[8px] font-[350]
+                hover:bg-lightGray 
+                ${index === 0 ? "rounded-t-[12px]" : ""}
+                ${index === data.length - 1 ? "rounded-b-[12px]" : ""}`}
                 onClick={(e) => {
                   e.stopPropagation();
                   handleSelect(d.value);

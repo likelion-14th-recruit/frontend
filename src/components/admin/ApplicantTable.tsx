@@ -51,7 +51,7 @@ const ApplicantTable = ({ data = [], isLoading }: TableProps) => {
         </colgroup>
 
         <thead>
-          <tr className="bg-lightGray text-black/80 text-[14px] font-[600]">
+          <tr className="bg-lightGray text-black/80 text-[14px] font-[550]">
             <th className="py-[8px] pl-[12px] pr-[20px] text-center">이름</th>
             <th className="py-[8px] px-[20px] text-center">학번</th>
             <th className="py-[8px] px-[20px] text-center">학적 상태</th>
@@ -71,7 +71,7 @@ const ApplicantTable = ({ data = [], isLoading }: TableProps) => {
           <tbody>
             <tr>
               <td colSpan={6}>
-                <div className="flex w-full py-[200px] items-center justify-center text-[16px] font-[400] text-center border-b border-b-lightGray">
+                <div className="flex w-full py-[200px] items-center justify-center text-[16px] font-[350] text-center border-b border-b-lightGray">
                   불러오는 중...
                 </div>
               </td>
@@ -90,7 +90,7 @@ const ApplicantTable = ({ data = [], isLoading }: TableProps) => {
               return (
                 <tr
                   key={item.applicationPublicId}
-                  className="border-b border-lightGray font-[400] text-[16px] cursor-pointer hover:bg-lightGray/50 duration-200"
+                  className="border-b border-lightGray font-[350] text-[16px] cursor-pointer hover:bg-lightGray/50 duration-200"
                   onClick={() =>
                     navigate(`/${ADMIN_PATH}/${item.applicationPublicId}`)
                   }
@@ -132,7 +132,7 @@ const ApplicantTable = ({ data = [], isLoading }: TableProps) => {
           <tbody>
             <tr>
               <td colSpan={6}>
-                <div className="flex w-full py-[200px] items-center justify-center text-[16px] font-[400] text-center border-b border-b-lightGray">
+                <div className="flex w-full py-[200px] items-center justify-center text-[16px] font-[350] text-center border-b border-b-lightGray">
                   검색 조건에 해당하는 지원자가 없습니다.
                   <br />
                   필터 또는 검색 조건을 변경해 주세요.

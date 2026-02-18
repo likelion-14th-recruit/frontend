@@ -8,7 +8,7 @@ type FilterLabelProps = {
 const FilterLabel = ({ children, label }: FilterLabelProps) => {
   return (
     <div className="flex gap-[27px] justify-center items-center text-[16px] font-sans">
-      <h3 className="text-black font-[600] w-[91px] text-center">{label}</h3>
+      <h3 className="text-black font-[550] w-[91px] text-center">{label}</h3>
       {children}
     </div>
   );

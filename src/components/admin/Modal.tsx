@@ -51,6 +51,7 @@ const Modal = ({ isOpen, isTwo, onClose, onConfirm, children }: modalProps) => {
     }
     setView("confirm");
     setResult(null);
+    onClose();
   };
 
   const handleClose = () => {
@@ -64,7 +65,7 @@ const Modal = ({ isOpen, isTwo, onClose, onConfirm, children }: modalProps) => {
 
   return createPortal(
     <div className="fixed inset-0 z-[9999] flex items-center justify-center w-full h-full t-0 l-0 bg-black/60">
-      <div className="flex flex-col text-[20px] font-[400] bg-white rounded-[20px] w-[560px] relative px-[40px] py-[24px] gap-[40px]">
+      <div className="flex flex-col text-[20px] font-[350] bg-white rounded-[20px] w-[560px] relative px-[40px] py-[24px] gap-[40px]">
         {view === "confirm"
           ? children
           : result?.message ??
@@ -73,7 +74,7 @@ const Modal = ({ isOpen, isTwo, onClose, onConfirm, children }: modalProps) => {
               : "문자 발송에 실패했습니다.")}
         {isTwo ? (
           view === "confirm" ? (
-            <div className="flex justify-end text-[16px] font-[600] gap-[16px]">
+            <div className="flex justify-end text-[16px] font-[550] gap-[16px]">
               <button
                 className="flex px-[24px] py-[10px] justify-center items-center rounded-[12px] bg-black/80 text-white disabled:opacity-50"
                 onClick={handleConfirm}
@@ -90,7 +91,7 @@ const Modal = ({ isOpen, isTwo, onClose, onConfirm, children }: modalProps) => {
               </button>
             </div>
           ) : (
-            <div className="flex justify-end text-[16px] font-[600] gap-[16px]">
+            <div className="flex justify-end text-[16px] font-[550] gap-[16px]">
               <button
                 className="flex px-[24px] py-[10px] justify-center items-center rounded-[12px] bg-black/80 text-white"
                 onClick={handleResultOk}
@@ -100,7 +101,7 @@ const Modal = ({ isOpen, isTwo, onClose, onConfirm, children }: modalProps) => {
             </div>
           )
         ) : (
-          <div className="flex justify-end text-[16px] font-[600] gap-[16px]">
+          <div className="flex justify-end text-[16px] font-[550] gap-[16px]">
             <button
               className="flex px-[24px] py-[10px] justify-center items-center rounded-[12px] bg-black/80 text-white"
               onClick={handleAccept}
