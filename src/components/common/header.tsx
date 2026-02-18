@@ -25,12 +25,13 @@ const Header = ({ onOpenMenu }: HeaderProps) => {
   const { pathname } = useLocation();
   const navigate = useNavigate();
 
-  const isAdmin = pathname.startsWith("/admin");
+  const isAdmin = pathname.startsWith(`/${ADMIN_PATH}`);
   const theme = useHeaderTheme(80); // "dark" | "light"
   const isDark = theme === "dark";
 
   const textLogo = isDark ? textLogoDark : textLogoLight; // dark일 때 light일 때 로고 다르게
-  const logoTo = isAdmin ? `${ADMIN_PATH}` : "/"; //admin일 때 아닐 때 로고 navigate 루트 다르게
+
+  const logoTo = isAdmin ? `/${ADMIN_PATH}` : "/"; //admin일 때 아닐 때 로고 navigate 루트 다르게
   // 공통 네비게이션 & 스크롤 함수
   const handleNavClick = (to: string) => {
     // 1. 스크롤 주체인 <main> 요소를 찾아 상단으로 이동
