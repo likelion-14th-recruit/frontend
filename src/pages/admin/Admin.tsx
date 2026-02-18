@@ -171,9 +171,11 @@ const Admin = () => {
     }
   };
 
+  // 필터와검색..
   const handleFilter = async () => {
     const nextFilters: Filter = {
       page: page.page,
+      size: 10,
     };
 
     if (partSelected !== "ALL") nextFilters.part = partSelected;
