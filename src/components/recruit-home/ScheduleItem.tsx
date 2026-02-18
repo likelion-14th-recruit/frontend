@@ -25,7 +25,7 @@ const ScheduleItem = ({ label, date }: ScheduleItemProps) => {
           text-center
 
           text-[16px]
-          tablet:lg:text-[20px]
+          tablet-lg:text-[20px]
         "
       >
         {label}
@@ -35,7 +35,7 @@ const ScheduleItem = ({ label, date }: ScheduleItemProps) => {
         className="
           font-pretendard
           font-regular
-          text-black
+          text-black/80
           leading-[160%]
           text-center
 
