@@ -27,8 +27,8 @@ const ArticleBlock = ({ question, answer, num }: articleProps) => {
     );
   } else {
     return (
-      <div className="w-[800px] flex flex-col font-[550] font-sans">
-        <div className="flex w-full text-[20px]/[140%] text-black/80">
+      <div className="w-[800px] flex flex-col font-[350] font-sans">
+        <div className="flex w-full text-[20px]/[140%] font-[550] text-black/80">
           <h2>{num + 1}.&nbsp;</h2>
           <h2>{question}</h2>
         </div>
