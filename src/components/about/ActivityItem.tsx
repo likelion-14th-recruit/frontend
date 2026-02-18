@@ -29,7 +29,7 @@ const ActivityItem = ({
       onMouseLeave={onMouseLeave}
       onClick={onClick}
       className={`group relative flex flex-col items-start w-[320px] h-[200px] tablet-lg:w-auto tablet-lg:h-[240px] overflow-hidden justify-end cursor-pointer transition-all duration-300
-      ${!isNothingHovered && !isHovered ? "opacity-80" : "opacity-90"}`}
+      ${!isNothingHovered && !isHovered ? "opacity-80" : "opacity-100"}`}
     >
       <div
         className="flex p-[24px_32px] flex-col items-start gap-[16px] self-stretch h-full transition-opacity duration-300"
