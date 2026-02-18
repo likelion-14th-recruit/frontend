@@ -11,40 +11,78 @@ export function useHeaderTheme(headerPx = 80) {
   const { pathname } = useLocation();
 
   useEffect(() => {
-    const marker = document.createElement("div");
-    marker.style.position = "fixed";
-    marker.style.top = `${headerPx}px`; // 헤더 높이만큼 아래
-    marker.style.left = "0";
-    marker.style.width = "1px";
-    marker.style.height = "1px";
-    marker.style.pointerEvents = "none";
-    marker.style.zIndex = "999999";
-    document.body.appendChild(marker);
+    let rafId: number | null = null;
+
+    const getScroller = (): Window | HTMLElement => {
+      const main = document.querySelector("main") as HTMLElement | null;
+      // main이 스크롤 컨테이너(overflow)일 때만 main을 쓰고,
+      // 아니면 window로 fallback
+      if (main) {
+        const style = window.getComputedStyle(main);
+        const canScroll =
+          /(auto|scroll|overlay)/.test(style.overflowY) ||
+          /(auto|scroll|overlay)/.test(style.overflow);
+        if (canScroll) return main;
+      }
+      return window;
+    };
 
     const pickTheme = () => {
-      // marker 좌표가 속한 요소를 찾고, 그 요소의 조상 중 data-header 가진 섹션을 찾음
-      const rect = marker.getBoundingClientRect();
-      const el = document.elementFromPoint(rect.left + 1, rect.top + 1);
-      const section = el?.closest<HTMLElement>("[data-header]") || null;
+      const y = headerPx + 1;
 
-      const next = (section?.dataset?.header as HeaderTheme) || "light";
+      // data-header 달린 섹션들 중에서 y를 포함하는 “가장 마지막” 요소 선택
+      // (겹칠 때 안쪽/후순위 DOM을 우선)
+      const sections = Array.from(
+        document.querySelectorAll<HTMLElement>("[data-header]")
+      );
+
+      let match: HTMLElement | null = null;
+      for (const sec of sections) {
+        const r = sec.getBoundingClientRect();
+        if (r.top <= y && r.bottom > y) match = sec;
+      }
+
+      const next = (match?.dataset.header as HeaderTheme) || "light";
       setTheme(next);
     };
 
-    const update = () => pickTheme();
+    const update = () => {
+      if (rafId != null) return;
+      rafId = window.requestAnimationFrame(() => {
+        rafId = null;
+        pickTheme();
+      });
+    };
 
-    window.addEventListener("scroll", update, { passive: true });
+    const scroller = getScroller();
+
+    if (scroller === window) {
+      window.addEventListener("scroll", update, { passive: true });
+    } else {
+      (scroller as HTMLElement).addEventListener("scroll", update, {
+        passive: true,
+      });
+    }
+
     window.addEventListener("resize", update);
 
-    // 처음 + route 바뀔 때도 실행
+    // 첫 렌더/라우트 변경 직후 레이아웃 안정화까지 반영
     update();
+    const t = window.setTimeout(update, 0);
 
     return () => {
-      window.removeEventListener("scroll", update);
+      if (rafId != null) cancelAnimationFrame(rafId);
+      window.clearTimeout(t);
+
+      if (scroller === window) {
+        window.removeEventListener("scroll", update);
+      } else {
+        (scroller as HTMLElement).removeEventListener("scroll", update);
+      }
+
       window.removeEventListener("resize", update);
-      marker.remove();
     };
-  }, [headerPx, pathname]); // ⭐ pathname 의존성 추가
+  }, [headerPx, pathname]);
 
   return theme;
 }

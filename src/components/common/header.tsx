@@ -2,7 +2,7 @@ import { useLocation, useNavigate, NavLink } from "react-router-dom";
 import mainLogo from "/main-logo.svg";
 import textLogoLight from "/text-logo.svg";
 import textLogoDark from "/text-logo-dark.svg";
-// import { useHeaderTheme } from "../../hooks/useHeaderTheme";
+import { useHeaderTheme } from "../../hooks/useHeaderTheme";
 
 interface HeaderProps {
   onOpenMenu?: () => void;
@@ -22,11 +22,13 @@ function cx(...arr: (string | false | null | undefined)[]) {
 const Header = ({ onOpenMenu }: HeaderProps) => {
   const { pathname } = useLocation();
   const navigate = useNavigate();
-  // const theme = useHeaderTheme(80); // "dark" | "light"
-  const isDark = pathname === "/" || pathname === "/recruit";
-  const textLogo = isDark ? textLogoDark : textLogoLight; // dark일 때 light일 때 로고 다르게
+
   const isAdmin = pathname.startsWith("/admin");
-  const logoTo = isAdmin ? "/admin79182e7i8-jd8h229jdkfj37r8x90" : "/"; //admin일 때 아닐 때 로고 navigate 루트 다르게
+  const theme = useHeaderTheme(80); // "dark" | "light"
+  const isDark = theme === "dark";
+
+  const textLogo = isDark ? textLogoDark : textLogoLight; // dark일 때 light일 때 로고 다르게
+  const logoTo = isAdmin ? "/admin" : "/"; //admin일 때 아닐 때 로고 navigate 루트 다르게
   // 공통 네비게이션 & 스크롤 함수
   const handleNavClick = (to: string) => {
     // 1. 스크롤 주체인 <main> 요소를 찾아 상단으로 이동
@@ -45,14 +47,26 @@ const Header = ({ onOpenMenu }: HeaderProps) => {
 
   return (
     <>
-      <header
-        className={cx(
-          "fixed top-0 left-0 z-[100] w-full transition-colors duration-350 ",
-          isDark ? "bg-header-dark" : "bg-header-light"
-        )}
-      >
+      <header className="fixed top-0 left-0 z-[100] w-full">
+        {/* base layer (light) */}
+        <div
+          className={cx(
+            "absolute inset-0 transition-opacity duration-100 ease-in-out z-0",
+            isDark ? "opacity-0" : "opacity-100",
+            "bg-header-light"
+          )}
+        />
+
+        {/* top layer (dark) */}
+        <div
+          className={cx(
+            "absolute inset-0 transition-opacity duration-100 ease-in-out z-0",
+            isDark ? "opacity-100" : "opacity-0",
+            "bg-header-dark"
+          )}
+        />
         {/* logo 부분 */}
-        <div className="mx-auto flex h-[80px] w-full items-center justify-between px-[20px] lg:px-[40px]">
+        <div className="mx-auto relative z-10 flex h-[80px] w-full items-center justify-between px-[20px] lg:px-[40px]">
           <div
             className="flex items-center gap-[12px] cursor-pointer"
             onClick={() => handleNavClick(logoTo)}
@@ -71,9 +85,7 @@ const Header = ({ onOpenMenu }: HeaderProps) => {
                 <div className="flex items-center">
                   <h2
                     className="font-sogang text-[16px] font-normal cursor-pointer hover:underline"
-                    onClick={() =>
-                      navigate("/admin79182e7i8-jd8h229jdkfj37r8x90")
-                    }
+                    onClick={() => navigate("/admin")}
                   >
                     HOME
                   </h2>

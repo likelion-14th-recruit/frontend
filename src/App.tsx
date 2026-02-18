@@ -23,6 +23,7 @@ import ScrollToTop from "./components/common/ScrollToTop";
 import AdminDetail from "./pages/admin/AdminDetail";
 
 const GA_ID = import.meta.env.VITE_GA_ID;
+const ADMIN_PATH = import.meta.env.VITE_ADMIN_PATH;
 
 function App() {
   useEffect(() => {
@@ -55,12 +56,9 @@ function App() {
         </Route>
 
         <Route element={<AdminLayout />}>
+          <Route path={`/${ADMIN_PATH}`} element={<Admin />} />
           <Route
-            path="/admin79182e7i8-jd8h229jdkfj37r8x90"
-            element={<Admin />}
-          />
-          <Route
-            path="/admin79182e7i8-jd8h229jdkfj37r8x90/:applicationPublicId"
+            path={`/${ADMIN_PATH}/:applicationPublicId`}
             element={<AdminDetail />}
           />
         </Route>
