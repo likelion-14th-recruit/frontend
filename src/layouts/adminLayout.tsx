@@ -3,10 +3,10 @@ import Header from "../components/common/header";
 // admin이랑 일반 페이지랑 레이아웃 달라서 구분해뒀습니다
 const AdminLayout = () => {
   return (
-    <div className="flex w-screen">
+    <div className="flex w-full h-screen overflow-hidden no-scrollbar">
       <div className="relative flex flex-col w-full h-full overflow-hidden">
         <Header />
-        <main className="no-scrollbar flex-1 overflow-y-auto mt-[80px]">
+        <main className="no-scrollbar flex-1 overflow-auto mt-[80px]">
           <Outlet />
         </main>
       </div>
