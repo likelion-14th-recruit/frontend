@@ -1,12 +1,27 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { createPortal } from "react-dom";
 
 interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
+const AuthModal: React.FC<AuthModalProps> = ({
+  isOpen,
+  onClose,
+}: AuthModalProps) => {
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [isOpen]);
+
   const navigate = useNavigate();
 
   const [showPassword, setShowPassword] = useState(false);
@@ -16,6 +31,8 @@ const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
   const [passwordError, setPasswordError] = useState("");
 
   if (!isOpen) return null;
+  const modalRoot = document.getElementById("modal-root");
+  if (!modalRoot) return null;
 
   const formatPhoneNumber = (value: string) => {
     const phoneNumber = value.replace(/[^\d]/g, "");
@@ -63,9 +80,9 @@ const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
     }
   };
 
-  return (
+  return createPortal(
     // 1. 오버레이 배경: rgba(0, 0, 0, 0.60) 적용
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 font-pretendard">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 p-4 font-pretendard">
       {/* 바깥쪽 클릭 시 닫히는 영역 */}
       <div className="absolute inset-0" onClick={onClose} />
 
@@ -179,7 +196,8 @@ const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    modalRoot,
   );
 };
 
