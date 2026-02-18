@@ -56,6 +56,7 @@ const Home = () => {
       {/********************************************  Experiences  *********************************************/}
 
       <motion.section
+        data-header="light"
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, amount: 0.3 }} // 20% 정도 보일 때 한 번만 실행
@@ -103,6 +104,7 @@ const Home = () => {
       </motion.section>
       {/********************************************  FAQ  *********************************************/}
       <motion.section
+        data-header="light"
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, amount: 0.3 }} // 20% 정도 보일 때 한 번만 실행
