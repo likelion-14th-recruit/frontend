@@ -106,7 +106,7 @@ const DropDown = <T extends string>({
       {open && !inactive && (
         <div
           className={`absolute top-[42px] left-0 flex flex-col w-full overflow-y-auto rounded-[12px] z-50 bg-white
-          shadow-[0_2px_8px_rgba(0,0,0,0.25)] border border-solid border-lightGray`}
+          shadow-[0_2px_8px_rgba(0,0,0,0.25)]`}
         >
           {data.map((d, index) => {
             return (

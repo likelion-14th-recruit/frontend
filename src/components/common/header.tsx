@@ -4,6 +4,8 @@ import textLogoLight from "/text-logo.svg";
 import textLogoDark from "/text-logo-dark.svg";
 import { useHeaderTheme } from "../../hooks/useHeaderTheme";
 
+const ADMIN_PATH = import.meta.env.VITE_ADMIN_PATH;
+
 interface HeaderProps {
   onOpenMenu?: () => void;
 }
@@ -28,7 +30,7 @@ const Header = ({ onOpenMenu }: HeaderProps) => {
   const isDark = theme === "dark";
 
   const textLogo = isDark ? textLogoDark : textLogoLight; // dark일 때 light일 때 로고 다르게
-  const logoTo = isAdmin ? "/admin" : "/"; //admin일 때 아닐 때 로고 navigate 루트 다르게
+  const logoTo = isAdmin ? `${ADMIN_PATH}` : "/"; //admin일 때 아닐 때 로고 navigate 루트 다르게
   // 공통 네비게이션 & 스크롤 함수
   const handleNavClick = (to: string) => {
     // 1. 스크롤 주체인 <main> 요소를 찾아 상단으로 이동
@@ -85,7 +87,7 @@ const Header = ({ onOpenMenu }: HeaderProps) => {
                 <div className="flex items-center">
                   <h2
                     className="font-sogang text-[16px] font-normal cursor-pointer hover:underline"
-                    onClick={() => navigate("/admin")}
+                    onClick={() => navigate(`/${ADMIN_PATH}`)}
                   >
                     HOME
                   </h2>

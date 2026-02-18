@@ -58,7 +58,7 @@ function App() {
         <Route element={<AdminLayout />}>
           <Route path={`/${ADMIN_PATH}`} element={<Admin />} />
           <Route
-            path={`/${ADMIN_PATH}:applicationPublicId`}
+            path={`/${ADMIN_PATH}/:applicationPublicId`}
             element={<AdminDetail />}
           />
         </Route>

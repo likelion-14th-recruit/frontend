@@ -2,6 +2,8 @@ import { useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 
+const ADMIN_PATH = import.meta.env.VITE_ADMIN_PATH;
+
 type modalProps = {
   isOpen: boolean;
   isTwo: boolean;
@@ -27,7 +29,7 @@ const Modal = ({ isOpen, isTwo, onClose, onConfirm, children }: modalProps) => {
     setResult(null);
     setIsSubmitting(false);
     onClose();
-    navigate("/admin79182e7i8-jd8h229jdkfj37r8x90");
+    navigate(`/${ADMIN_PATH}`);
   };
 
   const handleConfirm = async () => {
@@ -44,7 +46,7 @@ const Modal = ({ isOpen, isTwo, onClose, onConfirm, children }: modalProps) => {
       setView("confirm");
       setResult(null);
       onClose();
-      navigate("/admin79182e7i8-jd8h229jdkfj37r8x90");
+      navigate(`/${ADMIN_PATH}`);
       return;
     }
     setView("confirm");
