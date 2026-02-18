@@ -55,11 +55,17 @@ const FindPasswordPage = () => {
   const handleSendAuth = async () => {
     if (!isPhoneValid) return;
     try {
-      const response = await fetch("/api/verification", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phoneNumber: formData.phone }),
-      });
+      const response = await fetch(
+        "/api/verification/application-modification",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ phoneNumber: formData.phone }),
+        },
+      );
+
+      const result = await response.json();
+
       if (response.ok) {
         setAuthStatus("sent");
         setAuthGuide(
@@ -70,9 +76,14 @@ const FindPasswordPage = () => {
         setFormData((prev) => ({ ...prev, authCode: "" }));
         setAuthError(""); // 전송 시 에러 초기화
       } else {
-        setAuthGuide(
-          "해당 전화번호로 등록된 지원서를 찾을 수 없습니다. 번호를 다시 확인해주세요.",
-        );
+        if (result.code === "APPLICATION_NOT_EXISTS") {
+          setAuthGuide(
+            "해당 전화번호로 등록된 지원서를 찾을 수 없습니다. 번호를 다시 확인해주세요.",
+          );
+        } else {
+          setAuthGuide(result.message || "인증번호 전송에 실패했습니다.");
+        }
+        setAuthStatus("idle"); // 상태를 초기화하여 버튼 활성화 유지
       }
     } catch (error) {
       setAuthGuide("서버와 통신 중 오류가 발생했습니다.");
