@@ -47,14 +47,12 @@ const RecruitLayout = () => {
 
   const currentStep = getStep();
   const totalSteps = steps.length;
-  // 현재 단계의 라벨(이름) 가져오기
   const currentLabel = steps.find((s) => s.id === currentStep)?.label || "";
 
   return (
     <div className="flex flex-col w-full pt-[60px] md:pt-[80px] font-pretendard">
-      {/* 📱 모바일 전용 스텝 표시 (360px ~ 768px 구간) */}
+      {/* 📱 모바일 전용 스텝 표시 (360px ~ 768px) */}
       <div className="flex flex-col items-center md:hidden py-8 min-w-[360px]">
-        {/* 숫자 캡슐 */}
         <div className="flex items-center justify-center px-[12px] py-[4px] border border-[#121212] rounded-[20px] bg-white mb-[8px]">
           <span className="text-[16px] font-normal text-[#121212] leading-none">
             {currentStep}
@@ -66,40 +64,49 @@ const RecruitLayout = () => {
             {totalSteps}
           </span>
         </div>
-        {/* 단계별 라벨 텍스트 */}
         <span className="text-[20px] font-semibold text-[#121212]">
           {currentLabel}
         </span>
       </div>
 
-      {/* 💻 데스크탑 진행바 영역 (768px 이상) */}
+      {/* 💻 데스크탑 & 태블릿 진행바 영역 (769px 이상) */}
       <div className="hidden md:block w-full py-16 bg-white">
-        <div className="max-w-[800px] mx-auto px-4 flex items-center justify-between">
+        {/* 🔥 핵심 수정: 하단 main과 동일한 max-w-[800px]와 px-4 적용 */}
+        <div className="max-w-[800px] mx-auto px-[30px] flex items-center justify-between">
           {steps.map((step, index) => (
             <div
               key={step.id}
               className={`flex items-center ${index !== steps.length - 1 ? "flex-1" : ""}`}
             >
-              <div className="flex flex-col items-center gap-3 relative z-10">
+              {/* 스텝 아이콘 및 라벨 */}
+              <div className="flex flex-col items-center gap-[8px] relative z-10">
                 <div
-                  className={`w-10 h-10 rounded-full flex items-center justify-center text-lg font-bold transition-all duration-300
+                  className={`w-[24px] h-[24px] rounded-full flex items-center justify-center text-[14px] font-semibold transition-all duration-300
                     ${currentStep >= step.id ? "bg-[#b90000] text-white" : "bg-[#767676] text-white"}`}
                 >
                   {step.id}
                 </div>
                 <span
-                  className={`text-[13px] font-semibold whitespace-nowrap transition-all duration-300
+                  className={`text-[16px] font-normal whitespace-nowrap transition-all duration-300
                     ${currentStep >= step.id ? "text-[#b90000]" : "text-[#767676]"}`}
                 >
                   {step.label}
                 </span>
               </div>
 
+              {/* 스텝 사이의 연결 선 (SVG 대체) */}
               {index !== steps.length - 1 && (
-                <div className="flex-1 px-6 -translate-y-4">
-                  <div
-                    className={`border-t-2 border-dashed transition-all duration-500
-                      ${currentStep > step.id ? "border-[#b90000]" : "border-[#ccc]"}`}
+                <div
+                  className="
+                  /* 공통: 아이콘과의 간격 mx-[20px] */
+                  mx-[20px] -translate-y-4 flex items-center flex-1
+                "
+                >
+                  <img
+                    src="/public/recruit/line-icon.svg"
+                    alt="step line"
+                    className={`w-full h-[1px] object-cover transition-all duration-500
+                      ${currentStep > step.id ? "opacity-100" : "opacity-30"}`}
                   />
                 </div>
               )}
