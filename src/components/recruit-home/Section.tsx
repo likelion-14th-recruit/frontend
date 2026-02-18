@@ -20,14 +20,12 @@ const Section = ({ title, children }: SectionProps) => {
       <h2
         className={`
           text-[20px]
-          font-semibold
           tracking-[-0.64px]
-          text-black/80
-
           tablet-lg:text-[28px]
           desktop:text-[32px]
-  
-          ${isFAQ ? "font-sogang font-normal" : "font-pretendard"}
+          ${isFAQ 
+            ? "font-sogang font-normal text-black/80"
+            : "font-pretendard font-semibold text-black/80"}
         `}
       >
         {title}
