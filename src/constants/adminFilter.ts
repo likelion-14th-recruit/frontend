@@ -8,6 +8,7 @@ export type Filter = {
   dates?: string; // "2026-03-09,2026-03-10"
   startTime?: string; // "18:00:00"
   search?: string;
+  size?: number;
 };
 
 export type InterviewSchedule = {

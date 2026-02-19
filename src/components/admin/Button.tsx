@@ -29,9 +29,13 @@ const Button = ({
     <button
       onClick={onClick}
       disabled={!isActive}
-      className={`flex px-[12px] py-[8px] justify-center items-center rounded-[12px]
-        border-none font-sans font-[600] ease-in-out duration-200
-        ${block ? `w-full text-[20px] ${style}` : `text-[14px] ${style}`}`}
+      className={`flex justify-center items-center rounded-[12px]
+        border-none font-sans font-[550] ease-in-out duration-200
+        ${
+          block
+            ? `w-full text-[19px] px-[24px] py-[12px] ${style}`
+            : `text-[14px] px-[12px] py-[8px] ${style}`
+        }`}
     >
       {children}
     </button>

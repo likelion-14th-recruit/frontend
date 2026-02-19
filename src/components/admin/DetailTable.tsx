@@ -31,11 +31,11 @@ const DetailTable = ({
   setInterviewSchedule: Dispatch<SetStateAction<InterviewSchedule>>;
 }) => {
   const labelStyle =
-    "bg-lightGray w-[100px] font-[600] flex justify-center items-center text-center py-[10px] border-t border-t-lightGray";
+    "bg-lightGray w-[100px] font-[550] flex justify-center items-center text-center py-[10px] border-t border-t-[#E3E3E3]";
   const contentStyle =
-    "bg-white font-[400] py-[10px] pl-[20px] border-t border-t-lightGray";
+    "bg-white font-[350] py-[10px] pl-[20px] border-t border-t-[#E3E3E3]";
   const dropDownStyle =
-    "bg-white font-[400] flex py-[4px] pl-[10px] border-t border-t-lightGray";
+    "bg-white font-[350] flex py-[4px] pl-[10px] border-t border-t-[#E3E3E3]";
   const timetableStyle =
     "flex flex-col justify-start items-center px-[20px] py-[6px] gap-[4px]";
 
@@ -98,7 +98,7 @@ const DetailTable = ({
 
                 return (
                   <div key={day.value} className={timetableStyle}>
-                    <span className="font-[600] pb-[8px]">
+                    <span className="font-[550] pb-[8px]">
                       {day.label}({day.dayOfWeek})
                     </span>
 
@@ -168,26 +168,28 @@ const DetailTable = ({
           />
         </div>
         <div className={`${labelStyle} border-b`}>면접 장소</div>
-        <input
-          type="text"
-          value={interviewSchedule.place}
-          placeholder="면접 장소를 입력해주세요."
-          className={`${contentStyle} border-b focus:outline-none font-[400] text-black ${
-            ApplyState !== "DOCUMENT_PASSED" || !interviewSchedule?.startTime
-              ? " placeholder:text-black/30 text-black/30"
-              : " placeholder:text-black/60 text-black"
-          }`}
-          disabled={
-            ApplyState !== "DOCUMENT_PASSED" || !interviewSchedule?.startTime
-          }
-          onChange={(v) =>
-            setInterviewSchedule({
-              date: interviewSchedule.date,
-              startTime: interviewSchedule.startTime,
-              place: v.target.value,
-            })
-          }
-        />
+        <div className={`${dropDownStyle} border-b`}>
+          <input
+            type="text"
+            value={interviewSchedule.place}
+            placeholder="면접 장소를 입력해주세요."
+            className={`bg-white pl-[12px] w-[220px] focus:outline-none font-[350] text-black ${
+              ApplyState !== "DOCUMENT_PASSED" || !interviewSchedule?.startTime
+                ? " placeholder:text-black/30 text-black/30"
+                : " placeholder:text-black/60 text-black"
+            }`}
+            disabled={
+              ApplyState !== "DOCUMENT_PASSED" || !interviewSchedule?.startTime
+            }
+            onChange={(v) =>
+              setInterviewSchedule({
+                date: interviewSchedule.date,
+                startTime: interviewSchedule.startTime,
+                place: v.target.value,
+              })
+            }
+          />
+        </div>
       </div>
     </div>
   );
