@@ -27,7 +27,7 @@ const AdminDetail = () => {
       date: "",
       startTime: "",
       place: "",
-    }
+    },
   ); //면접 확정 날/시간/장소
 
   const [answers, setAnswers] = useState();
@@ -46,7 +46,7 @@ const AdminDetail = () => {
           headers: {
             "Content-type": "application/json",
           },
-        }
+        },
       );
 
       if (!response.ok) {
@@ -73,7 +73,7 @@ const AdminDetail = () => {
           headers: {
             "Content-type": "application/json",
           },
-        }
+        },
       );
 
       if (!response.ok) {
@@ -99,7 +99,7 @@ const AdminDetail = () => {
           headers: {
             "Content-type": "application/json",
           },
-        }
+        },
       );
 
       if (!response.ok) {
@@ -125,7 +125,7 @@ const AdminDetail = () => {
           headers: {
             "Content-type": "application/json",
           },
-        }
+        },
       );
 
       if (!response.ok) {
@@ -154,13 +154,13 @@ const AdminDetail = () => {
           body: JSON.stringify({
             passStatus: applyState,
           }),
-        }
+        },
       );
 
       if (!response.ok) {
         throw new Error("지원 결과 변경 중에 문제가 발생했습니다.");
       }
-      const data = await response.json();
+      // const data = await response.json();
     } catch (error) {
       console.error("Error fetching application detail data:", error);
     }
@@ -205,7 +205,7 @@ const AdminDetail = () => {
           startTime: interviewSchedule.startTime,
           place: interviewSchedule.place,
         }),
-      }
+      },
     );
 
     if (!response.ok) {

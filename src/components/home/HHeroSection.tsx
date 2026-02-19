@@ -18,7 +18,7 @@ const HeroSection = () => {
    "
     >
       <div
-        className="flex flex-col items-center self-stretch w-full mx-auto pt-[189.13px] md:pt-[179.5px] lg:pt-[225px]
+        className="flex flex-col items-center self-stretch w-full mx-auto pt-[189.13px] md:pt-[179.5px] lg:pt-[255px]
              gap-[40px] lg:gap-[60px] 
              h-[600px] md:h-[700px] lg:h-[960px] 
              md:max-w-[1024px] lg:max-w-[1440px]" // 최대 너비만 제한

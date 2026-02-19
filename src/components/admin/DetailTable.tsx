@@ -1,6 +1,5 @@
 import type { Dispatch, SetStateAction } from "react";
 import {
-  dateOfWeek,
   interviewDates,
   interviewTime,
   passStates,
@@ -91,7 +90,7 @@ const DetailTable = ({
             <div className="grid grid-cols-[1fr_1fr_1fr_1fr]">
               {interviewDates.map((day) => {
                 const matchedDate = availTime?.find(
-                  (i) => i.date === day.value
+                  (i) => i.date === day.value,
                 );
                 const times = matchedDate?.times ?? [];
                 const hasAvailTime = times.length > 0;

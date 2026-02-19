@@ -1,5 +1,3 @@
-import React from "react";
-
 import type { FAQ } from "../../types/faq";
 import FAQItem from "./FAQItem";
 
@@ -40,7 +38,12 @@ const FAQList = () => {
   return (
     <div className="flex flex-col gap-[16px] md:gap-[24px]">
       {faqList.map((faq, index) => (
-        <FAQItem key={index} variant="recruit" question={faq.question} answer={faq.answer} />
+        <FAQItem
+          key={index}
+          variant="recruit"
+          question={faq.question}
+          answer={faq.answer}
+        />
       ))}
     </div>
   );
