@@ -23,19 +23,17 @@ const FAQItem = ({ question, answer, variant }: FAQItemProps) => {
       "w-full flex justify-between items-center text-left transition-colors " +
       "px-[16px] py-[12px] md:px-[40px] md:py-[24px]";
 
-    const border =
-    open
+    const border = open
       ? `border ${border40}`
       : isHome
         ? `border ${border20}`
-        : "border border-transparent"; 
+        : "border border-transparent";
 
-    const bg =
-      open
-        ? isHome
-          ? "bg-lightGray"
-          : "bg-white" // recruit open: 배경색 없음(white 유지)
-        : "bg-white";
+    const bg = open
+      ? isHome
+        ? "bg-lightGray"
+        : "bg-white" // recruit open: 배경색 없음(white 유지)
+      : "bg-white";
 
     return [base, border, bg].filter(Boolean).join(" ");
   }, [open, isHome]);
