@@ -3,6 +3,24 @@ import { useNavigate, useLocation } from "react-router-dom";
 import SubmitModal from "../../../components/recruit/SubmitModal";
 import ConfirmModal from "../../../components/recruit/ConfirmModal";
 
+const CheckboxIcon = ({ isChecked }: { isChecked: boolean }) => (
+  <div className="w-[34px] h-[34px] shrink-0">
+    {isChecked ? (
+      <img
+        src="/recruit/checkbox_on.svg"
+        alt="checked"
+        className="w-full h-full"
+      />
+    ) : (
+      <img
+        src="/recruit/checkbox_off.svg"
+        alt="unchecked"
+        className="w-full h-full"
+      />
+    )}
+  </div>
+);
+
 const InterviewPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -106,6 +124,21 @@ const InterviewPage = () => {
     setSelectedTimes(newSelection);
   };
 
+  // 1. [수정] 브라우저 닫기/새로고침 방지 로직 (브라우저 기본 알림)
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (isDirty) {
+        // 표준 방식: e.preventDefault()와 returnValue 설정
+        e.preventDefault();
+        e.returnValue = "변경사항이 저장되지 않을 수 있습니다.";
+        return "변경사항이 저장되지 않을 수 있습니다.";
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [isDirty]);
+
   // InterviewPage.tsx 내부의 handleSave 함수
 
   const handleSave = async (isFinal = false) => {
@@ -129,7 +162,13 @@ const InterviewPage = () => {
       );
 
       if (!saveResponse.ok) {
-        alert("면접 시간 저장 중 오류가 발생했습니다.");
+        setInfoModal({
+          isOpen: true,
+          message: "면접 시간 저장 중 오류가 발생했습니다.",
+          onConfirm: () => setInfoModal((prev) => ({ ...prev, isOpen: false })),
+          isSingleButton: true,
+          confirmText: "확인",
+        });
         return;
       }
 
@@ -160,17 +199,35 @@ const InterviewPage = () => {
             confirmText: "확인",
           });
         } else {
-          alert(
-            `제출 실패: ${result.message || "이미 제출되었거나 오류가 발생했습니다."}`,
-          );
+          setInfoModal({
+            isOpen: true,
+            message: `제출 실패: ${result.message || "오류가 발생했습니다."}`,
+            onConfirm: () =>
+              setInfoModal((prev) => ({ ...prev, isOpen: false })),
+            isSingleButton: true,
+            confirmText: "확인",
+          });
         }
       } else {
-        // 최종 제출이 아닌 일반 임시 저장일 때
-        alert("임시 저장되었습니다.");
+        // 🔥 [디자인 반영] 임시 저장 성공 시 커스텀 모달 띄우기
+        setInfoModal({
+          isOpen: true,
+          message:
+            "임시 저장이 완료되었습니다. 작성 내용은 저장되었으며, 제출하기 버튼을 눌러야 최종 제출됩니다.",
+          onConfirm: () => setInfoModal((prev) => ({ ...prev, isOpen: false })),
+          isSingleButton: true,
+          confirmText: "확인",
+        });
       }
     } catch (error) {
       console.error("제출 에러:", error);
-      alert("서버 연결 오류가 발생했습니다.");
+      setInfoModal({
+        isOpen: true,
+        message: "서버 연결 오류가 발생했습니다.",
+        onConfirm: () => setInfoModal((prev) => ({ ...prev, isOpen: false })),
+        isSingleButton: true,
+        confirmText: "확인",
+      });
     }
   };
 
@@ -206,73 +263,89 @@ const InterviewPage = () => {
   const checkboxStyle = `appearance-none min-w-[24px] min-h-[24px] w-[24px] h-[24px] border border-[#000] rounded-[4px] cursor-pointer flex items-center justify-center transition-all checked:bg-[#000] checked:bg-[url('https://upload.wikimedia.org/wikipedia/commons/thumb/2/27/White_check.svg/1200px-White_check.svg.png')] checked:bg-[length:14px_14px] checked:bg-no-repeat checked:bg-center`;
 
   return (
-    <div className="flex flex-col max-w-[800px] mx-auto pb-20 font-pretendard">
-      <p className="text-center text-[19px] mb-12">
-        가능한 면접 시간을 모두 선택해주세요.
+    <div className="flex flex-col lg:max-w-[800px] md:max-w-[680px] mx-auto pb-[100px] font-pretendard">
+      <p className="text-left text-[16px] md:text-[20px] lg:text-[19px] md:mb-[32px] mb-[24px] lg:mb-[52px] leading-[160%]">
+        가능한 면접 시간을 모두 선택해주세요. 중복 선택 가능하며, 선택한 시간 중
+        하나로 면접이 진행됩니다.
       </p>
-      <div className="flex flex-col gap-14">
-        {interviewData.map((item) => (
-          <section key={item.date} className="flex flex-col gap-6">
-            <h3 className="text-[20px] font-bold">
-              {item.date} ({DAY_MAP[item.dayOfWeek] || item.dayOfWeek})
-            </h3>
-            <div className="grid grid-cols-2 gap-y-5 gap-x-10 px-2">
-              <label className="flex items-start gap-6 cursor-pointer">
-                <input
-                  type="checkbox"
-                  // 🔥 item.times 대신 item.interviewTimes 사용
-                  checked={item.interviewTimes.every((t) =>
-                    selectedTimes.has(t.interviewTimeId),
-                  )}
-                  onChange={() => toggleDateAll(item.interviewTimes)}
-                  className={checkboxStyle}
-                />
-                <span className="text-[16px]">전체 선택</span>
-              </label>
+      <div className="flex flex-col gap-[20px] md:gap-[32px] lg:gap-[40px]">
+        {interviewData.map((item) => {
+          // 🔥 1. 여기서 '전체 선택' 여부를 먼저 계산합니다.
+          const isDateAllSelected = item.interviewTimes.every((t) =>
+            selectedTimes.has(t.interviewTimeId),
+          );
 
-              {item.interviewTimes.map((time, idx) => (
-                <label
-                  key={time.interviewTimeId}
-                  className="flex items-start gap-6 cursor-pointer"
+          return (
+            <section
+              key={item.date}
+              className="flex flex-col gap-[10px] px-[12px]"
+            >
+              <h3 className="text-[16px] md:text-[20px] font-semibold text-[#000] leading-[140%] mb-[8px] md:mb-[20px]">
+                {new Date(item.date).getMonth() + 1}월{" "}
+                {new Date(item.date).getDate()}일 (
+                {DAY_MAP[item.dayOfWeek] || item.dayOfWeek}){" "}
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-y-[4px] gap-x-[20px]">
+                <div
+                  className="flex items-center cursor-pointer px-[8px]"
+                  onClick={() => toggleDateAll(item.interviewTimes)}
                 >
-                  <input
-                    type="checkbox"
-                    checked={selectedTimes.has(time.interviewTimeId)}
-                    onChange={() => toggleTime(time.interviewTimeId)}
-                    className={checkboxStyle}
-                  />
-                  <span className="text-[16px]">
-                    타임 {idx + 1} <span className="mx-2 text-gray-300">|</span>{" "}
-                    {formatTime(time.startTime)} - {formatTime(time.endTime)}
+                  <CheckboxIcon isChecked={isDateAllSelected} />
+                  <span className="text-[16px] font-normal text-[#000] ml-[20px]">
+                    전체 선택
                   </span>
-                </label>
-              ))}
-            </div>
-          </section>
-        ))}
+                </div>
+
+                {item.interviewTimes.map((time, idx) => {
+                  const isChecked = selectedTimes.has(time.interviewTimeId);
+                  return (
+                    <div
+                      key={time.interviewTimeId}
+                      className="flex items-center cursor-pointer px-[8px]"
+                      onClick={() => toggleTime(time.interviewTimeId)}
+                    >
+                      <CheckboxIcon isChecked={isChecked} />
+                      <span className="text-[16px] text-[#000] font-normal ml-[20px]">
+                        타임 {idx + 1}{" "}
+                        <span className="mx-2 text-[#787878]">|</span>{" "}
+                        {formatTime(time.startTime)} -{" "}
+                        {formatTime(time.endTime)}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </section>
+          );
+        })}
       </div>
 
-      <footer className="mt-20 flex gap-4 w-full">
+      <footer className="lg:mt-[60px] md:mt-[40px] mt-[32px] flex gap-[12px] md:gap-[16px] w-full">
         <button
           onClick={handleMoveBack} // 🔥 수정됨
-          className="flex-1 py-5 border border-[#ccc] rounded-[15px] font-bold"
+          className="flex-1 flex items-center justify-center h-auto md:h-[60px] py-[16px] md:py-0 px-[10px] 
+                   border border-[rgba(18,18,18,0.40)] bg-white text-[rgba(18,18,18,0.80)] 
+                   rounded-[12px] text-[16px] md:text-[20px] font-semibold transition-all"
         >
           이전으로
         </button>
         <button
           onClick={() => handleSave(false)}
-          className="flex-1 py-5 border border-[#ccc] rounded-[15px] font-bold"
+          className="flex-1 flex items-center justify-center h-auto md:h-[60px] py-[16px] md:py-0 px-[10px] 
+                   border border-[rgba(18,18,18,0.40)] bg-white text-[rgba(18,18,18,0.80)] 
+                   rounded-[12px] text-[16px] md:text-[20px] font-semibold transition-all"
         >
           임시 저장
         </button>
         <button
           disabled={selectedTimes.size === 0}
           onClick={onClickSubmit} // 🔥 수정됨
-          className={`flex-1 py-5 rounded-[15px] font-bold transition-all ${
-            selectedTimes.size > 0
-              ? "bg-black text-white"
-              : "bg-gray-300 text-white cursor-not-allowed"
-          }`}
+          className={`flex-1 flex items-center justify-center h-auto md:h-[60px] py-[16px] md:py-0 px-[10px] 
+                   rounded-[12px] text-[16px] md:text-[20px] font-semibold transition-all  ${
+                     selectedTimes.size > 0
+                       ? "bg-[rgba(18,18,18,0.80)] text-white cursor-pointer"
+                       : "bg-[rgba(18,18,18,0.20)] text-white cursor-not-allowed"
+                   }`}
         >
           제출하기
         </button>
@@ -283,11 +356,7 @@ const InterviewPage = () => {
         isOpen={infoModal.isOpen}
         onClose={() => setInfoModal((prev) => ({ ...prev, isOpen: false }))}
         onConfirm={infoModal.onConfirm}
-        message={
-          <div className="whitespace-pre-line text-center">
-            {infoModal.message}
-          </div>
-        }
+        message={<div className="whitespace-pre-line">{infoModal.message}</div>}
         isSingleButton={infoModal.isSingleButton}
         confirmText={infoModal.confirmText}
         cancelText={infoModal.cancelText}

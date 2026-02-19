@@ -9,16 +9,33 @@ const ApplyPage = () => {
   const location = useLocation();
   const [questions, setQuestions] = useState([]);
   const [isSaved, setIsSaved] = useState(false);
+
+  const context = useOutletContext();
+  const formData = context?.formData || {};
+  const setFormData = context?.setFormData;
+  // 🔥 1. 변경 사항이 있는지 확인 (하나라도 입력된 내용이 있으면 dirty)
+  const isDirty =
+    questions.some((q) => formData[`q${q.questionNumber}`]?.trim()) && !isSaved;
+
+  // 🔥 2. 브라우저 닫기/새로고침 방지 (브라우저 기본 알림)
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (isDirty) {
+        e.preventDefault();
+        e.returnValue = "변경사항이 저장되지 않을 수 있습니다.";
+        return "변경사항이 저장되지 않을 수 있습니다.";
+      }
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [isDirty]);
+
   const [infoModal, setInfoModal] = useState({
     isOpen: false,
     message: "",
     onConfirm: () => {},
     isSingleButton: true,
   });
-
-  const context = useOutletContext();
-  const formData = context?.formData || {};
-  const setFormData = context?.setFormData;
 
   const applicationId = location.state?.applicationId;
   const userField = location.state?.field || "프론트엔드";
@@ -97,7 +114,8 @@ const ApplyPage = () => {
     if (isOverLimit) {
       setInfoModal({
         isOpen: true,
-        message: "글자 수가 500자를 초과했습니다.\n내용을 줄여 주세요.",
+        message:
+          "글자 수가 500자를 초과했습니다.\n임시 저장을 위해 내용을 500자 이내로 줄여 주세요.",
         onConfirm: () => setInfoModal((prev) => ({ ...prev, isOpen: false })),
         isSingleButton: true,
       });
@@ -123,31 +141,39 @@ const ApplyPage = () => {
         setIsSaved(true);
         setInfoModal({
           isOpen: true,
-          message: "임시 저장이 완료되었습니다.",
+          message:
+            "임시 저장이 완료되었습니다. 작성 내용은 저장되었으며, 제출하기 버튼을 눌러야 최종 제출됩니다.",
           onConfirm: () => setInfoModal((prev) => ({ ...prev, isOpen: false })),
           isSingleButton: true,
+          confirmText: "확인",
         });
       }
     } catch (error) {
-      alert("네트워크 서버 오류");
+      setInfoModal({
+        isOpen: true,
+        message: "네트워크 오류가 발생했습니다.",
+        onConfirm: () => setInfoModal((prev) => ({ ...prev, isOpen: false })),
+        isSingleButton: true,
+        confirmText: "확인",
+      });
     }
   };
-
   const handleMoveBack = () => {
     const backState = { ...location.state, applicationId };
     const hasAnyContent = questions.some((q) =>
       formData[`q${q.questionNumber}`]?.trim(),
     );
 
-    if (isSaved || !hasAnyContent) {
+    if (isSaved || !isDirty) {
       navigate("/recruit/info", { state: backState });
     } else {
       setInfoModal({
         isOpen: true,
         message:
-          "임시저장하지 않고 나가면 내용이 사라집니다. 계속하시겠습니까?",
+          "임시저장하지 않고 나가면 지금까지 입력한 내용이 사라집니다. 계속 진행하시겠습니까?",
         onConfirm: () => navigate("/recruit/info", { state: backState }),
-        isSingleButton: false,
+        confirmText: "나가기",
+        cancelText: "취소",
       });
     }
   };
@@ -168,7 +194,8 @@ const ApplyPage = () => {
     if (isOverLimit) {
       setInfoModal({
         isOpen: true,
-        message: "글자 수가 500자를 초과했습니다.\n내용을 줄여 주세요.",
+        message:
+          "글자 수가 500자를 초과했습니다.\n임시 저장을 위해 내용을 500자 이내로 줄여 주세요.",
         onConfirm: () => setInfoModal((prev) => ({ ...prev, isOpen: false })),
         isSingleButton: true,
       });
@@ -212,7 +239,7 @@ const ApplyPage = () => {
   };
 
   return (
-    <div className="flex flex-col max-w-[800px] mx-auto pb-20 font-pretendard">
+    <div className="flex flex-col lg:max-w-[800px] md:max-w-[700px] mx-auto pb-20 font-pretendard">
       <div className="flex flex-col gap-12 w-full">
         {questions.map((q) => {
           // 💡 질문 내용에 "GitHub"나 "포트폴리오"가 포함되어 있는지 확인
@@ -224,13 +251,13 @@ const ApplyPage = () => {
             return (
               <Input
                 key={q.questionId}
-                label={`${q.questionNumber}. ${q.content}`}
+                label={`${q.content}`}
                 name={`q${q.questionNumber}`}
                 required={isDesign} // 디자인일 때만 필수 표시
                 placeholder={
                   isDesign
                     ? "포트폴리오 URL을 입력해주세요."
-                    : "GitHub URL을 입력해주세요."
+                    : "프로젝트, 과제 등 관련 경험을 공유해주세요."
                 }
                 guideText={
                   isDesign
@@ -246,8 +273,9 @@ const ApplyPage = () => {
             return (
               <TextArea
                 key={q.questionId}
-                label={`${q.questionNumber}. ${q.content}`}
+                label={q.content}
                 name={`q${q.questionNumber}`}
+                index={q.questionNumber || 0}
                 required
                 maxLength={500}
                 currentLength={formData[`q${q.questionNumber}`]?.length || 0}
@@ -262,18 +290,22 @@ const ApplyPage = () => {
         })}
       </div>
 
-      <footer className="mt-20 flex gap-4 w-full">
+      <footer className="lg:mt-[60px] md:mt-[40px] mt-[32px] flex gap-[12px] md:gap-[16px] w-full">
         <button
           type="button"
           onClick={handleMoveBack}
-          className="flex-1 px-[10px] py-[24px] border border-[#ccc] text-[rgba(18,18,18,0.8)] rounded-[12px] text-[20px] font-bold"
+          className="flex-1 flex items-center justify-center h-auto md:h-[60px] py-[16px] md:py-0 px-[10px] 
+                   border border-[rgba(18,18,18,0.40)] bg-white text-[rgba(18,18,18,0.80)] 
+                   rounded-[12px] text-[16px] md:text-[20px] font-semibold transition-all"
         >
           이전으로
         </button>
         <button
           type="button"
           onClick={handleSave}
-          className="flex-1 py-6 border border-[#ccc] rounded-[12px] text-[20px] font-bold hover:bg-gray-50"
+          className="flex-1 flex items-center justify-center h-auto md:h-[60px] py-[16px] md:py-0 px-[10px] 
+                   border border-[rgba(18,18,18,0.40)] bg-white text-[rgba(18,18,18,0.80)] 
+                   rounded-[12px] text-[16px] md:text-[20px] font-semibold transition-all"
         >
           임시 저장
         </button>
@@ -281,11 +313,12 @@ const ApplyPage = () => {
           type="button"
           disabled={!isFormValid}
           onClick={handleNext}
-          className={`flex-1 py-6 rounded-[12px] text-[20px] font-bold transition-all ${
-            isFormValid
-              ? "bg-black text-white cursor-pointer"
-              : "bg-[#ccc] text-white cursor-not-allowed"
-          }`}
+          className={`flex-1 flex items-center justify-center h-auto md:h-[60px] py-[16px] md:py-0 px-[10px] 
+                   rounded-[12px] text-[16px] md:text-[20px] font-semibold transition-all  ${
+                     isFormValid
+                       ? "bg-[rgba(18,18,18,0.80)] text-white cursor-pointer"
+                       : "bg-[rgba(18,18,18,0.20)] text-white cursor-not-allowed"
+                   }`}
         >
           다음으로
         </button>
@@ -295,14 +328,10 @@ const ApplyPage = () => {
         isOpen={infoModal.isOpen}
         onClose={() => setInfoModal((prev) => ({ ...prev, isOpen: false }))}
         onConfirm={infoModal.onConfirm}
-        message={
-          <div className="whitespace-pre-line text-center">
-            {infoModal.message}
-          </div>
-        }
+        message={<div className="whitespace-pre-line">{infoModal.message}</div>}
         isSingleButton={infoModal.isSingleButton}
-        confirmText={infoModal.isSingleButton ? "확인" : "나가기"}
-        cancelText="취소"
+        confirmText={infoModal.confirmText || "확인"}
+        cancelText={infoModal.cancelText || "취소"}
       />
     </div>
   );

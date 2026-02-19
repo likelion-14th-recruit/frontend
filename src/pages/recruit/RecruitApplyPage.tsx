@@ -3,18 +3,18 @@ import { useNavigate } from "react-router-dom";
 import RecruitActionCard from "../../components/recruit/RecruitActionCard";
 import AuthModal from "../../components/recruit/AuthModal";
 
-const RecruitApplyPage = () => {
+const RecruitApplyPage: React.FC = () => {
   const navigate = useNavigate();
   // 수정하기 클릭 시 띄울 인증 모달 상태
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
 
   return (
     /* 1. 배경은 화면 끝까지 차도록 (2560px 대응) */
     <div className="w-full min-h-screen bg-white">
       {/* 2. 컨텐츠를 담는 큰 바구니 */}
-      <main className="w-full">
+      <main className="w-full lg:pt-[40px] pt-[40px] pb-[100px] pr-[20px] pl-[20px] flex justify-center items-center">
         {/* 3. 실제 카드가 놓일 공간 - 헤더의 최대 너비와 맞춤 */}
-        <div className="min-h-screen flex flex-col md:flex-row items-center justify-center gap-[24px] md:gap-[40px] bg-white">
+        <div className="min-h-screen flex flex-col md:flex-row items-center justify-center gap-[20px] md:gap-[32px] lg:gap-[40px] bg-white">
           <RecruitActionCard
             image="/recruit/add.svg"
             title="지원서 생성하기"

@@ -53,7 +53,7 @@ const RecruitLayout = () => {
     <div className="flex flex-col w-full pt-[60px] md:pt-[80px] font-pretendard">
       {/* 📱 모바일 전용 스텝 표시 (360px ~ 768px) */}
       <div className="flex flex-col items-center md:hidden py-8 min-w-[360px]">
-        <div className="flex items-center justify-center px-[12px] py-[4px] border border-[#121212] rounded-[20px] bg-white mb-[8px]">
+        <div className="flex items-center justify-center px-[12px] py-[4px] border-[1px] border-[#121212] rounded-[20px] bg-white mb-[8px]">
           <span className="text-[16px] font-normal text-[#121212] leading-none">
             {currentStep}
           </span>
@@ -72,7 +72,7 @@ const RecruitLayout = () => {
       {/* 💻 데스크탑 & 태블릿 진행바 영역 (769px 이상) */}
       <div className="hidden md:block w-full py-16 bg-white">
         {/* 🔥 핵심 수정: 하단 main과 동일한 max-w-[800px]와 px-4 적용 */}
-        <div className="max-w-[800px] mx-auto px-[30px] flex items-center justify-between">
+        <div className="lg:max-w-[900px] md:max-w-[680px] mx-auto px-[70px] flex items-center justify-between">
           {steps.map((step, index) => (
             <div
               key={step.id}
@@ -103,7 +103,11 @@ const RecruitLayout = () => {
                 "
                 >
                   <img
-                    src="/public/recruit/line-icon.svg"
+                    src={
+                      currentStep > step.id
+                        ? "/recruit/redline-icon.svg"
+                        : "/recruit/line-icon.svg"
+                    }
                     alt="step line"
                     className={`w-full h-[1px] object-cover transition-all duration-500
                       ${currentStep > step.id ? "opacity-100" : "opacity-30"}`}
@@ -116,7 +120,7 @@ const RecruitLayout = () => {
       </div>
 
       {/* 중앙 컨텐츠 영역 */}
-      <main className="w-full max-w-[800px] mx-auto px-4">
+      <main className="w-full max-w-[1280px] mx-auto px-4">
         <Outlet
           context={{
             formData,

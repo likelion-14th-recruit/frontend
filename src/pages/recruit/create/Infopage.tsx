@@ -403,8 +403,8 @@ const InfoPage = () => {
   };
 
   return (
-    <div className="flex flex-col max-w-[800px] mx-auto pb-20 font-pretendard">
-      <div className="flex flex-col gap-10 w-full">
+    <div className="flex flex-col lg:max-w-[800px] md:max-w-[700px] mx-auto px-[20px] md:px-0 pb-[40px] font-pretendard">
+      <div className="flex flex-col gap-[32px] mobile:gap-[16px] w-full">
         <Input
           label="이름"
           name="name"
@@ -513,16 +513,21 @@ const InfoPage = () => {
         />
 
         <div className="flex flex-col gap-3" ref={inputRefs.status}>
-          <label className="font-bold text-[20px]">
-            현재 학적 상태 <span className="text-[#b90000]">*</span>
+          <label className="font-semibold text-[20px] flex items-center">
+            현재 학적 상태{" "}
+            <img
+              src="/recruit/required-icon.svg" // 여기에 파일명 적으세요!
+              alt="required"
+              className="ml-[6px] w-[10px] h-[10px] md:w-[10px] md:h-[10px] objet-contain"
+            />
           </label>
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-3 gap-[12px] md:gap-[16px]">
             {["재학", "휴학", "졸업 유예"].map((val) => (
               <button
                 key={val}
                 type="button"
                 onClick={() => handleSelect("status", val)}
-                className={`py-4 rounded-[10px] text-[15px] font-bold transition-all ${formData.status === val ? "bg-[#000] text-white" : "bg-[#f2f2f2] text-[#999] hover:bg-gray-200"}`}
+                className={`px-[12px] py-[11px] rounded-[12px] text-[16px] font-semibold transition-all ${formData.status === val ? "bg-[rgba(18,18,18,0.80)] text-white" : "bg-[#F0F0F0] text-[rgba(18,18,18,0.60)] hover:bg-gray-200"}`}
               >
                 {val}
               </button>
@@ -543,16 +548,21 @@ const InfoPage = () => {
         />
 
         <div className="flex flex-col gap-3" ref={inputRefs.field}>
-          <label className="font-bold text-[20px]">
-            지원 분야 <span className="text-[#b90000]">*</span>
+          <label className="font-semibold text-[20px] flex items-center">
+            지원 분야{" "}
+            <img
+              src="/recruit/required-icon.svg" // 여기에 파일명 적으세요!
+              alt="required"
+              className="ml-[6px] w-[10px] h-[10px] md:w-[10px] md:h-[10px] objet-contain"
+            />
           </label>
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-3 gap-[12px] md:gap-[16px]">
             {["백엔드", "프론트엔드", "기획·디자인"].map((val) => (
               <button
                 key={val}
                 type="button"
                 onClick={() => handleSelect("field", val)}
-                className={`py-4 rounded-[10px] text-[15px] font-bold transition-all ${formData.field === val ? "bg-[#000] text-white" : "bg-[#f2f2f2] text-[#999] hover:bg-gray-200"}`}
+                className={`px-[12px] py-[11px] rounded-[12px] text-[16px] font-semibold transition-all ${formData.field === val ? "bg-[rgba(18,18,18,0.80)] text-white" : "bg-[#F0F0F0] text-[rgba(18,18,18,0.60)] hover:bg-gray-200"}`}
               >
                 {val}
               </button>
@@ -561,18 +571,22 @@ const InfoPage = () => {
         </div>
       </div>
 
-      <footer className="mt-20 flex gap-4 w-full">
+      <footer className="lg:mt-[60px] md:mt-[40px] mt-[32px] flex gap-[12px] md:gap-[16px] w-full">
         <button
           type="button"
           onClick={handleBackClick}
-          className="flex-1 py-5 border border-[#F0F0F0] text-[#666] rounded-[15px] text-lg font-bold"
+          className="flex-1 flex items-center justify-center h-auto md:h-[60px] py-[16px] md:py-0 px-[10px] 
+                   border border-[rgba(18,18,18,0.40)] bg-white text-[rgba(18,18,18,0.80)] 
+                   rounded-[12px] text-[16px] md:text-[20px] font-semibold transition-all"
         >
           이전으로
         </button>
         <button
           type="button"
           onClick={handleSubmit}
-          className={`flex-1 py-5 rounded-[15px] text-lg font-bold transition-all ${isFormValid ? "bg-[#000] text-white cursor-pointer" : "bg-gray-300 text-white cursor-not-allowed"}`}
+          className={`flex-1 flex items-center justify-center h-auto md:h-[60px] py-[16px] md:py-0 px-[10px] 
+                   rounded-[12px] text-[16px] md:text-[20px] font-semibold transition-all 
+                   ${isFormValid ? "bg-[rgba(18,18,18,0.80)] text-white cursor-pointer" : "bg-[rgba(18,18,18,0.20)] text-white cursor-not-allowed"}"}`}
         >
           다음으로
         </button>
@@ -587,9 +601,8 @@ const InfoPage = () => {
         }}
         message={
           <>
-            이전 단계로 이동하게 되면 지금까지 입력한 내용이
-            <br />
-            모두 사라집니다. 계속 진행하시겠습니까?
+            이전 단계로 이동하게 되면 지금까지 입력한 내용이 모두 사라집니다.
+            계속 진행하시겠습니까?
           </>
         }
         confirmText="계속 진행"

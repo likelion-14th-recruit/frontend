@@ -98,14 +98,14 @@ const AuthModal: React.FC<AuthModalProps> = ({
         lg:w-[800px] lg:px-[100px] lg:py-[60px] lg:gap-[60px] lg:rounded-[40px]
         
         /* 2. 태블릿 (769px ~ 1023px) */
-        md:w-[600px] md:px-[60px] md:py-[40px] md:gap-[40px] md:rounded-[30px]
+        md:w-[600px] md:px-[60px] md:py-[40px] md:gap-[40px] md:rounded-[28px]
         
         /* 3. 모바일 (768px 이하) - 디자인 가이드 반영 */
         /* 가이드: width 340 고정, 패딩 상하좌우 24, 간격 변동 */
-        w-[340px] px-[24px] py-[24px] gap-[32px] rounded-[24px]
+        w-[340px] px-[24px] py-[24px] gap-[32px] rounded-[28px]
       "
       >
-        <div className="flex flex-col items-center gap-[32px] md:gap-[40px] self-stretch">
+        <div className="flex flex-col items-center gap-[32px] md:gap-[40px] lg:gap-[40px] self-stretch">
           {/* 타이틀 폰트 크기 조절 (lg: 데스크탑 / md: 태블릿 / 기본: 모바일) */}
           <h2 className="font-semibold text-[#000] text-[20px] md:text-[28px] lg:text-[32px]">
             지원자 인증
@@ -114,8 +114,8 @@ const AuthModal: React.FC<AuthModalProps> = ({
           {/* 입력 폼 영역 간격 조절 */}
           <div className="w-full flex flex-col gap-[16px] md:gap-[32px]">
             {/* 전화번호 필드 */}
-            <div className="flex flex-col gap-[8px] md:gap-[12px]">
-              <label className="font-semibold text-[#000] ml-1 lg:text-[20px] md:text-[18px] text-[20px]">
+            <div className="flex flex-col gap-[8px] md:gap-[12px] lg:gap-[12px]">
+              <label className="font-semibold text-[#000] ml-1 lg:text-[20px] md:text-[20px] text-[20px]">
                 전화번호
               </label>
               <input
@@ -127,18 +127,18 @@ const AuthModal: React.FC<AuthModalProps> = ({
                 }}
                 placeholder="숫자만 입력해 주세요."
                 maxLength={13}
-                className={`w-full h-[48px] p-4 bg-[#f2f2f2] rounded-[12px] outline-none text-[16px] transition-all
-                ${phoneError ? "ring-1 ring-[#b90000]" : "focus:ring-1 focus:ring-gray-300"}`}
+                className={`w-full h-[48px] px-[12px] py-[4px] bg-[#F0F0F0] rounded-[12px] outline-none text-[16px] transition-all
+                              `}
               />
               {phoneError && (
-                <span className="text-[#b90000] text-[14px] ml-1">
+                <span className="text-[#b90000] text-[16px] ml-1">
                   {phoneError}
                 </span>
               )}
             </div>
 
             {/* 비밀번호 필드 */}
-            <div className="flex flex-col gap-[8px] md:gap-[12px]">
+            <div className="flex flex-col gap-[8px] md:gap-[12px] lg:gap-[12px]">
               <label className="font-semibold text-[#000] ml-1 text-[20px]">
                 비밀번호
               </label>
@@ -151,8 +151,8 @@ const AuthModal: React.FC<AuthModalProps> = ({
                     if (passwordError) setPasswordError("");
                   }}
                   placeholder="비밀번호를 입력해 주세요."
-                  className={`w-full h-[48px] p-4 bg-[#f2f2f2] rounded-[12px] outline-none text-[16px] transition-all
-                  ${passwordError ? "ring-1 ring-[#b90000]" : "focus:ring-1 focus:ring-gray-300"}`}
+                  className={`w-full h-[48px] px-[12px] py-[4px] bg-[#F0F0F0] rounded-[12px] outline-none text-[16px] transition-all
+`}
                 />
                 <button
                   type="button"
@@ -163,19 +163,19 @@ const AuthModal: React.FC<AuthModalProps> = ({
                 </button>
               </div>
               {passwordError && (
-                <span className="text-[#b90000] text-[14px] ml-1">
+                <span className="text-[#b90000] text-[16px] ml-1">
                   {passwordError}
                 </span>
               )}
             </div>
           </div>
         </div>
-        <div className="flex flex-col items-center gap-[12px] lg:gap-[20px] self-stretch">
+        <div className="flex flex-col items-center gap-[12px] md:gap-[20px] lg:gap-[20px] self-stretch">
           {/* 인증하기 버튼 */}
           <button
             onClick={handleAuthSubmit}
             disabled={!isFormValid}
-            className={`w-full rounded-[12px] transition-all flex items-center justify-center text-white
+            className={`w-full rounded-[12px] transition-all flex items-center justify-center text-white font-semibold
                         p-[10px_24px]
             /* 높이 조절 */ md:h-[60px] h-[46px]
             /* 폰트 조절 */ md:text-[20px] text-[16px]
