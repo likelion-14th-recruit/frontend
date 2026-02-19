@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import type { Variants } from "framer-motion";
 import ApplyBtn from "../common/ApplyBtn";
+import recruit_bg from "/recruit/recruit_bg.webp";
 
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
@@ -47,7 +48,7 @@ const HeroSection = () => {
 
       {/* 배경 이미지 */}
       <img
-        src="https://likrlion.s3.us-east-1.amazonaws.com/14th+web/Recruit/1.png"
+        src={recruit_bg}
         className="
           absolute inset-0
           w-full

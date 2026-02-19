@@ -7,7 +7,7 @@ type HeaderTheme = "dark" | "light";
 // 자세한 건 home이랑 recruitHome에서만 배경색 변화 있어서 거기 코드 참고
 
 export function useHeaderTheme(headerPx = 80) {
-  const [theme, setTheme] = useState<HeaderTheme>("light");
+  const [theme, setTheme] = useState<HeaderTheme>("dark");
   const { pathname } = useLocation();
 
   useEffect(() => {
@@ -33,7 +33,7 @@ export function useHeaderTheme(headerPx = 80) {
       // data-header 달린 섹션들 중에서 y를 포함하는 “가장 마지막” 요소 선택
       // (겹칠 때 안쪽/후순위 DOM을 우선)
       const sections = Array.from(
-        document.querySelectorAll<HTMLElement>("[data-header]")
+        document.querySelectorAll<HTMLElement>("[data-header]"),
       );
 
       let match: HTMLElement | null = null;

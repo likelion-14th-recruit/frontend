@@ -32,7 +32,7 @@ const menuBar = ({ isOpen, onClose }: MenuBarProps) => {
       {/* 2. 메뉴 본체 (오른쪽 정렬 + 슬라이드 애니메이션) */}
       <div
         className={cx(
-          "fixed top-0 right-0 z-[120] h-full w-[200px] bg-[lightGray] transition-transform duration-300 ease-in-out shadow-2xl flex flex-col items-end",
+          "fixed top-0 right-0 z-[120] h-full w-[200px] bg-[white] transition-transform duration-300 ease-in-out shadow-2xl flex flex-col items-end",
           isOpen ? "translate-x-0" : "translate-x-full", // 오른쪽에서 왼쪽으로 나타남
         )}
       >

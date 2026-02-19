@@ -1,15 +1,15 @@
 import { motion } from "framer-motion";
 import ApplyBtn from "../common/ApplyBtn";
+import Home_logo from "/home/home_1.webp";
+import HomeMobile from "/home/title_2.webp";
+import HomeTablet from "/home/title_1.webp";
+import HomeDesktop from "/home/title.webp";
 
 const HeroSection = () => {
-  const homeIntrobg =
-    "https://likrlion.s3.us-east-1.amazonaws.com/14th+web/Home/1.png";
-  const homeIntroMobile =
-    "https://likrlion.s3.us-east-1.amazonaws.com/14th+web/Home/title_2.png";
-  const homeIntroTablet =
-    "https://likrlion.s3.us-east-1.amazonaws.com/14th+web/Home/title_1.png";
-  const homeIntroDesktop =
-    "https://likrlion.s3.us-east-1.amazonaws.com/14th+web/Home/title.png";
+  const homeIntrobg = Home_logo;
+  const homeIntroMobile = HomeMobile;
+  const homeIntroTablet = HomeTablet;
+  const homeIntroDesktop = HomeDesktop;
   const downbtn =
     "https://likrlion.s3.us-east-1.amazonaws.com/14th+web/Home/arrow.svg";
   return (
@@ -23,7 +23,9 @@ const HeroSection = () => {
              h-[600px] md:h-[700px] lg:h-[960px] 
              md:max-w-[1024px] lg:max-w-[1440px]" // 최대 너비만 제한
         style={{
-          background: `url(${homeIntrobg}) lightgray center center / cover no-repeat`,
+          backgroundImage: `url(${homeIntrobg})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
         }}
       >
         <motion.div
