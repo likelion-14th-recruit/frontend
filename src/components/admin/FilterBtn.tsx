@@ -18,7 +18,7 @@ const FilterBtn = ({
 }: FilterBtnProps) => {
   return (
     <button
-      className={`flex gap-[6px] justify-center items-center px-[12px] py-[4px] border rounded-[12px] border-solid font-400 ${
+      className={`flex gap-[6px] justify-center items-center px-[12px] py-[4px] border rounded-[12px] border-solid font-350 ${
         selected ? "text-sogang border-sogang" : "text-black/60 border-black/40"
       }`}
       onClick={onClick}

@@ -4,11 +4,11 @@ import textLogoLight from "/text-logo.svg";
 import textLogoDark from "/text-logo-dark.svg";
 import { useHeaderTheme } from "../../hooks/useHeaderTheme";
 
+const ADMIN_PATH = import.meta.env.VITE_ADMIN_PATH;
+
 interface HeaderProps {
   onOpenMenu?: () => void;
 }
-
-const ADMIN_PATH = import.meta.env.VITE_ADMIN_PATH;
 
 const Nav = [
   { to: "/about", label: "ABOUT" },
@@ -30,6 +30,7 @@ const Header = ({ onOpenMenu }: HeaderProps) => {
   const isDark = theme === "dark";
 
   const textLogo = isDark ? textLogoDark : textLogoLight; // dark일 때 light일 때 로고 다르게
+
   const logoTo = isAdmin ? `/${ADMIN_PATH}` : "/"; //admin일 때 아닐 때 로고 navigate 루트 다르게
   // 공통 네비게이션 & 스크롤 함수
   const handleNavClick = (to: string) => {
@@ -55,7 +56,7 @@ const Header = ({ onOpenMenu }: HeaderProps) => {
           className={cx(
             "absolute inset-0 transition-opacity duration-100 ease-in-out z-0",
             isDark ? "opacity-0" : "opacity-100",
-            "bg-header-light",
+            "bg-header-light"
           )}
         />
 
@@ -64,7 +65,7 @@ const Header = ({ onOpenMenu }: HeaderProps) => {
           className={cx(
             "absolute inset-0 transition-opacity duration-100 ease-in-out z-0",
             isDark ? "opacity-100" : "opacity-0",
-            "bg-header-dark",
+            "bg-header-dark"
           )}
         />
         {/* logo 부분 */}
@@ -87,7 +88,7 @@ const Header = ({ onOpenMenu }: HeaderProps) => {
                 <div className="flex items-center">
                   <h2
                     className="font-sogang text-[16px] font-normal cursor-pointer hover:underline"
-                    onClick={() => navigate("/admin")}
+                    onClick={() => navigate(`/${ADMIN_PATH}`)}
                   >
                     HOME
                   </h2>
@@ -104,8 +105,8 @@ const Header = ({ onOpenMenu }: HeaderProps) => {
                         isActive
                           ? "text-sogang" //현재 탭 활성화면 색상 변경
                           : isDark
-                            ? "text-white/80" //배경 dark일 때 텍스트
-                            : "text-black", //배경 light일 때 텍스트
+                          ? "text-white/80" //배경 dark일 때 텍스트
+                          : "text-black" //배경 light일 때 텍스트
                       )
                     }
                   >

@@ -19,6 +19,7 @@ const ProjectPageTitle = ({
   onTabChange,
 }: PageTitleProps) => {
   return (
+    <>
     <div className="flex flex-col items-center
         px-[20px]
         mt-[100px]
@@ -43,7 +44,7 @@ const ProjectPageTitle = ({
           {description}
         </p>
       )}
-
+      </div>
       {/* 탭 버튼 */}
       {tabs && tabs.length > 0 && (
         <div className="w-full py-[20px] md:py-[40px]">
@@ -92,7 +93,7 @@ const ProjectPageTitle = ({
           </div>
         </div>
       )}
-    </div>
+   </>
   );
 };
 
