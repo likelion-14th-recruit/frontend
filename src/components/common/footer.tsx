@@ -56,7 +56,7 @@ const Footer = () => {
           <div className="text-black/60 font-pretendard text-[14px] leading-[140%] self-stretch">
             서강대학교 IT 창업 동아리
           </div>
-          <div className="text-black/60 font-pretendard text-[12px] md:text-[14px] leading-[140%] self-stretch">
+          <div className="text-black/60 font-pretendard text-[14px] leading-[140%] self-stretch">
             © 2025 LikeLion Sogang 14th. All rights reserved.
           </div>
         </div>
