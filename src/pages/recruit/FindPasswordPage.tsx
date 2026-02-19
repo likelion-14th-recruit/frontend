@@ -128,7 +128,8 @@ const FindPasswordPage = () => {
     if (!isFormValid) return;
 
     try {
-      const response = await fetch("/api/password/reset", {
+      // 1. 비밀번호 재설정 API 호출
+      const resetResponse = await fetch("/api/password/reset", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -137,48 +138,55 @@ const FindPasswordPage = () => {
         }),
       });
 
-      const result = await response.json();
-      console.log("재설정 응답 데이터:", result); // 🔥 여기서 실제 데이터 구조를 꼭 확인해보세요!
+      const resetResult = await resetResponse.json();
 
-      // 💡 조건 수정: result.success가 true라면 일단 진행
-      if (response.ok && result.success) {
-        // 서버마다 data.applicationPublicId 일 수도 있고, result.applicationPublicId 일 수도 있음
-        const appId =
-          result.data?.applicationPublicId || result.applicationPublicId;
+      if (resetResponse.ok && resetResult.success) {
+        // 2. 🔥 자동 로그인 처리 (백엔드에 새 비밀번호로 로그인 요청)
+        const loginResponse = await fetch("/api/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            phoneNumber: formData.phone.replace(/[^\d]/g, ""),
+            password: formData.password,
+          }),
+        });
 
-        if (appId) {
-          // 1. 브라우저 저장소 저장
-          localStorage.setItem("applicationId", appId);
-          alert("비밀번호가 변경되었습니다. 작성 페이지로 이동합니다.");
+        const loginResult = await loginResponse.json();
 
-          // 2. 이동
+        if (loginResponse.ok && loginResult.success) {
+          // 로그인 성공 시 받은 데이터 활용
+          const { applicationPublicId, passwordLength } = loginResult.data;
+
+          localStorage.setItem("applicationId", applicationPublicId);
+          alert("비밀번호가 변경되었습니다. 작성 중이던 페이지로 이동합니다.");
+
+          // 3. 작성 페이지로 이동
           navigate("/recruit/apply", {
             state: {
-              ...location.state,
-              applicationId: appId,
+              applicationId: applicationPublicId,
+              passwordLength: passwordLength,
             },
             replace: true,
           });
         } else {
-          // 만약 ID가 안 왔다면? (백엔드에 따라 성공만 주고 ID는 안 줄 수도 있음)
-          console.warn(
-            "ID를 찾을 수 없습니다. 기존 ID를 사용하거나 다시 로그인해야 합니다.",
-          );
+          // 비밀번호는 바꿨는데 로그인이 실패한 경우 (예외 상황)
           alert("비밀번호는 변경되었습니다. 다시 로그인해 주세요.");
           navigate("/recruit");
         }
       } else {
-        alert(`변경 실패: ${result.message || "다시 시도해 주세요."}`);
+        alert(`변경 실패: ${resetResult.message || "다시 시도해 주세요."}`);
       }
     } catch (error) {
-      console.error("비밀번호 재설정 중 오류:", error);
+      console.error("처리 중 오류:", error);
       alert("서버 연결 오류가 발생했습니다.");
     }
   };
 
   return (
     <div className="flex flex-col max-w-[800px] mx-auto pt-[100px] pb-20 font-pretendard px-4">
-      <h1 className="text-[32px] font-semibold mb-[60px]">비밀번호 찾기</h1>
+      <h1 className="text-[20px] md:text-[28px] lg:text-[32px] font-semibold mb-[32px] md:mb-[40px]">
+        비밀번호 찾기
+      </h1>
 
       <div className="flex flex-col gap-10 w-full">
         {/* 전화번호 */}
@@ -254,8 +262,8 @@ const FindPasswordPage = () => {
       <button
         onClick={handleSubmit}
         disabled={!isFormValid}
-        className={`w-full h-[60px] mt-[60px] rounded-[12px] text-[20px] font-semibold transition-all
-          ${isFormValid ? "bg-black text-white cursor-pointer" : "bg-black text-white cursor-not-allowed opacity-20"}`}
+        className={`w-full lg:mt-[60px] md:mt-[40px] mt-[32px] md:h-[60px] rounded-[12px] text-[16px] md:text-[20px] font-semibold transition-all px-[24px] py-[10px]
+          ${isFormValid ? "bg-[rgba(18,18,18,0.80)] text-white cursor-pointer" : "bg-black text-white cursor-not-allowed opacity-20"}`}
       >
         확인하기
       </button>
