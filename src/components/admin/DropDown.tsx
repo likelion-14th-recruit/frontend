@@ -107,38 +107,46 @@ const DropDown = <T extends string>({
 
       {open && !inactive && (
         <div
-          className={`absolute top-[42px] left-0 flex flex-col w-full overflow-hidden overflow-y-auto rounded-[12px] z-50 bg-white
-          shadow-[0_2px_8px_rgba(0,0,0,0.25)]`}
+          className="absolute top-[42px] left-0 w-full z-50 shadow-[0_2px_8px_rgba(0,0,0,0.25)] rounded-[12px]"
+          style={{}}
         >
-          {data.map((d, index) => {
-            return (
-              <button
-                type="button"
-                key={d.value}
-                className={`text-left z-0 flex  ${
-                  index === data.length - 1
-                    ? "border-none"
-                    : "border-b border-b-solid border-b-lightGray"
-                }  px-[12px] py-[8px] font-[350]
-                hover:bg-lightGray 
+          <div
+            className="flex flex-col w-full bg-white overflow-hidden rounded-[12px]"
+            style={{
+              transform: "translateZ(0)",
+              WebkitMaskImage: "-webkit-radial-gradient(white, black)", // 사파리 border-radius 버그 수정
+            }}
+          >
+            {data.map((d, index) => {
+              return (
+                <button
+                  type="button"
+                  key={d.value}
+                  className={`text-left z-0 flex w-full ${
+                    index === data.length - 1
+                      ? "border-none"
+                      : "border-b border-b-solid border-b-lightGray"
+                  } px-[12px] py-[8px] font-[350] transition-colors
                 ${index === 0 ? "rounded-t-[12px]" : ""}
-                ${index === data.length - 1 ? "rounded-b-[12px]" : ""}`}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleSelect(d.value);
-                }}
-              >
-                {isTime
-                  ? isAll
-                    ? index !== 0
-                      ? `타임 ${index} |  `
-                      : ""
-                    : `타임 ${index + 1} |  `
-                  : ""}
-                {d.label}
-              </button>
-            );
-          })}
+                ${index === data.length - 1 ? "rounded-b-[12px]" : ""}
+                hover:bg-lightGray focus:outline-none`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleSelect(d.value);
+                  }}
+                >
+                  {isTime
+                    ? isAll
+                      ? index !== 0
+                        ? `타임 ${index} |  `
+                        : ""
+                      : `타임 ${index + 1} |  `
+                    : ""}
+                  {d.label}
+                </button>
+              );
+            })}
+          </div>
         </div>
       )}
     </div>
