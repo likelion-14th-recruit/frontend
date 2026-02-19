@@ -50,10 +50,10 @@ const RecruitLayout = () => {
   const currentLabel = steps.find((s) => s.id === currentStep)?.label || "";
 
   return (
-    <div className="flex flex-col w-full pt-[60px] md:pt-[80px] font-pretendard">
+    <div className="flex flex-col w-full pt-[60px] md:pt-[80px] font-Sogang">
       {/* 📱 모바일 전용 스텝 표시 (360px ~ 768px) */}
       <div className="flex flex-col items-center md:hidden py-8 min-w-[360px]">
-        <div className="flex items-center justify-center px-[12px] py-[4px] border-[1px] border-[#121212] rounded-[20px] bg-white mb-[8px]">
+        <div className="flex items-center justify-center px-[12px] py-[8px] border-[1px] border-[#121212] rounded-[20px] bg-white mb-[8px]">
           <span className="text-[16px] font-normal text-[#121212] leading-none">
             {currentStep}
           </span>
@@ -72,7 +72,7 @@ const RecruitLayout = () => {
       {/* 💻 데스크탑 & 태블릿 진행바 영역 (769px 이상) */}
       <div className="hidden md:block w-full py-16 bg-white">
         {/* 🔥 핵심 수정: 하단 main과 동일한 max-w-[800px]와 px-4 적용 */}
-        <div className="lg:max-w-[900px] md:max-w-[680px] mx-auto px-[70px] flex items-center justify-between">
+        <div className="w-full lg:max-w-[900px] md:max-w-[800px] mx-auto px-[70px] flex items-start justify-center">
           {steps.map((step, index) => (
             <div
               key={step.id}
@@ -94,13 +94,16 @@ const RecruitLayout = () => {
                 </span>
               </div>
 
-              {/* 스텝 사이의 연결 선 (SVG 대체) */}
+              {/* 스텝 사이의 연결 선 (SVG 파일 버전) */}
               {index !== steps.length - 1 && (
                 <div
                   className="
-                  /* 공통: 아이콘과의 간격 mx-[20px] */
-                  mx-[20px] -translate-y-4 flex items-center flex-1
-                "
+      flex-1 
+      mx-[10px] 
+      -translate-y-4 
+      flex items-center
+      min-w-[50px] /* 선이 너무 짧아지지 않도록 최소폭 설정 */
+    "
                 >
                   <img
                     src={
@@ -109,8 +112,13 @@ const RecruitLayout = () => {
                         : "/recruit/line-icon.svg"
                     }
                     alt="step line"
-                    className={`w-full h-[1px] object-cover transition-all duration-500
-                      ${currentStep > step.id ? "opacity-100" : "opacity-30"}`}
+                    className={`
+        w-full h-[1px] 
+        /* 🔥 중요: 비율을 무시하고 가로를 꽉 채우도록 강제함 */
+        object-fill 
+        transition-all duration-500
+        ${currentStep > step.id ? "opacity-100" : "opacity-30"}
+      `}
                   />
                 </div>
               )}

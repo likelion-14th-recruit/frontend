@@ -5,6 +5,7 @@ import Input from "../../components/recruit/Input";
 // 헬퍼 함수: 하이픈 자동 포맷 (InfoPage와 동일)
 const formatPhoneNumber = (value: string) => {
   if (!value) return "";
+  if (/[^\d-]/.test(value)) return value;
   const phoneNumber = value.replace(/[^\d]/g, "");
   const cp = phoneNumber.length;
   if (cp < 4) return phoneNumber;
@@ -27,19 +28,47 @@ const FindPasswordPage = () => {
   const [authStatus, setAuthStatus] = useState("idle");
   const [authGuide, setAuthGuide] = useState("");
   const [authError, setAuthError] = useState(""); // 🔥 커스텀 에러 상태 추가
+  const [phoneError, setPhoneError] = useState("");
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
 
+    // 1. 전화번호 처리 로직
     if (name === "phone") {
-      const rawDigits = value.replace(/[^\d]/g, "").slice(0, 11);
-      setFormData((prev) => ({ ...prev, [name]: rawDigits }));
-    } else {
+      setFormData((prev) => ({ ...prev, [name]: value.slice(0, 13) }));
+
+      const pure = value.replace(/[^\d]/g, "");
+      const hasNonDigit = /[^\d-]/.test(value);
+
+      if (
+        value.length > 0 &&
+        (hasNonDigit || (pure.length > 0 && pure.length < 11))
+      ) {
+        setPhoneError("올바른 형식을 입력해주세요.");
+      } else {
+        setPhoneError("");
+      }
+    }
+    // 2. 비밀번호 마스킹 가로채기 로직 (별표 무시하고 진짜 값만 저장)
+    else if (name === "password" || name === "passwordConfirm") {
+      const prevVal = formData[name];
+      let realNewValue = prevVal;
+
+      if (value.length < prevVal.length) {
+        realNewValue = prevVal.slice(0, value.length);
+      } else if (value.length > prevVal.length) {
+        realNewValue = prevVal + value.slice(-1);
+      }
+
+      setFormData((prev) => ({ ...prev, [name]: realNewValue }));
+    }
+    // 3. 기타 일반 필드 (인증번호 등)
+    else {
       setFormData((prev) => ({ ...prev, [name]: value }));
     }
   };
 
-  const isPhoneValid = /^[0-9]{11}$/.test(formData.phone);
+  const isPhoneValid = /^[0-9]{11}$/.test(formData.phone.replace(/[^\d]/g, ""));
   const isPasswordValid = /^(?=.*[a-zA-Z])(?=.*[0-9]).{8,20}$/.test(
     formData.password,
   );
@@ -53,7 +82,11 @@ const FindPasswordPage = () => {
     isPasswordMatch;
 
   const handleSendAuth = async () => {
-    if (!isPhoneValid) return;
+    if (!isPhoneValid) {
+      setPhoneError("올바른 형식을 입력해주세요.");
+      return;
+    }
+    setPhoneError("");
     try {
       const response = await fetch(
         "/api/verification/application-modification",
@@ -74,19 +107,19 @@ const FindPasswordPage = () => {
             : "인증번호가 재전송되었습니다.",
         );
         setFormData((prev) => ({ ...prev, authCode: "" }));
-        setAuthError(""); // 전송 시 에러 초기화
+        setAuthError("");
       } else {
         if (result.code === "APPLICATION_NOT_EXISTS") {
-          setAuthGuide(
+          setPhoneError(
             "해당 전화번호로 등록된 지원서를 찾을 수 없습니다. 번호를 다시 확인해주세요.",
           );
         } else {
-          setAuthGuide(result.message || "인증번호 전송에 실패했습니다.");
+          setPhoneError(result.message || "인증번호 전송에 실패했습니다.");
         }
-        setAuthStatus("idle"); // 상태를 초기화하여 버튼 활성화 유지
+        setAuthStatus("idle");
       }
     } catch (error) {
-      setAuthGuide("서버와 통신 중 오류가 발생했습니다.");
+      setPhoneError("서버와 통신 중 오류가 발생했습니다.");
     }
   };
 
@@ -120,6 +153,7 @@ const FindPasswordPage = () => {
         setAuthError(result.message || "인증번호가 올바르지 않습니다.");
       }
     } catch (error) {
+      console.error(error);
       setAuthError("인증 확인 중 오류가 발생했습니다.");
     }
   };
@@ -201,8 +235,9 @@ const FindPasswordPage = () => {
           onButtonClick={handleSendAuth}
           onChange={handleChange}
           value={formatPhoneNumber(formData.phone)} // 🔥 하이픈 포맷 적용
-          isError={formData.phone.length > 0 && !isPhoneValid}
-          guideText={authGuide || "숫자 11자리"}
+          isError={!!phoneError}
+          errorText={phoneError}
+          guideText="숫자 11자리"
         />
 
         {/* 인증번호 */}

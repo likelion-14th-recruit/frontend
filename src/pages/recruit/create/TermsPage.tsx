@@ -17,15 +17,15 @@ const TermsPage = () => {
         <img
           src="/recruit/checkbox_on.svg" // public 폴더 기준 경로는 /부터 시작합니다.
           alt="checked"
-          width="32px"
-          height="32px"
+          width="44px"
+          height="44px"
         />
       ) : (
         <img
           src="/recruit/checkbox_off.svg"
           alt="unchecked"
-          width="32px"
-          height="32px"
+          width="44px"
+          height="44px"
         />
       )}
     </div>
@@ -132,9 +132,10 @@ const TermsPage = () => {
               <p className="text-[#121212]">
                 OT(3/16), Lion Sprint(3월~6월, 시험기간 제외), 아이디어톤(5월),
                 중앙 해커톤(8월), 데모데이(11월) 위 활동들은 모두 필수 참여
-                프로그램으로,{" "}
+                프로그램으로,
                 <span className="font-semibold">1년간의 활동을 전제</span>로
-                운영되는 멋쟁이사자처럼 서강대학교 14기의 공식 일정입니다.
+                운영되는 멋쟁이사자처럼 서강대학교 14기의 공식 일정입니다. 모든
+                활동에 성실히 참여하신 분에 한해 수료증이 발급됩니다.
               </p>
             </div>
           </div>
@@ -146,7 +147,8 @@ const TermsPage = () => {
               <h3 className="font-semibold">공식 홈페이지, 인스타그램</h3>
               <p className="text-[#121212]">
                 서강대학교 멋쟁이사자처럼 공식 홈페이지와 @likelion_sg 공식
-                인스타그램에서 다양한 정보를 확인하실 수 있습니다.
+                인스타그램에서 커리큘럼, 활동 일정 등 다양한 정보를 확인하실 수
+                있습니다.
               </p>
             </div>
           </div>
@@ -207,7 +209,7 @@ const TermsPage = () => {
       <button
         disabled={!isAllChecked}
         onClick={() => navigate("/recruit/info")}
-        className={`w-full py-[10px] px-[24px] rounded-[12px] text-[20px] font-semibold transition-all lg:mt-[60px] md:mt-[40px] mt-[32px]
+        className={`w-full py-[16px] px-[24px] rounded-[12px] text-[20px] font-Pretendard font-normal transition-all lg:mt-[60px] md:mt-[40px] mt-[32px]
           ${
             isAllChecked
               ? "bg-[rgba(18,18,18,0.80)] text-white cursor-pointer hover:bg-[#222]"
