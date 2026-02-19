@@ -1,5 +1,3 @@
-import React from "react";
-
 interface CompleteModalProps {
   isOpen: boolean;
   onClose: () => void;

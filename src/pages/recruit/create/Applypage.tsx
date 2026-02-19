@@ -10,12 +10,17 @@ const ApplyPage = () => {
   const [questions, setQuestions] = useState([]);
   const [isSaved, setIsSaved] = useState(false);
 
+  const [initialData, setInitialData] = useState({});
+
   const context = useOutletContext();
   const formData = context?.formData || {};
   const setFormData = context?.setFormData;
   // 🔥 1. 변경 사항이 있는지 확인 (하나라도 입력된 내용이 있으면 dirty)
   const isDirty =
-    questions.some((q) => formData[`q${q.questionNumber}`]?.trim()) && !isSaved;
+    questions.some((q) => {
+      const key = `q${q.questionNumber}`;
+      return (formData[key] || "") !== (initialData[key] || "");
+    }) && !isSaved;
 
   // 🔥 2. 브라우저 닫기/새로고침 방지 (브라우저 기본 알림)
   useEffect(() => {
@@ -41,11 +46,12 @@ const ApplyPage = () => {
   const userField = location.state?.field || "프론트엔드";
   const isDesign = userField === "기획·디자인";
 
-  // 데이터 로딩 로직 (기존과 동일)
+  // 데이터 로딩 로직 수정
   useEffect(() => {
     const initData = async () => {
       if (!applicationId) return;
       try {
+        // 1. 질문 목록 로딩
         const qRes = await fetch(
           `/api/applications/${applicationId}/questions`,
         );
@@ -57,17 +63,37 @@ const ApplyPage = () => {
         );
         setQuestions(sortedQuestions);
 
+        // 2. 답변 로딩 (이미 입력된 내용이 없을 때만 서버에서 가져옴)
         const aRes = await fetch(`/api/applications/${applicationId}/answers`);
         const aResult = await aRes.json();
+
         if (aRes.ok && aResult.data?.answers) {
-          const newAnswers = {};
+          const serverAnswers = {};
           aResult.data.answers.forEach((ans) => {
             const targetQ = sortedQuestions.find(
               (q) => q.questionId === ans.questionId,
             );
-            if (targetQ) newAnswers[`q${targetQ.questionNumber}`] = ans.content;
+            if (targetQ) {
+              const key = `q${targetQ.questionNumber}`;
+              // 🔥 [핵심] context(formData)에 이미 값이 있으면 서버 데이터로 덮어쓰지 않음
+              if (!formData[key]) {
+                serverAnswers[key] = ans.content;
+              }
+            }
           });
-          setFormData?.((prev) => ({ ...prev, ...newAnswers }));
+
+          setInitialData(serverAnswers);
+
+          // 새로 가져온 답변이 있을 때만 업데이트
+          if (Object.keys(serverAnswers).length > 0) {
+            setFormData?.((prev) => {
+              const newFormData = { ...prev };
+              Object.keys(serverAnswers).forEach((key) => {
+                if (!newFormData[key]) newFormData[key] = serverAnswers[key];
+              });
+              return newFormData;
+            });
+          }
         }
       } catch (error) {
         console.error("데이터 로드 중 에러:", error);
@@ -139,6 +165,12 @@ const ApplyPage = () => {
 
       if (response.ok) {
         setIsSaved(true);
+        const currentData = {};
+        questions.forEach((q) => {
+          currentData[`q${q.questionNumber}`] =
+            formData[`q${q.questionNumber}`];
+        });
+        setInitialData(currentData);
         setInfoModal({
           isOpen: true,
           message:
@@ -160,9 +192,6 @@ const ApplyPage = () => {
   };
   const handleMoveBack = () => {
     const backState = { ...location.state, applicationId };
-    const hasAnyContent = questions.some((q) =>
-      formData[`q${q.questionNumber}`]?.trim(),
-    );
 
     if (isSaved || !isDirty) {
       navigate("/recruit/info", { state: backState });
@@ -178,11 +207,11 @@ const ApplyPage = () => {
     }
   };
 
-  const handleNext = async () => {
-    // 1. 유효성 검사 (isFormValid가 이미 버튼 활성화 여부를 결정하지만 안전을 위해 한 번 더 체크)
+  const handleNext = () => {
+    // 1. 유효성 검사 (버튼이 이미 활성화되어 있지만 안전장치로 한 번 더 체크)
     if (!isFormValid) return;
 
-    // 2. 글자 수 제한 체크 (임시 저장 로직과 동일)
+    // 2. 글자 수 제한 체크 (서버 저장은 안 하지만, 글자 수가 넘어가면 다음으로 못 가게 방지)
     const isOverLimit = questions.some((q) => {
       const isLinkQuestion =
         q.content.includes("GitHub") || q.content.includes("포트폴리오");
@@ -195,47 +224,16 @@ const ApplyPage = () => {
       setInfoModal({
         isOpen: true,
         message:
-          "글자 수가 500자를 초과했습니다.\n임시 저장을 위해 내용을 500자 이내로 줄여 주세요.",
+          "글자 수가 500자를 초과했습니다.\n내용을 500자 이내로 줄여 주세요.",
         onConfirm: () => setInfoModal((prev) => ({ ...prev, isOpen: false })),
         isSingleButton: true,
       });
       return;
     }
 
-    try {
-      // 3. 서버에 데이터 저장 (자동 임시 저장)
-      const answersPayload = questions.map((q) => ({
-        questionId: q.questionId,
-        content: formData[`q${q.questionNumber}`] || "",
-      }));
-
-      const response = await fetch(
-        `/api/applications/${applicationId}/answers`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ answers: answersPayload }),
-        },
-      );
-
-      if (response.ok) {
-        setIsSaved(true); // 저장 상태 업데이트
-        // 4. 저장 성공 시 다음 페이지로 이동
-        navigate("/recruit/interview", { state: { applicationId } });
-      } else {
-        // 서버 에러 시 안내
-        setInfoModal({
-          isOpen: true,
-          message:
-            "데이터 저장 중 오류가 발생했습니다.\n잠시 후 다시 시도해주세요.",
-          onConfirm: () => setInfoModal((prev) => ({ ...prev, isOpen: false })),
-          isSingleButton: true,
-        });
-      }
-    } catch (error) {
-      console.error("Next 단계 진행 중 오류:", error);
-      alert("네트워크 서버 오류가 발생했습니다.");
-    }
+    // 🔥 [핵심 수정] 서버 저장(fetch) 없이 바로 다음 페이지로 이동합니다.
+    // context의 formData는 이미 업데이트되어 있으므로 이동해도 데이터가 보존됩니다.
+    navigate("/recruit/interview", { state: { applicationId } });
   };
 
   return (

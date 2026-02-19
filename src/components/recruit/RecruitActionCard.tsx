@@ -38,7 +38,7 @@ const RecruitActionCard = ({
       <div className="flex flex-col items-center gap-[4px]">
         {/* 제목 */}
         <h3
-          className="text-[#rgba(18,18,18,0.8)] font-semibold text-center whitespace-nowrap
+          className="text-[rgba(18,18,18,0.8)] font-semibold text-center whitespace-nowrap
                        text-[20px] md:text-[28px] lg:text-[32px]"
         >
           {title}
