@@ -10,13 +10,15 @@ const HeroSection = () => {
     "https://likrlion.s3.us-east-1.amazonaws.com/14th+web/Home/title_1.png";
   const homeIntroDesktop =
     "https://likrlion.s3.us-east-1.amazonaws.com/14th+web/Home/title.png";
+  const downbtn =
+    "https://likrlion.s3.us-east-1.amazonaws.com/14th+web/Home/arrow.svg";
   return (
     <section
-      className="relative overflow-hidden w-full bg-black
+      className="relative overflow-hidden w-full bg-black 
    "
     >
       <div
-        className="flex flex-col items-center justify-center self-stretch w-full mx-auto
+        className="flex flex-col items-center self-stretch w-full mx-auto pt-[189.13px] md:pt-[179.5px] lg:pt-[255px]
              gap-[40px] lg:gap-[60px] 
              h-[600px] md:h-[700px] lg:h-[960px] 
              md:max-w-[1024px] lg:max-w-[1440px]" // 최대 너비만 제한
@@ -44,6 +46,14 @@ const HeroSection = () => {
         </motion.div>
         {/* 4. 버튼 */}
         <ApplyBtn />
+        <motion.div
+          className="flex aspect-1/1 w-[41.6px] lg:w-[52px]"
+          initial={{ opacity: 0, y: -30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1.2, delay: 0.6, ease: "easeOut" }}
+        >
+          <img src={downbtn} />
+        </motion.div>
       </div>
     </section>
   );
