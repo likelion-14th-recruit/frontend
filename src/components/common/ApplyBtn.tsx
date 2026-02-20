@@ -8,7 +8,7 @@ const ApplyBtn = () => {
   const nav = useNavigate();
   const [status, setStatus] = useState<RecruitStatus>("UPCOMING");
 
-  const START_DATE = new Date("2026-02-21T00:00:00+09:00");
+  const START_DATE = new Date("2026-02-23T00:00:00+09:00");
   const END_DATE = new Date("2026-03-05T23:59:59+09:00");
 
   useEffect(() => {
