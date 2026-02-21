@@ -7,8 +7,6 @@ import Modal from "../../components/admin/Modal";
 import FilterLabel from "../../components/admin/FilterLabel";
 import FilterBtn from "../../components/admin/FilterBtn";
 import {
-  PART,
-  PASS_STATUS,
   applyParts,
   interviewDates,
   interviewTime,
@@ -45,10 +43,6 @@ const Admin = () => {
   const [open, setOpen] = useState(false); //모달 표시 여부
   const [sendType, setSendType] = useState<"doc" | "final" | null>(null);
 
-  //필터 설정
-  const [filters, setFilters] = useState<Filter>({
-    page: 0,
-  });
   const [filteredList, setFilteredList] = useState([]); //필터링 결과
 
   const [page, setPage] = useState<Pages>({
@@ -70,7 +64,7 @@ const Admin = () => {
     }
   }, [partSelected, stateSelected, dateSelected, search, timeSelected]);
 
-  function buildQuery(params: Record<string, any>) {
+  function buildQuery(params: Record<string, unknown>) {
     const sp = new URLSearchParams();
     Object.entries(params).forEach(([k, v]) => {
       if (v === undefined || v === null || v === "") return;
@@ -81,7 +75,7 @@ const Admin = () => {
 
   const checkDate = (e: string) => {
     setDateSelected((prev) =>
-      prev.includes(e) ? prev.filter((item) => item !== e) : [...prev, e]
+      prev.includes(e) ? prev.filter((item) => item !== e) : [...prev, e],
     );
   };
 
@@ -108,7 +102,7 @@ const Admin = () => {
           headers: {
             "Content-type": "application/json",
           },
-        }
+        },
       );
 
       if (!response.ok) {
@@ -146,7 +140,7 @@ const Admin = () => {
           headers: {
             "Content-type": "application/json",
           },
-        }
+        },
       );
 
       if (!response.ok) {
@@ -186,8 +180,6 @@ const Admin = () => {
 
     if (search.trim() !== "") nextFilters.search = search.trim();
 
-    setFilters(nextFilters);
-
     try {
       const qs = buildQuery(nextFilters);
       const response = await fetch(
@@ -196,7 +188,7 @@ const Admin = () => {
           method: "GET",
           credentials: "include",
           headers: { Accept: "application/json" },
-        }
+        },
       );
 
       if (!response.ok) {
@@ -251,7 +243,7 @@ const Admin = () => {
     setModalContent(
       type === "doc"
         ? "서류 합격자 문자를 발송하시겠습니까?"
-        : "최종 합격자 문자를 발송하시겠습니까?"
+        : "최종 합격자 문자를 발송하시겠습니까?",
     );
 
     setOpen(true);

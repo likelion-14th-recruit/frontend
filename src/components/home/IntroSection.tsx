@@ -1,17 +1,6 @@
 import { ChevronRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
-import type { Variants } from "framer-motion";
 import introbg from "/home/intro.webp";
-// Props 타입 정의
-const itemVariants: Variants = {
-  hidden: { opacity: 0, y: 30 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.8, ease: "easeOut" },
-  },
-};
 
 const IntroSection = () => {
   const nav = useNavigate();
