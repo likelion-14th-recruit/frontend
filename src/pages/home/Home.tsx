@@ -41,7 +41,7 @@ const Home = () => {
   return (
     <div className="overflow-x-hidden w-full " data-header="dark">
       <HHeroSection />
-      <HSection color="light">
+      <HSection color="light" id="intro-section">
         <IntroSection />
       </HSection>
       <HSection color="lightGray">
@@ -159,7 +159,7 @@ const ExperiencesData = [
   {
     track: "( Frontend Part )",
     content:
-      "개발을 처음 해보는 입장이었는데 세션별로 수업이 있어서 차근차근 따라오기 좋았습니다. 또 직접 백,프론트,디자인과의 팀을 만들어 협업, 기획부터 배포 운영까지 전 과정을 겪을 수 있어서 좋았습니다.",
+      "개발을 처음 해보는 입장이었는데 세션별로 수업이 있어서 차근차근 따라오기 좋았습니다. 또 직접 백, 프론트, 디자인과의 팀을 만들어 협업, 기획부터 배포, 운영까지 전 과정을 겪을 수 있어서 좋았습니다.",
   },
   {
     track: "( Design Part )",

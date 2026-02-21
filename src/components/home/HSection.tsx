@@ -3,9 +3,11 @@ import { motion } from "framer-motion";
 
 const HSection = ({
   color,
+  id,
   children,
 }: {
   color: string;
+  id?: string;
   children: React.ReactNode;
 }) => {
   // 1. 부모(Section) 애니메이션 설정
@@ -22,6 +24,7 @@ const HSection = ({
   return (
     <motion.section
       data-header="light"
+      id={id}
       initial="hidden"
       whileInView="visible"
       viewport={{ once: true, amount: 0.3 }} // 20% 정도 보일 때 한 번만 실행

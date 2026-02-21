@@ -56,7 +56,7 @@ const Header = ({ onOpenMenu }: HeaderProps) => {
           className={cx(
             "absolute inset-0 transition-opacity duration-100 ease-in-out z-0",
             isDark ? "opacity-0" : "opacity-100",
-            "bg-header-light"
+            "bg-header-light",
           )}
         />
 
@@ -65,7 +65,7 @@ const Header = ({ onOpenMenu }: HeaderProps) => {
           className={cx(
             "absolute inset-0 transition-opacity duration-100 ease-in-out z-0",
             isDark ? "opacity-100" : "opacity-0",
-            "bg-header-dark"
+            "bg-header-dark",
           )}
         />
         {/* logo 부분 */}
@@ -105,8 +105,8 @@ const Header = ({ onOpenMenu }: HeaderProps) => {
                         isActive
                           ? "text-sogang" //현재 탭 활성화면 색상 변경
                           : isDark
-                          ? "text-white/80" //배경 dark일 때 텍스트
-                          : "text-black" //배경 light일 때 텍스트
+                            ? "text-white/80" //배경 dark일 때 텍스트
+                            : "text-black", //배경 light일 때 텍스트
                       )
                     }
                   >

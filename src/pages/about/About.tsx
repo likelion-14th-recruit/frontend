@@ -5,6 +5,10 @@ import { motion } from "framer-motion";
 import type { Variants } from "framer-motion";
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
+import about_bg from "/about/bg.png";
+import about_1 from "/about/1.png";
+import about_2 from "/about/2.png";
+import about_3 from "/about/3.png";
 
 // 1. 부모(Section) 애니메이션 설정
 const containerVariants = {
@@ -66,8 +70,9 @@ const About = () => {
         <div className="absolute left-0 pointer-events-none w-[468px] h-[323px] top-[212px] tablet-lg:top-[255px] aspect-[468/323]">
           <img
             className="relative w-1/2 h-1/2 tablet-lg:w-full tablet-lg:h-full object-cover"
-            src="https://likrlion.s3.us-east-1.amazonaws.com/14th+web/About/bg.png"
+            src={about_bg}
             alt="likelion-sogang-bg"
+            loading="eager"
           />
         </div>
 
@@ -77,20 +82,23 @@ const About = () => {
           "
         >
           <img
-            className="w-[90px] tablet-lg:w-[180px] h-auto object-contain"
-            src="https://likrlion.s3.us-east-1.amazonaws.com/14th+web/About/1.png"
+            className="w-[90px] tablet-lg:w-[180px] h-auto object-contain "
+            src={about_1}
             alt="about/1"
+            loading="eager"
           />
           <div className="flex items-start gap-[12px] tablet-lg:gap-[20px]">
             <img
               className="w-[70px] tablet-lg:w-[140px] h-auto object-contain"
-              src="https://likrlion.s3.us-east-1.amazonaws.com/14th+web/About/2.png"
+              src={about_2}
               alt="about/2"
+              loading="eager"
             />
             <img
               className="w-[70px] tablet-lg:w-[140px] h-auto object-contain"
-              src="https://likrlion.s3.us-east-1.amazonaws.com/14th+web/About/3.png"
+              src={about_3}
               alt="about/3"
+              loading="eager"
             />
           </div>
         </div>

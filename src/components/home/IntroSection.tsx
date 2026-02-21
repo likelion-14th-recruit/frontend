@@ -2,6 +2,7 @@ import { ChevronRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import type { Variants } from "framer-motion";
+import introbg from "/home/intro.webp";
 // Props 타입 정의
 const itemVariants: Variants = {
   hidden: { opacity: 0, y: 30 },
@@ -21,7 +22,7 @@ const IntroSection = () => {
     >
       <motion.img
         className="w-[320px] md:w-[576px] lg:w-[720px] h-[178px] md:h-[320px] lg:h-[400px] "
-        src="https://likrlion.s3.us-east-1.amazonaws.com/14th+web/Home/intro/1.png"
+        src={introbg}
       ></motion.img>
       <motion.div
         variants={itemVariants}
