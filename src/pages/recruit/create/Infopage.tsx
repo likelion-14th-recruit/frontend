@@ -10,23 +10,21 @@ import ConfirmModal from "../../../components/recruit/ConfirmModal";
 
 type RequiredField = {
   key: keyof FormDataType;
-  ref: React.RefObject<HTMLElement>;
+  ref: React.RefObject<HTMLElement | null>;
 };
 
-interface InputProps extends Omit<
-  React.InputHTMLAttributes<HTMLInputElement>,
-  "ref"
-> {
-  label: string;
-  required?: boolean;
-  guideText?: string;
-  isError?: boolean;
-  buttonText?: string;
-  onButtonClick?: () => void;
-  buttonDisabled?: boolean;
-  buttonActive?: boolean;
-  errorText?: string;
-}
+const ACADEMIC_STATUS_MAP = {
+  재학: "ENROLLED",
+  휴학: "ON_LEAVE",
+  "졸업 유예": "GRADUATION_DEFERRED",
+  졸업: "GRADUATED",
+} as const;
+
+const PART_MAP = {
+  "기획·디자인": "PRODUCT_DESIGN",
+  프론트엔드: "FRONTEND",
+  백엔드: "BACKEND",
+} as const;
 
 interface FormDataType {
   name: string;
@@ -75,19 +73,6 @@ const formatPhoneNumber = (value: string) => {
     return `${phoneNumber.slice(0, 3)}-${phoneNumber.slice(3, 7)}-${phoneNumber.slice(7)}`;
   return `${phoneNumber.slice(0, 3)}-${phoneNumber.slice(3, 7)}-${phoneNumber.slice(7, 11)}`;
 };
-
-const ACADEMIC_STATUS_MAP = {
-  재학: "ENROLLED",
-  휴학: "ON_LEAVE",
-  "졸업 유예": "GRADUATION_DEFERRED",
-  졸업: "GRADUATED",
-} as const;
-
-const PART_MAP = {
-  "기획·디자인": "PRODUCT_DESIGN",
-  프론트엔드: "FRONTEND",
-  백엔드: "BACKEND",
-} as const;
 
 // 상단에 역매핑 객체 추가
 const STATUS_REVERSE_MAP = {
@@ -172,20 +157,18 @@ const InfoPage = () => {
     term: formData.term.length > 0 && !isTermValid ? "숫자만 입력" : "",
   };
 
-  const inputRefs = {
-    name: useRef<HTMLInputElement | null>(null),
-    studentId: useRef<HTMLInputElement | null>(null),
-    phone: useRef<HTMLInputElement | null>(null),
-    authCode: useRef<HTMLInputElement | null>(null),
-    password: useRef<HTMLInputElement | null>(null),
-    passwordConfirm: useRef<HTMLInputElement | null>(null),
-    major: useRef<HTMLInputElement | null>(null),
-    term: useRef<HTMLInputElement | null>(null),
-
-    // 이 둘은 Input이 아니라 div에 연결됨
-    status: useRef<HTMLDivElement | null>(null),
-    field: useRef<HTMLDivElement | null>(null),
-  };
+  // inputRefs 선언부 수정
+  const nameRef = useRef<HTMLInputElement>(null);
+  const studentIdRef = useRef<HTMLInputElement>(null);
+  const phoneRef = useRef<HTMLInputElement>(null);
+  const passwordRef = useRef<HTMLInputElement>(null);
+  const passwordConfirmRef = useRef<HTMLInputElement>(null);
+  const majorRef = useRef<HTMLInputElement>(null);
+  const minorRef = useRef<HTMLInputElement>(null);
+  const termRef = useRef<HTMLInputElement>(null);
+  const authCodeRef = useRef<HTMLInputElement>(null);
+  const statusRef = useRef<HTMLDivElement>(null);
+  const fieldRef = useRef<HTMLDivElement>(null);
 
   const isDirty = Object.keys(formData).some((key) => {
     const typedKey = key as keyof FormDataType;
@@ -215,15 +198,17 @@ const InfoPage = () => {
   // 2. 블로커 상태에 따라 모달 제어 (useEffect 이용)
   useEffect(() => {
     if (blocker.state === "blocked") {
-      setInfoModal({
-        isOpen: true,
-        message:
-          "임시저장하지 않고 나가면 지금까지 입력한 내용이 모두 사라집니다. 계속 진행하시겠습니까?",
-        isSingleButton: false, // 취소/확인 두 개가 필요하므로 false
-        onConfirm: () => {
-          blocker.proceed(); // 이동 허용
-        },
-      });
+      setTimeout(() => {
+        setInfoModal({
+          isOpen: true,
+          message:
+            "임시저장하지 않고 나가면 지금까지 입력한 내용이 모두 사라집니다. 계속 진행하시겠습니까?",
+          isSingleButton: false, // 취소/확인 두 개가 필요하므로 false
+          onConfirm: () => {
+            blocker.proceed(); // 이동 허용
+          },
+        });
+      }, 0);
     }
   }, [blocker]);
 
@@ -293,12 +278,14 @@ const InfoPage = () => {
       "Length:",
       passwordLength,
     );
-    if (applicationId && passwordLength) {
-      fetchUserInfo();
-    } else {
+    if (!applicationId || !passwordLength) {
       console.warn("⚠️ ID나 비밀번호 길이가 없어서 API를 호출하지 않음");
+      return;
     }
-  }, [applicationId]); // passwordLength도 의존성 배열에 추가하는 게 안전해!
+    setTimeout(() => {
+      fetchUserInfo();
+    }, 0);
+  }, [applicationId, passwordLength]); // passwordLength도 의존성 배열에 추가하는 게 안전해!
 
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
@@ -376,6 +363,7 @@ const InfoPage = () => {
         setAuthGuide("전송에 실패했습니다. 번호를 확인해 주세요.");
       }
     } catch (error) {
+      console.error("Auth Error:", error);
       setAuthGuide("서버와 통신 중 오류가 발생했습니다.");
     }
   };
@@ -400,6 +388,7 @@ const InfoPage = () => {
         setAuthError("인증번호가 올바르지 않습니다. 다시 입력해 주세요.");
       }
     } catch (error) {
+      console.error("s Error:", error);
       setAuthError(
         "서버와의 연결이 원활하지 않습니다. 잠시 후 다시 시도해 주세요.",
       );
@@ -433,8 +422,10 @@ const InfoPage = () => {
         major: formData.major,
         doubleMajor: formData.minor || "",
         semester: Number(formData.term),
-        academicStatus: ACADEMIC_STATUS_MAP[formData.status],
-        part: PART_MAP[formData.field],
+        academicStatus: formData.status
+          ? ACADEMIC_STATUS_MAP[formData.status]
+          : "",
+        part: formData.field ? PART_MAP[formData.field] : "",
       };
     } else {
       // [수정하기 PATCH] 명세에 따라 phone, password 제외!!
@@ -443,9 +434,11 @@ const InfoPage = () => {
         studentNumber: formData.studentId,
         major: formData.major,
         doubleMajor: formData.minor || "",
-        academicStatus: ACADEMIC_STATUS_MAP[formData.status],
+        academicStatus: formData.status
+          ? ACADEMIC_STATUS_MAP[formData.status]
+          : "",
         semester: Number(formData.term),
-        part: PART_MAP[formData.field],
+        part: formData.field ? PART_MAP[formData.field] : "",
       };
     }
 
@@ -480,7 +473,7 @@ const InfoPage = () => {
         setFormData({ ...formData });
         navigate("/recruit/apply/", {
           state: {
-            field: PART_MAP[formData.field],
+            field: formData.field ? PART_MAP[formData.field] : "",
             applicationId: publicId,
             passwordLength: isEditMode
               ? passwordLength
@@ -522,23 +515,20 @@ const InfoPage = () => {
   };
 
   const handleSubmit = async () => {
+    // 1. 타입을 RefObject<any>로 하여 focus() 에러 방지
     const requiredFields: RequiredField[] = [
-      { key: "name", ref: inputRefs.name },
-      { key: "studentId", ref: inputRefs.studentId },
-      { key: "phone", ref: inputRefs.phone },
-      { key: "authCode", ref: inputRefs.authCode },
-      { key: "major", ref: inputRefs.major },
-      { key: "status", ref: inputRefs.status },
-      { key: "term", ref: inputRefs.term },
-      { key: "field", ref: inputRefs.field },
+      { key: "name", ref: nameRef },
+      { key: "studentId", ref: studentIdRef },
+      { key: "phone", ref: phoneRef },
+      { key: "authCode", ref: authCodeRef },
+      { key: "major", ref: majorRef },
+      {
+        key: "status",
+        ref: statusRef,
+      }, // 필요한 경우 단언
+      { key: "term", ref: termRef },
+      { key: "field", ref: fieldRef },
     ];
-
-    if (!isEditMode) {
-      requiredFields.push(
-        { key: "password", ref: inputRefs.password },
-        { key: "passwordConfirm", ref: inputRefs.passwordConfirm },
-      );
-    }
 
     // 2. 미입력 필드 스크롤 체크
     for (const field of requiredFields) {
@@ -550,6 +540,13 @@ const InfoPage = () => {
         field.ref.current?.focus?.();
         return; // ⚠️ 여기서 걸려서 밑으로 못 내려갔던 거야!
       }
+    }
+
+    if (!isEditMode) {
+      requiredFields.push(
+        { key: "password", ref: passwordRef },
+        { key: "passwordConfirm", ref: passwordConfirmRef },
+      );
     }
 
     if (!isFormValid) return;
@@ -586,7 +583,7 @@ const InfoPage = () => {
           name="name"
           required
           readOnly={isEditMode}
-          ref={inputRefs.name}
+          ref={nameRef}
           placeholder="이름을 입력해 주세요."
           onChange={handleChange}
           value={formData.name}
@@ -596,7 +593,7 @@ const InfoPage = () => {
           label="학번"
           name="studentId"
           required
-          ref={inputRefs.studentId}
+          ref={studentIdRef}
           placeholder="학번을 입력해주세요."
           guideText="숫자 8자리"
           isError={formData.studentId.length > 0 && !isStudentIdValid}
@@ -610,7 +607,7 @@ const InfoPage = () => {
           name="phone"
           required
           readOnly={isEditMode}
-          ref={inputRefs.phone}
+          ref={phoneRef}
           placeholder="전화번호를 입력해 주세요."
           buttonText={authStatus === "idle" ? "인증번호 전송" : "재전송"}
           buttonActive={isPhoneValid && !isEditMode}
@@ -631,7 +628,7 @@ const InfoPage = () => {
           type="text" // 🔥 반드시 type을 "text"로 명시해서 비밀번호 로직과 분리!
           required
           readOnly={isEditMode}
-          ref={inputRefs.authCode}
+          ref={authCodeRef}
           placeholder="인증번호를 입력해 주세요."
           buttonText={authStatus === "verified" ? "인증완료" : "인증번호 확인"}
           buttonActive={authStatus === "sent" && formData.authCode.length > 0}
@@ -662,7 +659,7 @@ const InfoPage = () => {
           type="password"
           required
           readOnly={isEditMode}
-          ref={inputRefs.password}
+          ref={passwordRef}
           placeholder={isEditMode ? "" : "비밀번호를 입력해 주세요."}
           guideText={
             isEditMode
@@ -684,7 +681,7 @@ const InfoPage = () => {
           type="password"
           required
           readOnly={isEditMode}
-          ref={inputRefs.passwordConfirm}
+          ref={passwordConfirmRef}
           placeholder={isEditMode ? "" : "비밀번호를 재입력해주세요."}
           // 🔥 !isEditMode를 붙여서 수정 모드일 땐 별표 에러 안 뜨게 함
           isError={
@@ -700,7 +697,7 @@ const InfoPage = () => {
           label="주전공"
           name="major"
           required
-          ref={inputRefs.major}
+          ref={majorRef}
           placeholder="주전공을 입력해 주세요."
           onChange={handleChange}
           value={formData.major}
@@ -709,11 +706,12 @@ const InfoPage = () => {
           label="부전공"
           name="minor"
           placeholder="부전공을 입력해 주세요."
+          ref={minorRef}
           onChange={handleChange}
           value={formData.minor}
         />
 
-        <div className="flex flex-col gap-3" ref={inputRefs.status}>
+        <div className="flex flex-col gap-3" ref={statusRef}>
           <label className="font-semibold text-[20px] flex items-center">
             현재 학적 상태{" "}
             <img
@@ -740,7 +738,7 @@ const InfoPage = () => {
           label="이수 학기"
           name="term"
           required
-          ref={inputRefs.term}
+          ref={termRef}
           guideText={errors.term || ""}
           isError={formData.term.length > 0 && !isTermValid}
           placeholder="이수 학기를 입력해 주세요."
@@ -748,7 +746,7 @@ const InfoPage = () => {
           value={formData.term}
         />
 
-        <div className="flex flex-col gap-3" ref={inputRefs.field}>
+        <div className="flex flex-col gap-3" ref={fieldRef}>
           <label className="font-semibold text-[20px] flex items-center">
             지원 분야{" "}
             <img
@@ -803,7 +801,7 @@ const InfoPage = () => {
         isOpen={isBackModalOpen}
         onClose={() => setIsBackModalOpen(false)}
         onConfirm={() => {
-          setIsBackModalOpen(false);
+          // setIsBackModalOpen(false);
           navigate("/recruit/terms");
         }}
         isInfoPage={true}

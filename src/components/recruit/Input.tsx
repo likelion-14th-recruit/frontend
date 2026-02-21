@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import React from "react";
-
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label: string;
   required?: boolean;
@@ -39,13 +38,17 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
 
       if (type === "password") {
         if (realValue.length === 0) {
-          setDisplayValue("");
+          setTimeout(() => {
+            setDisplayValue("");
+          }, 0);
           return;
         }
 
         // 마지막 글자만 보이게 설정 (g -> *k -> **s)
         const masked = "*".repeat(realValue.length - 1) + realValue.slice(-1);
-        setDisplayValue(masked);
+        setTimeout(() => {
+          setDisplayValue(masked);
+        }, 0);
 
         // 0.8초 후 전체 별표 처리
         const timer = setTimeout(() => {
@@ -55,7 +58,9 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         return () => clearTimeout(timer);
       } else {
         // 비밀번호가 아니면 그냥 값 그대로
-        setDisplayValue(realValue);
+        setTimeout(() => {
+          setDisplayValue(realValue);
+        }, 0);
       }
     }, [value, type]);
 
