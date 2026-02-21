@@ -45,7 +45,6 @@ const AuthModal: React.FC<AuthModalProps> = ({
 
   const navigate = useNavigate();
 
-  const [showPassword, setShowPassword] = useState(false);
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [displayPassword, setDisplayPassword] = useState("");
