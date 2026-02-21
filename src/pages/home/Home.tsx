@@ -41,7 +41,7 @@ const Home = () => {
   return (
     <div className="overflow-x-hidden w-full " data-header="dark">
       <HHeroSection />
-      <HSection color="light">
+      <HSection color="light" id="intro-section">
         <IntroSection />
       </HSection>
       <HSection color="lightGray">
