@@ -14,7 +14,6 @@ import Project from "./pages/project/Project";
 import TermsPage from "./pages/recruit/create/TermsPage";
 import InfoPage from "./pages/recruit/create/Infopage";
 import ApplyPage from "./pages/recruit/create/Applypage";
-import CompletePage from "./pages/recruit/create/CompletePage";
 import RecruitLayout from "./layouts/recruitLayout";
 import RecruitApplyPage from "./pages/recruit/RecruitApplyPage";
 import InterviewPage from "./pages/recruit/create/InterviewPage";
@@ -50,7 +49,6 @@ function App() {
             <Route path="/recruit/terms" element={<TermsPage />} />
             <Route path="/recruit/info" element={<InfoPage />} />
             <Route path="/recruit/apply" element={<ApplyPage />} />
-            <Route path="/recruit/complete" element={<CompletePage />} />
             <Route path="/recruit/interview" element={<InterviewPage />} />
           </Route>
         </Route>

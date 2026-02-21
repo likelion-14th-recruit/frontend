@@ -25,11 +25,11 @@ const TextArea = ({
         {" "}
         {/* items-start로 숫자가 위쪽에 고정되게 */}
         {/* 질문 번호 */}
-        <span className="font-normal text-[20px] leading-[140%] shrink-0">
+        <span className="font-semibold md:text-[20px] text-[16px] leading-[140%] shrink-0">
           {index}.
         </span>
         {/* 질문 내용 + 필수 아이콘 */}
-        <label className="font-normal text-[20px] leading-[140%] break-all">
+        <label className="font-semibold md:text-[20px] text-[16px] leading-[140%] break-all">
           {label}
           {required && (
             <img
@@ -44,7 +44,7 @@ const TextArea = ({
       <div className="flex flex-col gap-[4px]">
         <textarea
           {...props}
-          className={`w-full h-[240px] px-[20px] py-[12px] bg-[#f0f0f0] rounded-[12px] outline-none border-none text-[16px] resize-none placeholder:text-[rgba(18,18,18,0.60)] transition-all
+          className={`w-full h-[240px] px-[20px] py-[12px] bg-[#f0f0f0] rounded-[12px] outline-none border-none md:text-[16px] text-[14px] resize-none placeholder:text-[rgba(18,18,18,0.60)] transition-all
             ${isOverLimit ? "ring-[1px] ring-[#b90000]" : "focus:ring-0 focus:ring-gray-300"}`}
         />
         <div

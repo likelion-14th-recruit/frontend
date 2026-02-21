@@ -8,6 +8,7 @@ interface ConfirmModalProps {
   confirmText?: string; // "계속 진행" 등 (흰색 버튼)
   cancelText?: string; // "취소" 등 (검정색 버튼)
   isSingleButton?: boolean;
+  isInfoPage?: boolean;
 }
 
 const ConfirmModal = ({
@@ -18,6 +19,7 @@ const ConfirmModal = ({
   confirmText = "계속 진행",
   cancelText = "취소",
   isSingleButton = false,
+  isInfoPage = false,
 }: ConfirmModalProps) => {
   if (!isOpen) return null;
 
@@ -25,7 +27,12 @@ const ConfirmModal = ({
     <div className="fixed inset-0 z-[110] flex items-center justify-center font-pretendard">
       <div className="absolute inset-0 bg-black/50" onClick={onClose} />
 
-      <div className="relative bg-white rounded-[12px] gap-[20px] md:rounded-[20px] shadow-xl flex flex-col transition-all w-full max-w-[320px] md:max-w-[560px] px-[20px] py-[24px] md:px-[40px] md:py-[24px]">
+      <div
+        className={`
+        relative bg-white rounded-[12px] gap-[20px] md:gap-[40px] md:rounded-[20px] shadow-xl flex flex-col transition-all 
+        w-full max-w-[320px] md:max-w-[560px] px-[20px] py-[24px] md:px-[40px] md:py-[24px]
+      `}
+      >
         <div className="w-full text-left text-[16px] md:text-[20px] font-normal leading-[140%] text-[#000] whitespace-pre-line">
           {message}
         </div>

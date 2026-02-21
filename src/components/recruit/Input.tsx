@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import { useState, useEffect } from "react";
+import React from "react";
 
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label: string;
@@ -30,12 +31,33 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
     },
     ref,
   ) => {
-    // 비밀번호 보이기 상태 관리
-    const [showPassword, setShowPassword] = useState(false);
+    // 🔥 화면에 보여줄 마스킹 텍스트 상태
+    const [displayValue, setDisplayValue] = useState("");
 
-    // 비밀번호 타입일 경우 상태에 따라 text와 password를 전환
-    const inputType =
-      type === "password" ? (showPassword ? "text" : "password") : type;
+    useEffect(() => {
+      const realValue = String(value || "");
+
+      if (type === "password") {
+        if (realValue.length === 0) {
+          setDisplayValue("");
+          return;
+        }
+
+        // 마지막 글자만 보이게 설정 (g -> *k -> **s)
+        const masked = "*".repeat(realValue.length - 1) + realValue.slice(-1);
+        setDisplayValue(masked);
+
+        // 0.8초 후 전체 별표 처리
+        const timer = setTimeout(() => {
+          setDisplayValue("*".repeat(realValue.length));
+        }, 800);
+
+        return () => clearTimeout(timer);
+      } else {
+        // 비밀번호가 아니면 그냥 값 그대로
+        setDisplayValue(realValue);
+      }
+    }, [value, type]);
 
     return (
       <div className="flex flex-col w-full">
@@ -45,7 +67,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             <img
               src="/recruit/required-icon.svg" // 여기에 파일명 적으세요!
               alt="required"
-              className="ml-[8px] w-[10px] h-[10px] md:w-[10px] md:h-[10px] objet-contain"
+              className="ml-[8px] w-[10px] h-[10px] md:w-[10px] md:h-[10px] object-contain"
             />
           )}
         </label>
@@ -55,23 +77,17 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             <input
               {...props}
               ref={ref}
-              type={inputType}
-              value={value}
-              className={`w-full h-[48px] px-[12px] py-[4px] bg-[#F0F0F0] rounded-[12px] outline-none border-none text-[16px] 
+              type="text"
+              value={type === "password" ? displayValue : value}
+              /* 🔥 맥북 파란 밑줄 및 자동 완성 방지 속성 추가 */
+              spellCheck={false}
+              autoComplete="off"
+              autoCorrect="off" // iOS(아이폰) 대응
+              autoCapitalize="off" // 첫 글자 자동 대문자 방지
+              className={`w-full h-[48px] px-[12px] py-[4px] bg-[#F0F0F0] rounded-[12px] outline-none border-none md:text-[16px] text-[14px] 
             focus:outline-none focus:ring-0 focus:ring-offset-0 focus:shadow-none placeholder:text-[rgba(18,18,18,0.60)]
-            ${isError ? "ring-1 ring-[#b90000]" : "ring-0"}`}
+            `}
             />
-
-            {/* 🔥 비밀번호 타입일 때만 나타나는 눈 모양 버튼 */}
-            {type === "password" && (
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 px-2"
-              >
-                {showPassword ? "🙈" : "👁️"}
-              </button>
-            )}
           </div>
 
           {buttonText && (
@@ -82,8 +98,8 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
               className={`h-[48px] px-[14px] py-[12px] rounded-[12px] text-[14px] font-semibold whitespace-nowrap transition-all shrink-0
               ${
                 buttonActive
-                  ? "bg-black text-white"
-                  : "bg-[#f0f0f0] text-[#121212]/60 disabled:opacity-50"
+                  ? "bg-[rgba(18,18,18,0.8)] text-white"
+                  : "bg-[#f0f0f0] text-[#121212]/60"
               }`}
             >
               {buttonText}
@@ -112,5 +128,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
     );
   },
 );
+
+Input.displayName = "Input";
 
 export default Input;

@@ -9,6 +9,9 @@ const formatPhoneNumber = (value: string) => {
   const phoneNumber = value.replace(/[^\d]/g, ""); // 숫자 외 제거
   const cp = phoneNumber.length;
 
+  const hasNonDoc = /[^\d]/.test(value.replace(/-/g, ""));
+  if (hasNonDoc) return value;
+
   if (cp < 4) return phoneNumber;
   if (cp < 8) return `${phoneNumber.slice(0, 3)}-${phoneNumber.slice(3)}`;
   if (cp < 12)
@@ -45,15 +48,14 @@ const PART_REVERSE_MAP = {
 
 const InfoPage = () => {
   const location = useLocation();
-
-  // 1. 이전 페이지(로그인 등)에서 넘어온 데이터 확인
-  // 만약 state가 없다면 localStorage 등을 활용하는 로직이 추가로 필요할 수 있습니다.
   const { applicationId, passwordLength } = location.state || {};
   const navigate = useNavigate();
+
+  // 🔥 1. 수정 모드 여부 (가장 먼저 선언)
+  const isEditMode = !!applicationId;
+
   const [isBackModalOpen, setIsBackModalOpen] = useState(false);
-
   const [authError, setAuthError] = useState("");
-
   const [infoModal, setInfoModal] = useState({
     isOpen: false,
     message: "",
@@ -68,6 +70,33 @@ const InfoPage = () => {
     authGuide,
     setAuthGuide,
   } = useOutletContext();
+
+  // 🔥 2. 유효성 검사 로직 (오타 수정 및 통합)
+  const isStudentIdValid = /^[0-9]{8}$/.test(formData.studentId);
+
+  // 수정 모드일 때는 별표가 들어오므로 무조건 통과, 아닐 때만 정규식 체크
+  const isPasswordValid = isEditMode
+    ? true
+    : /^(?=.*[a-zA-Z])(?=.*[0-9]).{8,20}$/.test(formData.password);
+
+  const isPasswordMatch = isEditMode
+    ? true
+    : formData.password === formData.passwordConfirm &&
+      formData.password !== "";
+
+  const isPhoneValid = /^[0-9]{11}$/.test(formData.phone.replace(/[^\d]/g, ""));
+  const isTermValid = /^[0-9]+$/.test(formData.term);
+
+  // 에러 메시지 처리용 (기존 로직 유지)
+  const errors = {
+    passwordConfirm:
+      !isEditMode &&
+      formData.passwordConfirm.length > 0 &&
+      formData.password !== formData.passwordConfirm
+        ? "비밀번호가 일치하지 않습니다."
+        : "",
+    term: formData.term.length > 0 && !isTermValid ? "숫자만 입력" : "",
+  };
 
   const inputRefs = {
     name: useRef(null),
@@ -113,19 +142,19 @@ const InfoPage = () => {
 
         const d = result.data;
 
-        // 🔥 서정의 formData 필드명에 맞춰서 매핑!
+        // 🔥 [필독] 서버 필드명(d.xxx)을 서정님의 폼 필드명(이름)으로 1:1 매칭합니다.
         setFormData({
           name: d.name || "",
-          studentId: d.studentNumber || "", // 서버는 studentNumber로 줄 거야
-          phone: d.phoneNumber || "", // 서버는 phoneNumber로 줄 거야
-          password: "",
-          passwordConfirm: "",
+          studentId: d.studentNumber || "", // 서버는 studentNumber로 줍니다.
+          phone: d.phoneNumber || "", // 서버는 phoneNumber로 줍니다.
+          password: "*".repeat(passwordLength || 8),
+          passwordConfirm: "*".repeat(passwordLength || 8),
           major: d.major || "",
-          minor: d.doubleMajor || "", // 서버는 doubleMajor로 줄 거야
+          minor: d.doubleMajor || "", // 서버는 doubleMajor로 줍니다.
           status: STATUS_REVERSE_MAP[d.academicStatus] || "",
-          term: d.semester ? String(d.semester) : "",
+          term: d.semester !== undefined ? String(d.semester) : "", // 서버는 semester로 줍니다.
           field: PART_REVERSE_MAP[d.part] || "",
-          authCode: "VERIFIED", // 이미 불러온 데이터니까 인증된 걸로 간주
+          authCode: "********",
         });
 
         // 🚀 불러오기 성공했으니 인증 상태를 완료로 바꿔야 '다음으로' 버튼이 활성화돼!
@@ -136,23 +165,6 @@ const InfoPage = () => {
     } catch (error) {
       console.error("❌ 서버 통신 오류:", error);
     }
-  };
-
-  const isStudentIdValid = /^[0-9]{8}$/.test(formData.studentId);
-  const isPasswordValid = /^(?=.*[a-zA-Z])(?=.*[0-9]).{8,20}$/.test(
-    formData.password,
-  );
-  const isPhoneValid = /^[0-9]{11}$/.test(formData.phone);
-  const isTermValid = /^[0-9]+$/.test(formData.term);
-
-  const errors = {
-    passwordConfirm:
-      formData.passwordConfirm.length > 0 &&
-      formData.password !== formData.passwordConfirm
-        ? "비밀번호가 일치하지 않습니다."
-        : "",
-    term:
-      formData.term.length > 0 && !isTermValid ? "숫자만 입력" : "숫자만 입력",
   };
 
   // 폼에 입력된 내용이 있는지 확인하는 변수
@@ -171,17 +183,12 @@ const InfoPage = () => {
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, [isDirty]);
 
-  // 수정 모드인지 확인 (ID가 있으면 수정 모드)
-  const isEditMode = !!applicationId;
-
   const isFormValid =
     formData.name.trim() !== "" &&
     isStudentIdValid &&
     isPhoneValid &&
     authStatus === "verified" &&
-    // 🔥 수정 모드라면 비밀번호가 비어있어도 통과! (새로 쓸 때만 필수 체크)
-    (isEditMode ||
-      (isPasswordValid && formData.password === formData.passwordConfirm)) &&
+    (isEditMode || (isPasswordValid && isPasswordMatch)) &&
     formData.major.trim() !== "" &&
     formData.status !== "" &&
     isTermValid &&
@@ -191,18 +198,27 @@ const InfoPage = () => {
     const { name, value } = e.target;
 
     if (name === "phone") {
-      // 하이픈이 포함된 시각적 값
-      const formattedValue = formatPhoneNumber(value);
-      // 실제 상태에는 숫자만 저장 (백엔드 전송용)
-      const rawDigits = value.replace(/[^\d]/g, "").slice(0, 11);
+      if (value.length <= 13) {
+        setFormData((prev) => ({
+          ...prev,
+          [name]: value,
+        }));
+      }
+    }
+    // 🔥 비밀번호 필드 가로채기 로직 추가
+    else if (name === "password" || name === "passwordConfirm") {
+      const prevVal = formData[name];
+      let realNewValue = prevVal;
 
-      setFormData((prev) => ({
-        ...prev,
-        [name]: rawDigits, // 👈 숫지만 저장 (isPhoneValid 검사 등은 여기서 수행됨)
-      }));
-
-      // input 태그의 시각적 값 강제 업데이트는 아래 Input 컴포넌트 호출에서 처리
-    } else {
+      if (value.length < prevVal.length) {
+        realNewValue = prevVal.slice(0, value.length);
+      } else if (value.length > prevVal.length) {
+        realNewValue = prevVal + value.slice(-1);
+      }
+      setFormData((prev) => ({ ...prev, [name]: realNewValue }));
+    }
+    // 🔥 일반 필드(이름, 학번 등)는 displayValue 로직을 타지 않게 그냥 저장
+    else {
       setFormData((prev) => ({ ...prev, [name]: value }));
     }
   };
@@ -294,28 +310,33 @@ const InfoPage = () => {
     }
 
     if (isFormValid) {
-      const mappedPart = PART_MAP[formData.field];
+      let requestData: any;
 
-      // 🔍 여기서 로그를 찍어서 mappedPart가 undefined인지 꼭 확인해봐!
-      console.log("선택된 필드:", formData.field);
-      console.log("서버로 보낼 파트 코드:", mappedPart);
-
-      const requestData = {
-        name: formData.name,
-        studentNumber: formData.studentId,
-        phoneNumber: formData.phone,
-        major: formData.major,
-        doubleMajor: formData.minor || "",
-        semester: Number(formData.term),
-        academicStatus: ACADEMIC_STATUS_MAP[formData.status],
-        part: PART_MAP[formData.field],
-      };
-
-      // 💡 서버가 "key"라는 봉투를 원한다면:
-      const bodyData = isEditMode ? { key: requestData } : requestData;
-
-      // 💡 만약 위 구조로 보냈는데 SUCCESS만 뜨고 데이터가 안 바뀐다면, 아래처럼 그냥 보내보세요:
-      // const bodyData = requestData;
+      if (!isEditMode) {
+        // [생성하기 POST] 명세에 맞춤
+        requestData = {
+          name: formData.name,
+          studentNumber: formData.studentId,
+          phoneNumber: formData.phone.replace(/[^\d]/g, ""), // 하이픈 제거
+          password: formData.password,
+          major: formData.major,
+          doubleMajor: formData.minor || "",
+          semester: Number(formData.term),
+          academicStatus: ACADEMIC_STATUS_MAP[formData.status],
+          part: PART_MAP[formData.field],
+        };
+      } else {
+        // [수정하기 PATCH] 명세에 따라 phone, password 제외!!
+        requestData = {
+          name: formData.name,
+          studentNumber: formData.studentId,
+          major: formData.major,
+          doubleMajor: formData.minor || "",
+          academicStatus: ACADEMIC_STATUS_MAP[formData.status],
+          semester: Number(formData.term),
+          part: PART_MAP[formData.field],
+        };
+      }
 
       try {
         // 🔥 2. 수정 모드에 따른 URL 및 설정 분기
@@ -324,11 +345,6 @@ const InfoPage = () => {
           : "/api/applications";
 
         const method = isEditMode ? "PATCH" : "POST";
-
-        // 새로 만드는 POST일 때만 password 추가
-        if (!isEditMode) {
-          requestData.password = formData.password;
-        }
 
         const response = await fetch(url, {
           method: method,
@@ -339,36 +355,46 @@ const InfoPage = () => {
 
         const result = await response.json();
 
-        if (response.ok) {
-          const publicId = result.data?.publicId || applicationId;
+        if (response.ok && result.success) {
+          const publicId = result.data?.applicationPublicId || applicationId;
 
           // 🔥 [핵심] 수정사항을 Context에 즉시 반영
-          setFormData({
-            ...formData,
-            name: formData.name,
-            studentId: formData.studentId,
-            phone: formData.phone,
-            major: formData.major,
-            minor: formData.minor,
-            status: formData.status,
-            term: formData.term,
-            field: formData.field,
-          });
+          setFormData({ ...formData });
 
-          console.log("✅ Context 업데이트 완료! 다음 페이지로 이동합니다.");
+          // 🔥 2. 신규 생성일 때만 모달 띄우기
+          if (!isEditMode) {
+            setInfoModal({
+              isOpen: true,
+              message:
+                "지원서가 자동으로 생성 및 저장되었습니다. 이후에도 수정 및 임시 저장이 가능합니다.",
+              isSingleButton: true,
+              onConfirm: () => {
+                setInfoModal((prev) => ({ ...prev, isOpen: false }));
+                navigate("/recruit/apply", {
+                  state: {
+                    field: formData.field,
+                    applicationId: publicId,
+                    passwordLength: formData.password.length,
+                  },
+                });
+              },
+            });
+          } else {
+            // 🔥 3. 수정 모드일 때는 모달 없이 바로 이동
+            navigate("/recruit/apply", {
+              state: {
+                field: formData.field,
+                applicationId: publicId,
+                passwordLength: passwordLength,
+              },
+            });
+          }
 
-          navigate("/recruit/apply", {
-            state: {
-              field: formData.field, // ApplyPage에서 바로 쓸 수 있게 전달
-              applicationId: publicId,
-              passwordLength: passwordLength,
-            },
-          });
           // 🔥 1. 이미 최종 제출을 완료한 경우
         } else if (result.code === "APPLICATION_ALREADY_SUBMITTED") {
           setInfoModal({
             isOpen: true,
-            message: "이미 제출된 지원서가 있어 추가 제출이 불가합니다.",
+            message: "이미 제출된 지원서가 있어 추가 제출이 불가합니다.\n ",
             onConfirm: () => navigate("/recruit"),
           });
         }
@@ -409,10 +435,12 @@ const InfoPage = () => {
           label="이름"
           name="name"
           required
+          readOnly={isEditMode}
           ref={inputRefs.name}
           placeholder="이름을 입력해 주세요."
           onChange={handleChange}
           value={formData.name}
+          type="text"
         />
         <Input
           label="학번"
@@ -424,76 +452,99 @@ const InfoPage = () => {
           isError={formData.studentId.length > 0 && !isStudentIdValid}
           onChange={handleChange}
           value={formData.studentId}
+          type="text"
         />
+        {/* 전화번호 */}
         <Input
           label="전화번호"
           name="phone"
           required
+          readOnly={isEditMode}
           ref={inputRefs.phone}
           placeholder="전화번호를 입력해 주세요."
           buttonText={authStatus === "idle" ? "인증번호 전송" : "재전송"}
-          buttonActive={isPhoneValid}
-          buttonDisabled={!isPhoneValid}
+          buttonActive={isPhoneValid && !isEditMode}
+          buttonDisabled={!isPhoneValid || isEditMode} // 🔥 readonly일 때 재전송 금지
           onButtonClick={handleSendAuth}
           onChange={handleChange}
-          guideText={authGuide || "숫자 11자리"}
-          isError={formData.phone.length > 0 && !isPhoneValid}
+          guideText={isEditMode ? "" : authGuide || "숫자 11자리"}
+          isError={!isEditMode && formData.phone.length > 0 && !isPhoneValid}
+          errorText="올바른 형식을 입력해주세요."
           value={formatPhoneNumber(formData.phone)}
           maxLength={13}
         />
+
+        {/* 인증번호 */}
         <Input
           label="인증번호"
           name="authCode"
+          type="text" // 🔥 반드시 type을 "text"로 명시해서 비밀번호 로직과 분리!
           required
+          readOnly={isEditMode}
           ref={inputRefs.authCode}
           placeholder="인증번호를 입력해 주세요."
           buttonText={authStatus === "verified" ? "인증완료" : "인증번호 확인"}
           buttonActive={authStatus === "sent" && formData.authCode.length > 0}
-          buttonDisabled={authStatus === "verified" || !formData.authCode}
+          buttonDisabled={
+            authStatus === "verified" || !formData.authCode || isEditMode
+          }
           onButtonClick={handleVerifyAuth}
           onChange={(e) => {
             handleChange(e);
-            if (authError) setAuthError(""); // 입력 시작하면 에러 삭제
+            if (authError) setAuthError("");
           }}
-          isError={!!authError} // 🔥 에러 상태 연결
-          errorText={authError} // 🔥 가공된 멘트 전달
-          value={formData.authCode}
-          // 🔥 인증 완료 시 가이드 텍스트
-          guideText={authStatus === "verified" ? "인증이 완료되었습니다." : ""}
+          isError={!!authError}
+          errorText={authError}
+          value={formData.authCode} // 마스킹 없는 실제 값을 그대로 보여줍니다.
+          guideText={
+            isEditMode
+              ? "인증이 완료된 번호입니다."
+              : authStatus === "verified"
+                ? "인증이 완료되었습니다."
+                : ""
+          }
         />
+
+        {/* 비밀번호 */}
         <Input
           label="비밀번호"
           name="password"
           type="password"
           required
+          readOnly={isEditMode}
           ref={inputRefs.password}
-          placeholder={
+          placeholder={isEditMode ? "" : "비밀번호를 입력해 주세요."}
+          guideText={
             isEditMode
-              ? "변경 시에만 입력해 주세요."
-              : "비밀번호를 입력해 주세요."
+              ? "비밀번호는 보안을 위해 가려져 있습니다."
+              : "영문·숫자 조합 8~20자"
           }
-          guideText="영문·숫자 조합 8~20자"
-          isError={formData.password.length > 0 && !isPasswordValid}
+          // 🔥 !isEditMode를 붙여서 수정 모드일 땐 별표 에러 안 뜨게 함
+          isError={
+            !isEditMode && formData.password.length > 0 && !isPasswordValid
+          }
           onChange={handleChange}
           value={formData.password}
         />
+
+        {/* 비밀번호 확인 */}
         <Input
           label="비밀번호 확인"
           name="passwordConfirm"
           type="password"
           required
+          readOnly={isEditMode}
           ref={inputRefs.passwordConfirm}
-          placeholder="비밀번호를 재입력해주세요."
-          // guideText={errors.passwordConfirm}  <- 기존 guideText는 가독성을 위해 제거하거나 비워둡니다.
+          placeholder={isEditMode ? "" : "비밀번호를 재입력해주세요."}
+          // 🔥 !isEditMode를 붙여서 수정 모드일 땐 별표 에러 안 뜨게 함
+          isError={
+            !isEditMode &&
+            formData.passwordConfirm.length > 0 &&
+            !isPasswordMatch
+          }
+          errorText="비밀번호가 일치하지 않습니다."
           onChange={handleChange}
           value={formData.passwordConfirm}
-          // 🔥 에러 상태 연결: 값이 입력되었는데 비밀번호와 다를 경우
-          isError={
-            formData.passwordConfirm.length > 0 &&
-            formData.password !== formData.passwordConfirm
-          }
-          // 🔥 빨간색으로 띄울 멘트 전달
-          errorText="비밀번호가 일치하지 않습니다."
         />
         <Input
           label="주전공"
@@ -527,7 +578,7 @@ const InfoPage = () => {
                 key={val}
                 type="button"
                 onClick={() => handleSelect("status", val)}
-                className={`px-[12px] py-[11px] rounded-[12px] text-[16px] font-semibold transition-all ${formData.status === val ? "bg-[rgba(18,18,18,0.80)] text-white" : "bg-[#F0F0F0] text-[rgba(18,18,18,0.60)] hover:bg-gray-200"}`}
+                className={`px-[12px] py-[11px] rounded-[12px] text-[16px] font-semibold transition-all ${formData.status === val ? "bg-[rgba(18,18,18,0.80)] text-white" : "bg-[#F0F0F0] text-[rgba(18,18,18,0.60)]"}`}
               >
                 {val}
               </button>
@@ -562,7 +613,7 @@ const InfoPage = () => {
                 key={val}
                 type="button"
                 onClick={() => handleSelect("field", val)}
-                className={`px-[12px] py-[11px] rounded-[12px] text-[16px] font-semibold transition-all ${formData.field === val ? "bg-[rgba(18,18,18,0.80)] text-white" : "bg-[#F0F0F0] text-[rgba(18,18,18,0.60)] hover:bg-gray-200"}`}
+                className={`px-[12px] py-[11px] rounded-[12px] text-[16px] font-semibold transition-all ${formData.field === val ? "bg-[rgba(18,18,18,0.80)] text-white" : "bg-[#F0F0F0] text-[rgba(18,18,18,0.60)]"}`}
               >
                 {val}
               </button>
@@ -577,16 +628,22 @@ const InfoPage = () => {
           onClick={handleBackClick}
           className="flex-1 flex items-center justify-center h-auto md:h-[60px] py-[16px] md:py-0 px-[10px] 
                    border border-[rgba(18,18,18,0.40)] bg-white text-[rgba(18,18,18,0.80)] 
-                   rounded-[12px] text-[16px] md:text-[20px] font-semibold transition-all"
+                   rounded-[12px] text-[16px] md:text-[20px] font-semibold transition-all hover:bg-[#f0f0f0]"
         >
           이전으로
         </button>
         <button
           type="button"
           onClick={handleSubmit}
-          className={`flex-1 flex items-center justify-center h-auto md:h-[60px] py-[16px] md:py-0 px-[10px] 
+          disabled={!isFormValid}
+          className={`relative overflow-hidden flex-1 flex items-center justify-center h-auto md:h-[60px] py-[16px] md:py-0 px-[10px] 
                    rounded-[12px] text-[16px] md:text-[20px] font-semibold transition-all 
-                   ${isFormValid ? "bg-[rgba(18,18,18,0.80)] text-white cursor-pointer" : "bg-[rgba(18,18,18,0.20)] text-white cursor-not-allowed"}"}`}
+                   ${
+                     isFormValid
+                       ? "bg-[rgba(18,18,18,0.80)] text-white cursor-pointer" +
+                         "after:content-[''] after:absolute after:inset-0 after:bg-black after:opacity-0 hover:after:opacity-20 transition-all"
+                       : "bg-[rgba(18,18,18,0.20)] text-white cursor-not-allowed"
+                   } hover:bg-[#000/20]"}`}
         >
           다음으로
         </button>
@@ -599,6 +656,7 @@ const InfoPage = () => {
           setIsBackModalOpen(false);
           navigate("/recruit/terms");
         }}
+        isInfoPage={true}
         message={
           <>
             이전 단계로 이동하게 되면 지금까지 입력한 내용이 모두 사라집니다.

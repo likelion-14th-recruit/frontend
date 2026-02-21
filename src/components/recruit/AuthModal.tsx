@@ -7,6 +7,27 @@ interface AuthModalProps {
   onClose: () => void;
 }
 
+/**
+ * ResponseEntityApiResponseLoginResponse
+ */
+export interface Response {
+  code?: string;
+  data?: LoginResponse;
+  message?: string;
+  success?: boolean;
+  [property: string]: unknown;
+}
+
+/**
+ * LoginResponse
+ */
+export interface LoginResponse {
+  applicationPublicId?: string;
+  passwordLength?: number;
+  phoneNumber?: string;
+  [property: string]: unknown;
+}
+
 const AuthModal: React.FC<AuthModalProps> = ({
   isOpen,
   onClose,
@@ -27,24 +48,67 @@ const AuthModal: React.FC<AuthModalProps> = ({
   const [showPassword, setShowPassword] = useState(false);
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
+  const [displayPassword, setDisplayPassword] = useState("");
   const [phoneError, setPhoneError] = useState("");
   const [passwordError, setPasswordError] = useState("");
+
+  useEffect(() => {
+    if (password.length === 0) {
+      setDisplayPassword("");
+      return;
+    }
+
+    // 1. 마지막 글자만 보이게 설정 (g -> *k -> **s)
+    const masked = "*".repeat(password.length - 1) + password.slice(-1);
+    setDisplayPassword(masked);
+
+    // 2. 0.8초 후 전체 별표 처리
+    const timer = setTimeout(() => {
+      setDisplayPassword("*".repeat(password.length));
+    }, 800);
+
+    return () => clearTimeout(timer);
+  }, [password]);
+
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [isOpen]);
 
   if (!isOpen) return null;
   const modalRoot = document.getElementById("modal-root");
   if (!modalRoot) return null;
 
   const formatPhoneNumber = (value: string) => {
-    const phoneNumber = value.replace(/[^\d]/g, "");
-    if (phoneNumber.length < 4) return phoneNumber;
-    if (phoneNumber.length < 8)
-      return `${phoneNumber.slice(0, 3)}-${phoneNumber.slice(3)}`;
-    return `${phoneNumber.slice(0, 3)}-${phoneNumber.slice(3, 7)}-${phoneNumber.slice(7, 11)}`;
+    // 숫자가 아닌 걸 지우는 로직([^\d])을 제거하고,
+    // 포맷팅은 숫자일 때만 적용되도록 살짝 비틉니다.
+    const pure = value.replace(/[^\d]/g, "");
+
+    // 만약 입력값에 문자가 포함되어 있다면 하이픈 포맷팅을 포기하고
+    // 사용자가 친 그대로를 보여줍니다 (그래야 문자가 입력됨)
+    if (/[^\d-]/.test(value)) return value;
+
+    if (pure.length < 4) return pure;
+    if (pure.length < 8) return `${pure.slice(0, 3)}-${pure.slice(3)}`;
+    return `${pure.slice(0, 3)}-${pure.slice(3, 7)}-${pure.slice(7, 11)}`;
   };
 
-  const isFormValid = phone.trim() !== "" && password.trim() !== "";
+  // 🔥 실시간 형식 검사
+  const purePhone = phone.replace(/[^\d]/g, "");
+  const isPhoneValid = purePhone.length === 10 || purePhone.length === 11;
+  const isFormValid = isPhoneValid && password.trim() !== "";
 
   const handleAuthSubmit = async () => {
+    if (!isPhoneValid) {
+      setPhoneError("올바른 형식을 입력해주세요.");
+      return;
+    }
     setPhoneError("");
     setPasswordError("");
     try {
@@ -57,10 +121,12 @@ const AuthModal: React.FC<AuthModalProps> = ({
         }),
       });
 
-      const result = await response.json();
+      const result = (await response.json()) as Response;
 
       if (response.ok && result.success) {
-        const { applicationPublicId, passwordLength } = result.data;
+        const applicationPublicId = result.data?.applicationPublicId;
+        const passwordLength = result.data?.passwordLength;
+
         navigate("/recruit/apply", {
           state: {
             applicationId: applicationPublicId,
@@ -76,6 +142,7 @@ const AuthModal: React.FC<AuthModalProps> = ({
         }
       }
     } catch (error) {
+      console.error(error);
       alert("로그인 처리 중 오류가 발생했습니다.");
     }
   };
@@ -105,7 +172,7 @@ const AuthModal: React.FC<AuthModalProps> = ({
         w-[340px] px-[24px] py-[24px] gap-[32px] rounded-[28px]
       "
       >
-        <div className="flex flex-col items-center gap-[32px] md:gap-[40px] lg:gap-[40px] self-stretch">
+        <div className="flex flex-col items-center gap-[32px] md:gap-[40px] lg:gap-[40px] self-stretch font-Sogang">
           {/* 타이틀 폰트 크기 조절 (lg: 데스크탑 / md: 태블릿 / 기본: 모바일) */}
           <h2 className="font-semibold text-[#000] text-[20px] md:text-[28px] lg:text-[32px]">
             지원자 인증
@@ -122,13 +189,24 @@ const AuthModal: React.FC<AuthModalProps> = ({
                 type="text"
                 value={formatPhoneNumber(phone)}
                 onChange={(e) => {
-                  setPhone(e.target.value);
-                  if (phoneError) setPhoneError("");
+                  const inputVal = e.target.value;
+                  setPhone(inputVal);
+
+                  // 🔥 실시간 에러 검사 로직
+                  const pure = inputVal.replace(/[^\d]/g, "");
+                  // 숫자가 아닌 값이 포함되어 있거나, 다 입력했는데 길이는 틀릴 때
+                  const hasNonDigit = /[^\d-]/.test(inputVal);
+
+                  if (hasNonDigit || (pure.length > 0 && pure.length < 10)) {
+                    setPhoneError("올바른 형식을 입력해주세요.");
+                  } else {
+                    setPhoneError("");
+                  }
                 }}
-                placeholder="숫자만 입력해 주세요."
+                placeholder="전화번호를 입력해 주세요."
                 maxLength={13}
-                className={`w-full h-[48px] px-[12px] py-[4px] bg-[#F0F0F0] rounded-[12px] outline-none text-[16px] transition-all
-                              `}
+                className={`w-full h-[48px] px-[12px] py-[4px] bg-[#F0F0F0] rounded-[12px] outline-none text-[16px] placeholder:text-[rgba(18, 18, 18, 0.60)] transition-all 
+                }`}
               />
               {phoneError && (
                 <span className="text-[#b90000] text-[16px] ml-1">
@@ -144,23 +222,22 @@ const AuthModal: React.FC<AuthModalProps> = ({
               </label>
               <div className="relative">
                 <input
-                  type={showPassword ? "text" : "password"}
-                  value={password}
+                  type="text"
+                  value={displayPassword}
                   onChange={(e) => {
-                    setPassword(e.target.value);
+                    const val = e.target.value;
+                    // 글자가 지워졌을 때와 추가됐을 때를 구분하여 실제 password 상태 업데이트
+                    if (val.length < password.length) {
+                      setPassword(password.slice(0, val.length));
+                    } else if (val.length > password.length) {
+                      setPassword(password + val.slice(-1));
+                    }
                     if (passwordError) setPasswordError("");
                   }}
                   placeholder="비밀번호를 입력해 주세요."
-                  className={`w-full h-[48px] px-[12px] py-[4px] bg-[#F0F0F0] rounded-[12px] outline-none text-[16px] transition-all
+                  className={`w-full h-[48px] px-[12px] py-[4px] bg-[#F0F0F0] placeholder:text-[rgba(18, 18, 18, 0.60)] rounded-[12px] outline-none text-[16px] transition-all
 `}
                 />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400"
-                >
-                  {showPassword ? "🙈" : "👁️"}
-                </button>
               </div>
               {passwordError && (
                 <span className="text-[#b90000] text-[16px] ml-1">
