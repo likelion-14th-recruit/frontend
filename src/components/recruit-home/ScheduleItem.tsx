@@ -1,5 +1,3 @@
-import React from "react";
-
 type ScheduleItemProps = {
   label: string;
   date: string;
