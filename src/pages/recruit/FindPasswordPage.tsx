@@ -237,7 +237,7 @@ const FindPasswordPage = () => {
           value={formatPhoneNumber(formData.phone)} // 🔥 하이픈 포맷 적용
           isError={!!phoneError}
           errorText={phoneError}
-          guideText="숫자 11자리"
+          guideText={authGuide || "숫자 11자리"}
         />
 
         {/* 인증번호 */}

@@ -9,47 +9,54 @@ import TextArea from "../../../components/recruit/TextArea";
 import Input from "../../../components/recruit/Input";
 import ConfirmModal from "../../../components/recruit/ConfirmModal";
 
+interface AnswerResponse {
+  questionId: number;
+  content: string | null;
+}
+
+interface OutletContextType {
+  formData: Record<string, string | undefined>;
+  setFormData: React.Dispatch<
+    React.SetStateAction<Record<string, string | undefined>>
+  >;
+}
+
+interface InfoModalType {
+  isOpen: boolean;
+  message: string;
+  onConfirm: () => void;
+  isSingleButton: boolean;
+  confirmText?: string;
+  cancelText?: string;
+}
+
+interface Question {
+  questionId: number;
+  questionNumber: number;
+  content: string;
+}
+
 const ApplyPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const [questions, setQuestions] = useState([]);
+  const [questions, setQuestions] = useState<Question[]>([]);
   const [isSaved, setIsSaved] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [initialData, setInitialData] = useState({});
+  const [initialData, setInitialData] = useState<
+    Record<string, string | undefined>
+  >({});
 
-  const context = useOutletContext();
-  const formData = context?.formData || {};
-  const setFormData = context?.setFormData;
+  const { formData, setFormData } = useOutletContext<OutletContextType>();
 
-  // 1. 블로커 설정
-  const blocker = useBlocker(
-    ({ currentLocation, nextLocation }) =>
-      !isSubmitting &&
-      isDirty &&
-      currentLocation.pathname !== nextLocation.pathname,
-  );
-
-  // 2. 블로커 상태에 따른 모달 제어
-  useEffect(() => {
-    if (blocker.state === "blocked") {
-      setInfoModal({
-        isOpen: true,
-        message:
-          "임시저장하지 않고 나가면 지금까지 입력한 내용이 사라집니다. 계속 진행하시겠습니까?",
-        isSingleButton: false,
-        confirmText: "나가기",
-        cancelText: "취소",
-        onConfirm: () => blocker.proceed(), // 이동 허용
-      });
-    }
-  }, [blocker]);
-
-  // 3. 취소 시 블로커 해제
-  const handleModalClose = () => {
-    setInfoModal((prev) => ({ ...prev, isOpen: false }));
-    if (blocker.state === "blocked") blocker.reset();
-  };
+  const [infoModal, setInfoModal] = useState<InfoModalType>({
+    isOpen: false,
+    message: "",
+    onConfirm: () => {},
+    isSingleButton: true,
+    confirmText: "",
+    cancelText: "",
+  });
 
   // 🔥 수정된 isDirty: 원본(initialData)과 현재 입력값(formData)을 비교
   const isDirty =
@@ -59,6 +66,36 @@ const ApplyPage = () => {
       const initialVal = (initialData[key] || "").trim();
       return currentVal !== initialVal;
     }) && !isSaved;
+
+  // 1. 블로커 설정
+  const blocker = useBlocker(
+    ({ currentLocation, nextLocation }) =>
+      !isSubmitting &&
+      isDirty &&
+      currentLocation.pathname !== nextLocation.pathname,
+  );
+
+  useEffect(() => {
+    if (blocker.state === "blocked") {
+      Promise.resolve().then(() => {
+        setInfoModal({
+          isOpen: true,
+          message:
+            "임시저장하지 않고 나가면 지금까지 입력한 내용이 사라집니다. 계속 진행하시겠습니까?",
+          isSingleButton: false,
+          confirmText: "나가기",
+          cancelText: "취소",
+          onConfirm: () => blocker.proceed(),
+        });
+      });
+    }
+  }, [blocker.state]);
+
+  // 3. 취소 시 블로커 해제
+  const handleModalClose = () => {
+    setInfoModal((prev) => ({ ...prev, isOpen: false }));
+    if (blocker.state === "blocked") blocker.reset();
+  };
 
   // 🔥 2. 브라우저 닫기/새로고침 방지 (브라우저 기본 알림)
   useEffect(() => {
@@ -73,16 +110,7 @@ const ApplyPage = () => {
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, [isDirty]);
 
-  const [infoModal, setInfoModal] = useState({
-    isOpen: false,
-    message: "",
-    onConfirm: () => {},
-    isSingleButton: true,
-  });
-
-  const [applicationId, setApplicationId] = useState(
-    location.state?.applicationId || null,
-  );
+  const [applicationId] = useState(location.state?.applicationId || null);
 
   const userField = location.state?.field || "프론트엔드";
   const isDesign = userField === "기획·디자인";
@@ -96,7 +124,11 @@ const ApplyPage = () => {
         const qRes = await fetch(
           `/api/applications/${applicationId}/questions`,
         );
-        const qResult = await qRes.json();
+        const qResult = (await qRes.json()) as {
+          data: {
+            questions: Question[];
+          };
+        };
         if (!qRes.ok || !qResult.data) return;
 
         const sortedQuestions = qResult.data.questions.sort(
@@ -110,8 +142,8 @@ const ApplyPage = () => {
 
         // 답변 로딩 API 성공 시
         if (aRes.ok && aResult.data?.answers) {
-          const serverAnswers = {};
-          aResult.data.answers.forEach((ans) => {
+          const serverAnswers: Record<string, string | undefined> = {};
+          aResult.data.answers.forEach((ans: AnswerResponse) => {
             const targetQ = sortedQuestions.find(
               (q) => q.questionId === ans.questionId,
             );
@@ -196,7 +228,7 @@ const ApplyPage = () => {
 
       if (response.ok) {
         setIsSaved(true);
-        const currentData = {};
+        const currentData: Record<string, string | undefined> = {};
         questions.forEach((q) => {
           currentData[`q${q.questionNumber}`] =
             formData[`q${q.questionNumber}`];
@@ -238,6 +270,7 @@ const ApplyPage = () => {
         onConfirm: () => navigate("/recruit/info", { state: backState }),
         confirmText: "나가기",
         cancelText: "취소",
+        isSingleButton: false,
       });
     }
   };
