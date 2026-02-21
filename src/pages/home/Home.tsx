@@ -41,9 +41,15 @@ const Home = () => {
   return (
     <div className="overflow-x-hidden w-full " data-header="dark">
       <HHeroSection />
-      <HSection color="light" id="intro-section">
+      <div
+        data-header="light"
+        id="intro-section"
+        className={
+          "flex p-[28px_20px] md:p-[60px] lg:p-[100px] flex-col justify-center items-start gap-10 self-strech"
+        }
+      >
         <IntroSection />
-      </HSection>
+      </div>
       <HSection color="lightGray">
         <ProgramSection />
       </HSection>
