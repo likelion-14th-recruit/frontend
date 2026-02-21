@@ -1,6 +1,30 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+interface CheckboxIconProps {
+  isChecked: boolean;
+}
+
+const CheckboxIcon: React.FC<CheckboxIconProps> = ({ isChecked }) => (
+  <div className="w-30 h-30 shrink-0">
+    {isChecked ? (
+      <img
+        src="/recruit/checkbox_on.svg" // public 폴더 기준 경로는 /부터 시작합니다.
+        alt="checked"
+        width="44px"
+        height="44px"
+      />
+    ) : (
+      <img
+        src="/recruit/checkbox_off.svg"
+        alt="unchecked"
+        width="44px"
+        height="44px"
+      />
+    )}
+  </div>
+);
+
 const TermsPage = () => {
   const navigate = useNavigate();
 
@@ -10,26 +34,6 @@ const TermsPage = () => {
 
   // 모든 체크박스가 선택되었는지 확인
   const isAllChecked = checked1 && checked2;
-
-  const CheckboxIcon = ({ isChecked }: { isChecked: boolean }) => (
-    <div className="w-30 h-30 shrink-0">
-      {isChecked ? (
-        <img
-          src="/recruit/checkbox_on.svg" // public 폴더 기준 경로는 /부터 시작합니다.
-          alt="checked"
-          width="44px"
-          height="44px"
-        />
-      ) : (
-        <img
-          src="/recruit/checkbox_off.svg"
-          alt="unchecked"
-          width="44px"
-          height="44px"
-        />
-      )}
-    </div>
-  );
 
   return (
     <div

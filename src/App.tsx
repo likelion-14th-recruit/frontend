@@ -1,7 +1,7 @@
 import "./index.css";
 import { useEffect } from "react";
 import ReactGA from "react-ga4";
-import { Routes, Route, BrowserRouter } from "react-router-dom";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Admin from "./pages/admin/Admin";
 import AdminLayout from "./layouts/adminLayout";
 import Home from "./pages/home/Home";
@@ -24,6 +24,42 @@ import AdminDetail from "./pages/admin/AdminDetail";
 const GA_ID = import.meta.env.VITE_GA_ID;
 const ADMIN_PATH = import.meta.env.VITE_ADMIN_PATH;
 
+const router = createBrowserRouter([
+  {
+    element: (
+      <>
+        <MainLayout />
+        <ScrollToTop />
+      </>
+    ),
+    children: [
+      { path: "/", element: <Home /> },
+      { path: "/about", element: <About /> },
+      { path: "/project", element: <Project /> },
+      { path: "/people", element: <People /> },
+      { path: "/recruit", element: <RecruitHome /> },
+      { path: "/recruit/start", element: <RecruitApplyPage /> },
+      { path: "/recruit/find-password", element: <FindPasswordPage /> },
+      {
+        element: <RecruitLayout />,
+        children: [
+          { path: "/recruit/terms", element: <TermsPage /> },
+          { path: "/recruit/apply", element: <ApplyPage /> },
+          { path: "/recruit/info", element: <InfoPage /> },
+          { path: "/recruit/interview", element: <InterviewPage /> },
+        ],
+      },
+    ],
+  },
+  {
+    element: <AdminLayout />,
+    children: [
+      { path: `/${ADMIN_PATH}`, element: <Admin /> },
+      { path: `/${ADMIN_PATH}/:applicationPublicId`, element: <AdminDetail /> },
+    ],
+  },
+]);
+
 function App() {
   useEffect(() => {
     // 1. 초기화 (한 번만 실행됨)
@@ -32,37 +68,7 @@ function App() {
     ReactGA.send("pageview");
   }, []);
 
-  return (
-    <BrowserRouter>
-      <ScrollToTop />
-      <Routes>
-        <Route element={<MainLayout />}>
-          <Route path="/" element={<Home />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/project" element={<Project />} />
-          <Route path="/people" element={<People />} />
-          <Route path="/recruit" element={<RecruitHome />} />
-          <Route path="/recruit/start" element={<RecruitApplyPage />} />
-          <Route path="/recruit/find-password" element={<FindPasswordPage />} />
-
-          <Route element={<RecruitLayout />}>
-            <Route path="/recruit/terms" element={<TermsPage />} />
-            <Route path="/recruit/info" element={<InfoPage />} />
-            <Route path="/recruit/apply" element={<ApplyPage />} />
-            <Route path="/recruit/interview" element={<InterviewPage />} />
-          </Route>
-        </Route>
-
-        <Route element={<AdminLayout />}>
-          <Route path={`/${ADMIN_PATH}`} element={<Admin />} />
-          <Route
-            path={`/${ADMIN_PATH}/:applicationPublicId`}
-            element={<AdminDetail />}
-          />
-        </Route>
-      </Routes>
-    </BrowserRouter>
-  );
+  return <RouterProvider router={router} />;
 }
 
 export default App;
