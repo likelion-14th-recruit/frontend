@@ -1,7 +1,64 @@
 import React, { useRef, useState, useEffect } from "react";
-import { useNavigate, useOutletContext, useLocation } from "react-router-dom";
+import {
+  useNavigate,
+  useOutletContext,
+  useLocation,
+  useBlocker,
+} from "react-router-dom";
 import Input from "../../../components/recruit/Input";
 import ConfirmModal from "../../../components/recruit/ConfirmModal";
+
+type RequiredField = {
+  key: keyof FormDataType;
+  ref: React.RefObject<HTMLElement>;
+};
+
+interface InputProps extends Omit<
+  React.InputHTMLAttributes<HTMLInputElement>,
+  "ref"
+> {
+  label: string;
+  required?: boolean;
+  guideText?: string;
+  isError?: boolean;
+  buttonText?: string;
+  onButtonClick?: () => void;
+  buttonDisabled?: boolean;
+  buttonActive?: boolean;
+  errorText?: string;
+}
+
+interface FormDataType {
+  name: string;
+  studentId: string;
+  phone: string;
+  password: string;
+  passwordConfirm: string;
+  major: string;
+  minor: string;
+  term: string;
+  authCode: string;
+  status: keyof typeof ACADEMIC_STATUS_MAP | "";
+  field: keyof typeof PART_MAP | "";
+}
+
+interface InfoModalType {
+  isOpen: boolean;
+  message: string | React.ReactNode;
+  onConfirm: () => void;
+  isSingleButton?: boolean;
+}
+
+interface OutletContextType {
+  formData: FormDataType;
+  setFormData: React.Dispatch<React.SetStateAction<FormDataType>>;
+  authStatus: "idle" | "sent" | "verified";
+  setAuthStatus: React.Dispatch<
+    React.SetStateAction<"idle" | "sent" | "verified">
+  >;
+  authGuide: string;
+  setAuthGuide: React.Dispatch<React.SetStateAction<string>>;
+}
 
 // 숫자만 추출해서 010-0000-0000 형식으로 변환하는 함수
 const formatPhoneNumber = (value: string) => {
@@ -24,13 +81,13 @@ const ACADEMIC_STATUS_MAP = {
   휴학: "ON_LEAVE",
   "졸업 유예": "GRADUATION_DEFERRED",
   졸업: "GRADUATED",
-};
+} as const;
 
 const PART_MAP = {
   "기획·디자인": "PRODUCT_DESIGN",
   프론트엔드: "FRONTEND",
   백엔드: "BACKEND",
-};
+} as const;
 
 // 상단에 역매핑 객체 추가
 const STATUS_REVERSE_MAP = {
@@ -38,29 +95,46 @@ const STATUS_REVERSE_MAP = {
   ON_LEAVE: "휴학",
   GRADUATION_DEFERRED: "졸업 유예",
   GRADUATED: "졸업",
-};
+} as const;
 
 const PART_REVERSE_MAP = {
   PRODUCT_DESIGN: "기획·디자인",
   FRONTEND: "프론트엔드",
   BACKEND: "백엔드",
-};
+} as const;
 
 const InfoPage = () => {
   const location = useLocation();
   const { applicationId, passwordLength } = location.state || {};
   const navigate = useNavigate();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // 🔥 1. 수정 모드 여부 (가장 먼저 선언)
   const isEditMode = !!applicationId;
 
   const [isBackModalOpen, setIsBackModalOpen] = useState(false);
   const [authError, setAuthError] = useState("");
-  const [infoModal, setInfoModal] = useState({
+  const [infoModal, setInfoModal] = useState<InfoModalType>({
     isOpen: false,
     message: "",
     onConfirm: () => {},
   });
+
+  const emptyFormData: FormDataType = {
+    name: "",
+    studentId: "",
+    phone: "",
+    password: "",
+    passwordConfirm: "",
+    major: "",
+    minor: "",
+    status: "",
+    term: "",
+    field: "",
+    authCode: "",
+  };
+
+  const [initialData, setInitialData] = useState<FormDataType>(emptyFormData);
 
   const {
     formData,
@@ -69,7 +143,7 @@ const InfoPage = () => {
     setAuthStatus,
     authGuide,
     setAuthGuide,
-  } = useOutletContext();
+  } = useOutletContext<OutletContextType>();
 
   // 🔥 2. 유효성 검사 로직 (오타 수정 및 통합)
   const isStudentIdValid = /^[0-9]{8}$/.test(formData.studentId);
@@ -99,31 +173,67 @@ const InfoPage = () => {
   };
 
   const inputRefs = {
-    name: useRef(null),
-    studentId: useRef(null),
-    phone: useRef(null),
-    authCode: useRef(null),
-    password: useRef(null),
-    passwordConfirm: useRef(null),
-    major: useRef(null),
-    status: useRef(null),
-    term: useRef(null),
-    field: useRef(null),
+    name: useRef<HTMLInputElement | null>(null),
+    studentId: useRef<HTMLInputElement | null>(null),
+    phone: useRef<HTMLInputElement | null>(null),
+    authCode: useRef<HTMLInputElement | null>(null),
+    password: useRef<HTMLInputElement | null>(null),
+    passwordConfirm: useRef<HTMLInputElement | null>(null),
+    major: useRef<HTMLInputElement | null>(null),
+    term: useRef<HTMLInputElement | null>(null),
+
+    // 이 둘은 Input이 아니라 div에 연결됨
+    status: useRef<HTMLDivElement | null>(null),
+    field: useRef<HTMLDivElement | null>(null),
   };
 
+  const isDirty = Object.keys(formData).some((key) => {
+    const typedKey = key as keyof FormDataType;
+
+    if (
+      typedKey === "password" ||
+      typedKey === "passwordConfirm" ||
+      typedKey === "authCode"
+    )
+      return false;
+
+    const currentVal = String(formData[typedKey] ?? "").trim();
+    const initialVal = String(initialData[typedKey] ?? "").trim();
+
+    return currentVal !== initialVal;
+  });
+
+  // 1. 블로커 설정: 데이터가 입력된 상태(isDirty)에서 주소가 바뀔 때 작동
+  const blocker = useBlocker(
+    ({ currentLocation, nextLocation }) =>
+      // 🔥 제출 중(isSubmitting)이 아닐 때만 블로커 작동
+      !isSubmitting &&
+      isDirty &&
+      currentLocation.pathname !== nextLocation.pathname,
+  );
+
+  // 2. 블로커 상태에 따라 모달 제어 (useEffect 이용)
   useEffect(() => {
-    console.log(
-      "📍 useEffect 실행됨! ID:",
-      applicationId,
-      "Length:",
-      passwordLength,
-    );
-    if (applicationId && passwordLength) {
-      fetchUserInfo();
-    } else {
-      console.warn("⚠️ ID나 비밀번호 길이가 없어서 API를 호출하지 않음");
+    if (blocker.state === "blocked") {
+      setInfoModal({
+        isOpen: true,
+        message:
+          "임시저장하지 않고 나가면 지금까지 입력한 내용이 모두 사라집니다. 계속 진행하시겠습니까?",
+        isSingleButton: false, // 취소/확인 두 개가 필요하므로 false
+        onConfirm: () => {
+          blocker.proceed(); // 이동 허용
+        },
+      });
     }
-  }, [applicationId]); // passwordLength도 의존성 배열에 추가하는 게 안전해!
+  }, [blocker]);
+
+  // 3. 모달의 '취소' 버튼을 눌렀을 때 블로커 해제 처리
+  const handleModalClose = () => {
+    setInfoModal((prev) => ({ ...prev, isOpen: false }));
+    if (blocker.state === "blocked") {
+      blocker.reset(); // 이동 차단 해제
+    }
+  };
 
   const fetchUserInfo = async () => {
     try {
@@ -142,20 +252,29 @@ const InfoPage = () => {
 
         const d = result.data;
 
-        // 🔥 [필독] 서버 필드명(d.xxx)을 서정님의 폼 필드명(이름)으로 1:1 매칭합니다.
-        setFormData({
+        // 🔥 1. 세팅할 데이터를 변수에 먼저 담습니다.
+        const dataToSet = {
           name: d.name || "",
-          studentId: d.studentNumber || "", // 서버는 studentNumber로 줍니다.
-          phone: d.phoneNumber || "", // 서버는 phoneNumber로 줍니다.
+          studentId: d.studentNumber || "",
+          phone: d.phoneNumber || "",
           password: "*".repeat(passwordLength || 8),
           passwordConfirm: "*".repeat(passwordLength || 8),
           major: d.major || "",
-          minor: d.doubleMajor || "", // 서버는 doubleMajor로 줍니다.
-          status: STATUS_REVERSE_MAP[d.academicStatus] || "",
-          term: d.semester !== undefined ? String(d.semester) : "", // 서버는 semester로 줍니다.
-          field: PART_REVERSE_MAP[d.part] || "",
+          minor: d.doubleMajor || "",
+          status:
+            STATUS_REVERSE_MAP[
+              d.academicStatus as keyof typeof STATUS_REVERSE_MAP
+            ] || "",
+
+          field:
+            PART_REVERSE_MAP[d.part as keyof typeof PART_REVERSE_MAP] || "",
+          term: d.semester !== undefined ? String(d.semester) : "",
           authCode: "********",
-        });
+        };
+
+        // 🔥 2. 현재 폼 데이터와 원본 데이터를 똑같이 맞춥니다.
+        setFormData(dataToSet);
+        setInitialData(dataToSet); // 👈 이게 꼭 정확히 들어가야 합니다!
 
         // 🚀 불러오기 성공했으니 인증 상태를 완료로 바꿔야 '다음으로' 버튼이 활성화돼!
         setAuthStatus("verified");
@@ -167,13 +286,22 @@ const InfoPage = () => {
     }
   };
 
-  // 폼에 입력된 내용이 있는지 확인하는 변수
-  const isDirty = Object.values(formData).some(
-    (val) => val !== "" && val !== "VERIFIED",
-  );
+  useEffect(() => {
+    console.log(
+      "📍 useEffect 실행됨! ID:",
+      applicationId,
+      "Length:",
+      passwordLength,
+    );
+    if (applicationId && passwordLength) {
+      fetchUserInfo();
+    } else {
+      console.warn("⚠️ ID나 비밀번호 길이가 없어서 API를 호출하지 않음");
+    }
+  }, [applicationId]); // passwordLength도 의존성 배열에 추가하는 게 안전해!
 
   useEffect(() => {
-    const handleBeforeUnload = (e) => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       if (isDirty) {
         e.preventDefault();
         e.returnValue = ""; // 브라우저 기본 경고창 유도
@@ -223,7 +351,7 @@ const InfoPage = () => {
     }
   };
 
-  const handleSelect = (name, value) => {
+  const handleSelect = (name: keyof FormDataType, value: string) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
@@ -278,24 +406,139 @@ const InfoPage = () => {
     }
   };
 
+  const executeSubmit = async () => {
+    setIsSubmitting(true);
+
+    let requestData:
+      | {
+          name: string;
+          studentNumber: string;
+          phoneNumber?: string;
+          password?: string;
+          major: string;
+          doubleMajor: string;
+          semester: number;
+          academicStatus: string;
+          part: string;
+        }
+      | Record<string, never>;
+
+    if (!isEditMode) {
+      // [생성하기 POST] 명세에 맞춤
+      requestData = {
+        name: formData.name,
+        studentNumber: formData.studentId,
+        phoneNumber: formData.phone.replace(/[^\d]/g, ""), // 하이픈 제거
+        password: formData.password,
+        major: formData.major,
+        doubleMajor: formData.minor || "",
+        semester: Number(formData.term),
+        academicStatus: ACADEMIC_STATUS_MAP[formData.status],
+        part: PART_MAP[formData.field],
+      };
+    } else {
+      // [수정하기 PATCH] 명세에 따라 phone, password 제외!!
+      requestData = {
+        name: formData.name,
+        studentNumber: formData.studentId,
+        major: formData.major,
+        doubleMajor: formData.minor || "",
+        academicStatus: ACADEMIC_STATUS_MAP[formData.status],
+        semester: Number(formData.term),
+        part: PART_MAP[formData.field],
+      };
+    }
+
+    try {
+      // 🔥 2. 수정 모드에 따른 URL 및 설정 분기
+      const url = isEditMode
+        ? `/api/applications/${applicationId}`
+        : "/api/applications";
+
+      const method = isEditMode ? "PATCH" : "POST";
+
+      const response = await fetch(url, {
+        method: method,
+        headers: { "Content-Type": "application/json" },
+        // 서버 예시가 { "key": { ... } } 라면 아래처럼 감싸서 보내기
+        body: JSON.stringify(requestData),
+      });
+
+      const result = await response.json();
+
+      if (response.ok && result.success) {
+        const publicId = result.data?.publicId || applicationId;
+
+        console.log("🚀 [InfoPage -> ApplyPage] 이동 시작!");
+        console.log("📍 전달할 applicationId:", publicId);
+        console.log(
+          "📍 전달할 passwordLength:",
+          isEditMode ? passwordLength : formData.password.length,
+        );
+
+        // 🔥 [핵심] 수정사항을 Context에 즉시 반영
+        setFormData({ ...formData });
+        navigate("/recruit/apply/", {
+          state: {
+            field: PART_MAP[formData.field],
+            applicationId: publicId,
+            passwordLength: isEditMode
+              ? passwordLength
+              : formData.password.length,
+          },
+        });
+
+        // 🔥 1. 이미 최종 제출을 완료한 경우
+      } else if (result.code === "APPLICATION_ALREADY_SUBMITTED") {
+        setIsSubmitting(false);
+        setInfoModal({
+          isOpen: true,
+          message: "이미 제출된 지원서가 있어 추가 제출이 불가합니다.\n ",
+          onConfirm: () => navigate("/recruit"),
+        });
+      }
+      // 🔥 2. 임시 저장된 지원서가 있는 경우 (APPLICATION_ALREADY_EXISTS)
+      else if (
+        result.code === "APPLICATION_ALREADY_EXISTS" ||
+        response.status === 409
+      ) {
+        setIsSubmitting(false);
+        setInfoModal({
+          isOpen: true,
+          message:
+            "이미 임시 저장된 지원서가 있어, 새로 생성할 수 없습니다.\n기존 지원서를 수정해 주세요.",
+          onConfirm: () => navigate("/recruit/start"), // 혹은 로그인/조회 페이지로 이동
+        });
+      } else {
+        setIsSubmitting(false);
+        const errorData = await response.json();
+        alert(`저장 실패: ${errorData.message}`);
+      }
+    } catch (error) {
+      setIsSubmitting(false);
+      console.error("네트워크 에러:", error);
+      alert("서버 연결 오류가 발생했습니다.");
+    }
+  };
+
   const handleSubmit = async () => {
-    const requiredFields = [
+    const requiredFields: RequiredField[] = [
       { key: "name", ref: inputRefs.name },
       { key: "studentId", ref: inputRefs.studentId },
       { key: "phone", ref: inputRefs.phone },
       { key: "authCode", ref: inputRefs.authCode },
-      // 🔥 여기가 핵심! 수정 모드(isEditMode)가 아닐 때만 비밀번호를 필수 체크함
-      ...(isEditMode
-        ? []
-        : [
-            { key: "password", ref: inputRefs.password },
-            { key: "passwordConfirm", ref: inputRefs.passwordConfirm },
-          ]),
       { key: "major", ref: inputRefs.major },
       { key: "status", ref: inputRefs.status },
       { key: "term", ref: inputRefs.term },
       { key: "field", ref: inputRefs.field },
     ];
+
+    if (!isEditMode) {
+      requiredFields.push(
+        { key: "password", ref: inputRefs.password },
+        { key: "passwordConfirm", ref: inputRefs.passwordConfirm },
+      );
+    }
 
     // 2. 미입력 필드 스크롤 체크
     for (const field of requiredFields) {
@@ -309,114 +552,21 @@ const InfoPage = () => {
       }
     }
 
-    if (isFormValid) {
-      let requestData: any;
+    if (!isFormValid) return;
 
-      if (!isEditMode) {
-        // [생성하기 POST] 명세에 맞춤
-        requestData = {
-          name: formData.name,
-          studentNumber: formData.studentId,
-          phoneNumber: formData.phone.replace(/[^\d]/g, ""), // 하이픈 제거
-          password: formData.password,
-          major: formData.major,
-          doubleMajor: formData.minor || "",
-          semester: Number(formData.term),
-          academicStatus: ACADEMIC_STATUS_MAP[formData.status],
-          part: PART_MAP[formData.field],
-        };
-      } else {
-        // [수정하기 PATCH] 명세에 따라 phone, password 제외!!
-        requestData = {
-          name: formData.name,
-          studentNumber: formData.studentId,
-          major: formData.major,
-          doubleMajor: formData.minor || "",
-          academicStatus: ACADEMIC_STATUS_MAP[formData.status],
-          semester: Number(formData.term),
-          part: PART_MAP[formData.field],
-        };
-      }
-
-      try {
-        // 🔥 2. 수정 모드에 따른 URL 및 설정 분기
-        const url = isEditMode
-          ? `/api/applications/${applicationId}`
-          : "/api/applications";
-
-        const method = isEditMode ? "PATCH" : "POST";
-
-        const response = await fetch(url, {
-          method: method,
-          headers: { "Content-Type": "application/json" },
-          // 서버 예시가 { "key": { ... } } 라면 아래처럼 감싸서 보내기
-          body: JSON.stringify(requestData),
-        });
-
-        const result = await response.json();
-
-        if (response.ok && result.success) {
-          const publicId = result.data?.applicationPublicId || applicationId;
-
-          // 🔥 [핵심] 수정사항을 Context에 즉시 반영
-          setFormData({ ...formData });
-
-          // 🔥 2. 신규 생성일 때만 모달 띄우기
-          if (!isEditMode) {
-            setInfoModal({
-              isOpen: true,
-              message:
-                "지원서가 자동으로 생성 및 저장되었습니다. 이후에도 수정 및 임시 저장이 가능합니다.",
-              isSingleButton: true,
-              onConfirm: () => {
-                setInfoModal((prev) => ({ ...prev, isOpen: false }));
-                navigate("/recruit/apply", {
-                  state: {
-                    field: formData.field,
-                    applicationId: publicId,
-                    passwordLength: formData.password.length,
-                  },
-                });
-              },
-            });
-          } else {
-            // 🔥 3. 수정 모드일 때는 모달 없이 바로 이동
-            navigate("/recruit/apply", {
-              state: {
-                field: formData.field,
-                applicationId: publicId,
-                passwordLength: passwordLength,
-              },
-            });
-          }
-
-          // 🔥 1. 이미 최종 제출을 완료한 경우
-        } else if (result.code === "APPLICATION_ALREADY_SUBMITTED") {
-          setInfoModal({
-            isOpen: true,
-            message: "이미 제출된 지원서가 있어 추가 제출이 불가합니다.\n ",
-            onConfirm: () => navigate("/recruit"),
-          });
-        }
-        // 🔥 2. 임시 저장된 지원서가 있는 경우 (APPLICATION_ALREADY_EXISTS)
-        else if (
-          result.code === "APPLICATION_ALREADY_EXISTS" ||
-          response.status === 409
-        ) {
-          setInfoModal({
-            isOpen: true,
-            message:
-              "이미 임시 저장된 지원서가 있어, 새로 생성할 수 없습니다.\n기존 지원서를 수정해 주세요.",
-            onConfirm: () => navigate("/recruit/start"), // 혹은 로그인/조회 페이지로 이동
-          });
-        } else {
-          const errorData = await response.json();
-          alert(`저장 실패: ${errorData.message}`);
-        }
-      } catch (error) {
-        console.error("네트워크 에러:", error);
-        alert("서버 연결 오류가 발생했습니다.");
-      }
+    if (isEditMode) {
+      executeSubmit();
+    } else {
+      setInfoModal({
+        isOpen: true,
+        message:
+          "지원서가 자동으로 생성 및 저장되었습니다. 이후에도 수정 및 임시 저장이 가능합니다.",
+        isSingleButton: true,
+        onConfirm: () => {
+          setInfoModal((prev) => ({ ...prev, isOpen: false }));
+          executeSubmit();
+        },
+      });
     }
   };
 
@@ -573,7 +723,7 @@ const InfoPage = () => {
             />
           </label>
           <div className="grid grid-cols-3 gap-[12px] md:gap-[16px]">
-            {["재학", "휴학", "졸업 유예"].map((val) => (
+            {(["재학", "휴학", "졸업 유예"] as const).map((val) => (
               <button
                 key={val}
                 type="button"
@@ -591,7 +741,7 @@ const InfoPage = () => {
           name="term"
           required
           ref={inputRefs.term}
-          guideText={errors.term}
+          guideText={errors.term || ""}
           isError={formData.term.length > 0 && !isTermValid}
           placeholder="이수 학기를 입력해 주세요."
           onChange={handleChange}
@@ -608,7 +758,7 @@ const InfoPage = () => {
             />
           </label>
           <div className="grid grid-cols-3 gap-[12px] md:gap-[16px]">
-            {["백엔드", "프론트엔드", "기획·디자인"].map((val) => (
+            {(["백엔드", "프론트엔드", "기획·디자인"] as const).map((val) => (
               <button
                 key={val}
                 type="button"
@@ -668,10 +818,12 @@ const InfoPage = () => {
 
       <ConfirmModal
         isOpen={infoModal.isOpen}
-        onClose={() => setInfoModal({ ...infoModal, isOpen: false })}
+        onClose={handleModalClose} // 위에서 만든 닫기 함수로 교체
         onConfirm={infoModal.onConfirm}
         message={infoModal.message}
-        isSingleButton={true}
+        isSingleButton={infoModal.isSingleButton} // 상태값에 따라 버튼 개수 조절
+        confirmText="계속 진행"
+        cancelText="취소"
       />
     </div>
   );

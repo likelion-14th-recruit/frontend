@@ -10,7 +10,7 @@ interface AuthModalProps {
 /**
  * ResponseEntityApiResponseLoginResponse
  */
-export interface Response {
+export interface LoginApiResponse {
   code?: string;
   data?: LoginResponse;
   message?: string;
@@ -47,9 +47,10 @@ const AuthModal: React.FC<AuthModalProps> = ({
 
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
-  const [displayPassword, setDisplayPassword] = useState("");
   const [phoneError, setPhoneError] = useState("");
   const [passwordError, setPasswordError] = useState("");
+
+  const [displayPassword, setDisplayPassword] = useState("");
 
   useEffect(() => {
     if (password.length === 0) {
@@ -57,28 +58,16 @@ const AuthModal: React.FC<AuthModalProps> = ({
       return;
     }
 
-    // 1. 마지막 글자만 보이게 설정 (g -> *k -> **s)
     const masked = "*".repeat(password.length - 1) + password.slice(-1);
+
     setDisplayPassword(masked);
 
-    // 2. 0.8초 후 전체 별표 처리
     const timer = setTimeout(() => {
       setDisplayPassword("*".repeat(password.length));
     }, 800);
 
     return () => clearTimeout(timer);
   }, [password]);
-
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "unset";
-    }
-    return () => {
-      document.body.style.overflow = "unset";
-    };
-  }, [isOpen]);
 
   if (!isOpen) return null;
   const modalRoot = document.getElementById("modal-root");
@@ -120,7 +109,7 @@ const AuthModal: React.FC<AuthModalProps> = ({
         }),
       });
 
-      const result = (await response.json()) as Response;
+      const result = (await response.json()) as LoginApiResponse;
 
       if (response.ok && result.success) {
         const applicationPublicId = result.data?.applicationPublicId;

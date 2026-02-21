@@ -19,7 +19,7 @@ const ConfirmModal = ({
   confirmText = "계속 진행",
   cancelText = "취소",
   isSingleButton = false,
-  isInfoPage = false,
+  // isInfoPage = false,
 }: ConfirmModalProps) => {
   if (!isOpen) return null;
 

@@ -1,5 +1,10 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useLocation, useOutletContext } from "react-router-dom";
+import {
+  useNavigate,
+  useLocation,
+  useOutletContext,
+  useBlocker,
+} from "react-router-dom";
 import TextArea from "../../../components/recruit/TextArea";
 import Input from "../../../components/recruit/Input";
 import ConfirmModal from "../../../components/recruit/ConfirmModal";
@@ -7,19 +12,52 @@ import ConfirmModal from "../../../components/recruit/ConfirmModal";
 const ApplyPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
+
   const [questions, setQuestions] = useState([]);
   const [isSaved, setIsSaved] = useState(false);
-
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [initialData, setInitialData] = useState({});
 
   const context = useOutletContext();
   const formData = context?.formData || {};
   const setFormData = context?.setFormData;
-  // 🔥 1. 변경 사항이 있는지 확인 (하나라도 입력된 내용이 있으면 dirty)
+
+  // 1. 블로커 설정
+  const blocker = useBlocker(
+    ({ currentLocation, nextLocation }) =>
+      !isSubmitting &&
+      isDirty &&
+      currentLocation.pathname !== nextLocation.pathname,
+  );
+
+  // 2. 블로커 상태에 따른 모달 제어
+  useEffect(() => {
+    if (blocker.state === "blocked") {
+      setInfoModal({
+        isOpen: true,
+        message:
+          "임시저장하지 않고 나가면 지금까지 입력한 내용이 사라집니다. 계속 진행하시겠습니까?",
+        isSingleButton: false,
+        confirmText: "나가기",
+        cancelText: "취소",
+        onConfirm: () => blocker.proceed(), // 이동 허용
+      });
+    }
+  }, [blocker]);
+
+  // 3. 취소 시 블로커 해제
+  const handleModalClose = () => {
+    setInfoModal((prev) => ({ ...prev, isOpen: false }));
+    if (blocker.state === "blocked") blocker.reset();
+  };
+
+  // 🔥 수정된 isDirty: 원본(initialData)과 현재 입력값(formData)을 비교
   const isDirty =
     questions.some((q) => {
       const key = `q${q.questionNumber}`;
-      return (formData[key] || "") !== (initialData[key] || "");
+      const currentVal = (formData[key] || "").trim();
+      const initialVal = (initialData[key] || "").trim();
+      return currentVal !== initialVal;
     }) && !isSaved;
 
   // 🔥 2. 브라우저 닫기/새로고침 방지 (브라우저 기본 알림)
@@ -42,7 +80,10 @@ const ApplyPage = () => {
     isSingleButton: true,
   });
 
-  const applicationId = location.state?.applicationId;
+  const [applicationId, setApplicationId] = useState(
+    location.state?.applicationId || null,
+  );
+
   const userField = location.state?.field || "프론트엔드";
   const isDesign = userField === "기획·디자인";
 
@@ -67,6 +108,7 @@ const ApplyPage = () => {
         const aRes = await fetch(`/api/applications/${applicationId}/answers`);
         const aResult = await aRes.json();
 
+        // 답변 로딩 API 성공 시
         if (aRes.ok && aResult.data?.answers) {
           const serverAnswers = {};
           aResult.data.answers.forEach((ans) => {
@@ -75,28 +117,17 @@ const ApplyPage = () => {
             );
             if (targetQ) {
               const key = `q${targetQ.questionNumber}`;
-              // 🔥 [핵심] context(formData)에 이미 값이 있으면 서버 데이터로 덮어쓰지 않음
-              if (!formData[key]) {
-                serverAnswers[key] = ans.content;
-              }
+              serverAnswers[key] = ans.content || "";
             }
           });
 
+          // 🔥 원본 데이터를 저장해두어야 나중에 비교가 가능합니다!
           setInitialData(serverAnswers);
 
-          // 새로 가져온 답변이 있을 때만 업데이트
-          if (Object.keys(serverAnswers).length > 0) {
-            setFormData?.((prev) => {
-              const newFormData = { ...prev };
-              Object.keys(serverAnswers).forEach((key) => {
-                if (!newFormData[key]) newFormData[key] = serverAnswers[key];
-              });
-              return newFormData;
-            });
-          }
+          setFormData?.((prev) => ({ ...prev, ...serverAnswers }));
         }
       } catch (error) {
-        console.error("데이터 로드 중 에러:", error);
+        console.error(error);
       }
     };
     initData();
@@ -191,7 +222,11 @@ const ApplyPage = () => {
     }
   };
   const handleMoveBack = () => {
-    const backState = { ...location.state, applicationId };
+    const backState = {
+      applicationId,
+      passwordLength: location.state?.passwordLength,
+      field: location.state?.field,
+    };
 
     if (isSaved || !isDirty) {
       navigate("/recruit/info", { state: backState });
@@ -233,6 +268,7 @@ const ApplyPage = () => {
 
     // 🔥 [핵심 수정] 서버 저장(fetch) 없이 바로 다음 페이지로 이동합니다.
     // context의 formData는 이미 업데이트되어 있으므로 이동해도 데이터가 보존됩니다.
+    setIsSubmitting(true);
     navigate("/recruit/interview", { state: { applicationId } });
   };
 
@@ -324,7 +360,7 @@ const ApplyPage = () => {
 
       <ConfirmModal
         isOpen={infoModal.isOpen}
-        onClose={() => setInfoModal((prev) => ({ ...prev, isOpen: false }))}
+        onClose={handleModalClose}
         onConfirm={infoModal.onConfirm}
         message={<div className="whitespace-pre-line">{infoModal.message}</div>}
         isSingleButton={infoModal.isSingleButton}

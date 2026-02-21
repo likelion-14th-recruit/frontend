@@ -1,8 +1,24 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useLocation, useOutletContext } from "react-router-dom";
+import {
+  useNavigate,
+  useLocation,
+  useOutletContext,
+  useBlocker,
+} from "react-router-dom";
 import ConfirmModal from "../../../components/recruit/ConfirmModal";
 
 // --- 타입 정의 부분 생략 (동일) ---
+
+interface Question {
+  questionId: number;
+  questionNumber: number;
+  content?: string;
+}
+
+interface OutletContextType {
+  formData: Record<string, string>;
+}
+
 export interface ListInterviewTimesResponse {
   success?: boolean;
   code?: string;
@@ -53,14 +69,53 @@ const InterviewPage = () => {
   const location = useLocation();
   const applicationId = location.state?.applicationId;
 
-  // 🔥 [수정] 이 페이지에서도 수정 모드인지 확인이 필요하다면 선언해줍니다.
-  const isEditMode = !!applicationId;
-
   const [interviewData, setInterviewData] = useState<InterviewDateGroup[]>([]);
   const [selectedTimes, setSelectedTimes] = useState<Set<number>>(new Set());
-  const [questions, setQuestions] = useState<any[]>([]); // 질문 목록 추가
+  const [questions, setQuestions] = useState<Question[]>([]);
+  const [initialSelectedTimes, setInitialSelectedTimes] = useState<Set<number>>(
+    new Set(),
+  ); // 🔥 이 줄을 추가하세요!
 
   const [isSaved, setIsSaved] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const context = useOutletContext<OutletContextType>();
+  const formData = context?.formData || {};
+
+  // 🔥 수정된 isDirty: 초기 선택값과 현재 선택값이 다를 때만 true
+  const isDirty =
+    (selectedTimes.size !== initialSelectedTimes.size ||
+      ![...selectedTimes].every((id) => initialSelectedTimes.has(id))) &&
+    !isSaved;
+
+  // 1. 블로커 설정
+  const blocker = useBlocker(
+    ({ currentLocation, nextLocation }) =>
+      !isSubmitting &&
+      isDirty &&
+      currentLocation.pathname !== nextLocation.pathname,
+  );
+
+  // 2. 블로커 상태에 따른 모달 제어
+  useEffect(() => {
+    if (blocker.state === "blocked") {
+      setInfoModal({
+        isOpen: true,
+        message:
+          "임시저장하지 않고 나가면 지금까지 선택한 내용이 사라집니다. 계속 진행하시겠습니까?",
+        isSingleButton: false,
+        confirmText: "나가기",
+        cancelText: "취소",
+        onConfirm: () => blocker.proceed(), // 이동 허용
+      });
+    }
+  }, [blocker]);
+
+  // 3. 모달 닫기 (블로커 리셋)
+  const handleModalClose = () => {
+    setInfoModal((prev) => ({ ...prev, isOpen: false }));
+    if (blocker.state === "blocked") blocker.reset();
+  };
 
   const [infoModal, setInfoModal] = useState<ModalState>({
     isOpen: false,
@@ -70,11 +125,6 @@ const InterviewPage = () => {
     confirmText: "확인",
     cancelText: "취소",
   });
-
-  const context = useOutletContext() as any;
-  const formData = context?.formData || {};
-
-  const isDirty = selectedTimes.size > 0 && !isSaved;
 
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
@@ -108,12 +158,25 @@ const InterviewPage = () => {
         const allRes = await fetch("/api/interview-times");
         const allResult = (await allRes.json()) as ListInterviewTimesResponse;
         if (allRes.ok && allResult.data) {
-          setInterviewData(
-            [...allResult.data].sort(
-              (a, b) =>
-                new Date(a.date!).getTime() - new Date(b.date!).getTime(),
-            ),
-          );
+          const normalized: InterviewDateGroup[] = allResult.data
+            .filter(
+              (item): item is InterviewTimesResponse & { date: string } =>
+                !!item.date,
+            )
+            .map((item) => ({
+              date: item.date,
+              dayOfWeek: item.dayOfWeek || "",
+              interviewTimes: (item.interviewTimes || []).map((t) => ({
+                interviewTimeId: t.interviewTimeId,
+                startTime: t.startTime,
+                endTime: t.endTime,
+              })),
+            }))
+            .sort(
+              (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
+            );
+
+          setInterviewData(normalized);
         }
 
         // 내가 선택한 시간 로드
@@ -122,7 +185,9 @@ const InterviewPage = () => {
         );
         const myResult = await myRes.json();
         if (myRes.ok && myResult.data?.interviewTimeIds) {
-          setSelectedTimes(new Set(myResult.data.interviewTimeIds));
+          const loadedTimes = new Set<number>(myResult.data.interviewTimeIds);
+          setSelectedTimes(loadedTimes);
+          setInitialSelectedTimes(new Set(loadedTimes));
         }
 
         // 질문 목록 로드 (답변 매핑용)
@@ -142,9 +207,13 @@ const InterviewPage = () => {
 
   const toggleTime = (timeId: number) => {
     const newSelection = new Set(selectedTimes);
-    newSelection.has(timeId)
-      ? newSelection.delete(timeId)
-      : newSelection.add(timeId);
+
+    if (newSelection.has(timeId)) {
+      newSelection.delete(timeId);
+    } else {
+      newSelection.add(timeId);
+    }
+
     setSelectedTimes(newSelection);
     setIsSaved(false);
   };
@@ -153,15 +222,20 @@ const InterviewPage = () => {
     const newSelection = new Set(selectedTimes);
     const timeIds = times.map((t) => t.interviewTimeId);
     const allSelected = timeIds.every((id) => newSelection.has(id));
-    timeIds.forEach((id) =>
-      allSelected ? newSelection.delete(id) : newSelection.add(id),
-    );
+    timeIds.forEach((id) => {
+      if (allSelected) {
+        newSelection.delete(id);
+      } else {
+        newSelection.add(id);
+      }
+    });
     setSelectedTimes(newSelection);
     setIsSaved(false);
   };
 
   // 🔥 [통합] 저장 함수 (하나로 합쳤습니다!)
   const handleSave = async (isFinal = false) => {
+    setIsSubmitting(true);
     const token = localStorage.getItem("accessToken");
     const headers = {
       "Content-Type": "application/json",
@@ -210,10 +284,13 @@ const InterviewPage = () => {
         if (submitRes.ok) {
           navigate("/recruit", { state: { showCompleteModal: true } });
         } else {
+          setIsSubmitting(false);
           alert(`제출 실패: ${result.message}`);
         }
       } else {
         setIsSaved(true);
+        setInitialSelectedTimes(new Set(selectedTimes)); // 🔥 현재 선택값을 새로운 원본으로 갱신!
+        setIsSubmitting(false);
         setInfoModal({
           isOpen: true,
           isSingleButton: true,
@@ -224,6 +301,7 @@ const InterviewPage = () => {
         });
       }
     } catch (error) {
+      setIsSubmitting(false);
       console.error("저장 중 오류:", error);
       alert("서버 통신 오류가 발생했습니다.");
     }
@@ -335,7 +413,7 @@ const InterviewPage = () => {
 
       <ConfirmModal
         isOpen={infoModal.isOpen}
-        onClose={() => setInfoModal((prev) => ({ ...prev, isOpen: false }))}
+        onClose={handleModalClose}
         onConfirm={infoModal.onConfirm}
         message={<div className="whitespace-pre-line">{infoModal.message}</div>}
         isSingleButton={infoModal.isSingleButton}
