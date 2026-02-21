@@ -165,7 +165,9 @@ const ApplyPage = () => {
     initData();
   }, [applicationId]);
 
-  const handleAnswerChange = (e) => {
+  const handleAnswerChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
     const { name, value } = e.target;
     setFormData?.((prev) => ({ ...prev, [name]: value }));
     setIsSaved(false);
