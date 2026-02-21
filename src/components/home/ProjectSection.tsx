@@ -5,6 +5,15 @@ import { useState, useEffect } from "react";
 import ProjectSkeletonCard from "../project/ProjectSkeletonCard";
 import { motion } from "framer-motion";
 import type { Variants } from "framer-motion";
+
+interface Post {
+  imageUrl: string;
+  name: string;
+  description: string;
+  instagramUrl: string;
+  cohort: number;
+}
+
 // Props 타입 정의
 const itemVariants: Variants = {
   hidden: { opacity: 0, y: 30 },
@@ -14,14 +23,6 @@ const itemVariants: Variants = {
     transition: { duration: 0.8, ease: "easeOut" },
   },
 };
-
-interface Post {
-  imageUrl: string;
-  name: string;
-  description: string;
-  instagramUrl: string;
-  cohort: number;
-}
 
 const CACHE_KEY = "PJT";
 const CACHE_EXPIRY = 24 * 60 * 60 * 1000; // 1일 (밀리초 단위)
