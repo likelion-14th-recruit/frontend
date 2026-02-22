@@ -59,7 +59,7 @@ const TermsPage = () => {
         <ul className="flex flex-col gap-2 font-normal text-[16px]">
           <li>
             📌 <span className="font-semibold">서류 모집 기간 :</span> 2월
-            21일(토) 12:00 ~ 3월 5일(목) 23:59
+            23일(월) 00:00 ~ 3월 5일(목) 23:59
           </li>
           <li>
             📌 <span className="font-semibold">서류 합격 발표 :</span> 3월
