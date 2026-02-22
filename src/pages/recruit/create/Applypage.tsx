@@ -41,8 +41,6 @@ const ApplyPage = () => {
   const location = useLocation();
 
   const [questions, setQuestions] = useState<Question[]>([]);
-  const [isSaved, setIsSaved] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [initialData, setInitialData] = useState<
     Record<string, string | undefined>
   >({});
@@ -59,20 +57,17 @@ const ApplyPage = () => {
   });
 
   // 🔥 수정된 isDirty: 원본(initialData)과 현재 입력값(formData)을 비교
-  const isDirty =
-    questions.some((q) => {
-      const key = `q${q.questionNumber}`;
-      const currentVal = (formData[key] || "").trim();
-      const initialVal = (initialData[key] || "").trim();
-      return currentVal !== initialVal;
-    }) && !isSaved;
+  const isDirty = questions.some((q) => {
+    const key = `q${q.questionNumber}`;
+    const currentVal = (formData[key] || "").trim();
+    const initialVal = (initialData[key] || "").trim();
+    return currentVal !== initialVal;
+  });
 
   // 1. 블로커 설정
   const blocker = useBlocker(
     ({ currentLocation, nextLocation }) =>
-      !isSubmitting &&
-      isDirty &&
-      currentLocation.pathname !== nextLocation.pathname,
+      isDirty && currentLocation.pathname !== nextLocation.pathname,
   );
 
   useEffect(() => {
@@ -85,7 +80,9 @@ const ApplyPage = () => {
           isSingleButton: false,
           confirmText: "나가기",
           cancelText: "취소",
-          onConfirm: () => blocker.proceed(),
+          onConfirm: () => {
+            blocker.proceed();
+          },
         });
       });
     }
@@ -94,7 +91,9 @@ const ApplyPage = () => {
   // 3. 취소 시 블로커 해제
   const handleModalClose = () => {
     setInfoModal((prev) => ({ ...prev, isOpen: false }));
-    if (blocker.state === "blocked") blocker.reset();
+    if (blocker.state === "blocked") {
+      blocker.reset();
+    }
   };
 
   // 🔥 2. 브라우저 닫기/새로고침 방지 (브라우저 기본 알림)
@@ -170,7 +169,6 @@ const ApplyPage = () => {
   ) => {
     const { name, value } = e.target;
     setFormData?.((prev) => ({ ...prev, [name]: value }));
-    setIsSaved(false);
   };
 
   // --- 유효성 검사 로직 수정 ---
@@ -229,7 +227,6 @@ const ApplyPage = () => {
       );
 
       if (response.ok) {
-        setIsSaved(true);
         const currentData: Record<string, string | undefined> = {};
         questions.forEach((q) => {
           currentData[`q${q.questionNumber}`] =
@@ -262,7 +259,7 @@ const ApplyPage = () => {
       field: location.state?.field,
     };
 
-    if (isSaved || !isDirty) {
+    if (!isDirty) {
       navigate("/recruit/info", { state: backState });
     } else {
       setInfoModal({
@@ -303,7 +300,6 @@ const ApplyPage = () => {
 
     // 🔥 [핵심 수정] 서버 저장(fetch) 없이 바로 다음 페이지로 이동합니다.
     // context의 formData는 이미 업데이트되어 있으므로 이동해도 데이터가 보존됩니다.
-    setIsSubmitting(true);
     navigate("/recruit/interview", { state: { applicationId } });
   };
 

@@ -315,7 +315,7 @@ const InterviewPage = () => {
         confirmText: "나가기",
         cancelText: "취소",
         message:
-          "임시저장하지 않고 나가면 지금까지 입력한 내용이 모두 사라집니다.\n계속 진행하시겠습니까?",
+          "임시저장하지 않고 나가면 지금까지 선택한 내용이 사라집니다. 계속 진행하시겠습니까?",
         onConfirm: () => navigate(-1),
       });
     } else {
