@@ -112,8 +112,8 @@ const ApplyPage = () => {
 
   const [applicationId] = useState(location.state?.applicationId || null);
 
-  const userField = location.state?.field || "프론트엔드";
-  const isDesign = userField === "기획·디자인";
+  const userField = location.state?.field || "FRONTEND";
+  const isDesign = userField === "PRODUCT_DESIGN";
 
   // 데이터 로딩 로직 수정
   useEffect(() => {

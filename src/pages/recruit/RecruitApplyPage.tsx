@@ -12,7 +12,7 @@ const RecruitApplyPage: React.FC = () => {
     /* 1. 배경은 화면 끝까지 차도록 (2560px 대응) */
     <div className="w-full min-h-screen bg-white">
       {/* 2. 컨텐츠를 담는 큰 바구니 */}
-      <main className="w-full lg:pt-[40px] pt-[40px] pb-[100px] pr-[20px] pl-[20px] flex justify-center items-center">
+      <main className="w-full lg:pt-[40px] pt-[0px] pb-[100px] pr-[20px] pl-[20px] flex justify-center items-center">
         {/* 3. 실제 카드가 놓일 공간 - 헤더의 최대 너비와 맞춤 */}
         <div className="min-h-screen flex flex-col md:flex-row items-center justify-center gap-[20px] md:gap-[32px] lg:gap-[40px] bg-white">
           <RecruitActionCard
