@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
 import React from "react";
+
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label: string;
   required?: boolean;
@@ -23,54 +23,30 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
       onButtonClick,
       buttonDisabled,
       buttonActive,
-      type, // type 추출
+      type,
       value,
       errorText,
       ...props
     },
     ref,
   ) => {
-    // 🔥 화면에 보여줄 마스킹 텍스트 상태
-    const [displayValue, setDisplayValue] = useState("");
+    // 🔥 렌더 시 계산 (state 없음, effect 없음)
+    const realValue = String(value ?? "");
 
-    useEffect(() => {
-      const realValue = String(value || "");
+    let displayValue = realValue;
 
-      if (type === "password") {
-        if (realValue.length === 0) {
-          setTimeout(() => {
-            setDisplayValue("");
-          }, 0);
-          return;
-        }
-
-        // 마지막 글자만 보이게 설정 (g -> *k -> **s)
-        const masked = "*".repeat(realValue.length - 1) + realValue.slice(-1);
-        setTimeout(() => {
-          setDisplayValue(masked);
-        }, 0);
-
-        // 0.8초 후 전체 별표 처리
-        const timer = setTimeout(() => {
-          setDisplayValue("*".repeat(realValue.length));
-        }, 800);
-
-        return () => clearTimeout(timer);
-      } else {
-        // 비밀번호가 아니면 그냥 값 그대로
-        setTimeout(() => {
-          setDisplayValue(realValue);
-        }, 0);
-      }
-    }, [value, type]);
+    if (type === "password") {
+      // 즉시 전체 마스킹 (안전하고 안정적)
+      displayValue = "*".repeat(realValue.length);
+    }
 
     return (
       <div className="flex flex-col w-full">
         <label className="font-semibold text-[20px] flex items-center mb-[8px] lg:mb-[12px] md:mb-[12px]">
-          {label}{" "}
+          {label}
           {required && (
             <img
-              src="/recruit/required-icon.svg" // 여기에 파일명 적으세요!
+              src="/recruit/required-icon.svg"
               alt="required"
               className="ml-[8px] w-[10px] h-[10px] md:w-[10px] md:h-[10px] object-contain"
             />
@@ -82,16 +58,14 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             <input
               {...props}
               ref={ref}
-              type="text"
-              value={type === "password" ? displayValue : value}
-              /* 🔥 맥북 파란 밑줄 및 자동 완성 방지 속성 추가 */
+              type="text" // 항상 text (우리가 직접 마스킹)
+              value={type === "password" ? displayValue : realValue}
               spellCheck={false}
               autoComplete="off"
-              autoCorrect="off" // iOS(아이폰) 대응
-              autoCapitalize="off" // 첫 글자 자동 대문자 방지
-              className={`w-full h-[48px] px-[12px] py-[4px] bg-[#F0F0F0] rounded-[12px] outline-none border-none md:text-[16px] text-[14px] 
-            focus:outline-none focus:ring-0 focus:ring-offset-0 focus:shadow-none placeholder:text-[rgba(18,18,18,0.60)]
-            `}
+              autoCorrect="off"
+              autoCapitalize="off"
+              className="w-full h-[48px] px-[12px] py-[4px] bg-[#F0F0F0] rounded-[12px] outline-none border-none md:text-[16px] text-[14px]
+              focus:outline-none focus:ring-0 focus:ring-offset-0 focus:shadow-none placeholder:text-[rgba(18,18,18,0.60)]"
             />
           </div>
 
@@ -112,20 +86,15 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           )}
         </div>
 
-        {/* 하단 텍스트 영역 (에러/가이드) */}
         {(isError || guideText) && (
           <div className="flex flex-col mt-[4px] ml-[4px] px-1">
             {isError && (
-              <span className="font-pretendard text-[16px] font-normal leading-[160%] text-[#b90000] mb-1">
-                {errorText || "올바른 형식을 입력해주세요."}{" "}
-                {/* 🔥 가공된 멘트 출력 */}
+              <span className="text-[16px] text-[#b90000] mb-1">
+                {errorText || "올바른 형식을 입력해주세요."}
               </span>
             )}
-            {/* 인증 완료 문구 등이 나올 곳 */}
             {guideText && (
-              <span className="font-pretendard text-[16px] font-normal leading-[160%] text-black">
-                {guideText}
-              </span>
+              <span className="text-[16px] text-black">{guideText}</span>
             )}
           </div>
         )}

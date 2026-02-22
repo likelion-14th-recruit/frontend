@@ -427,6 +427,7 @@ const InfoPage = () => {
           : "",
         part: formData.field ? PART_MAP[formData.field] : "",
       };
+      console.log("requestData", requestData);
     } else {
       // [수정하기 PATCH] 명세에 따라 phone, password 제외!!
       requestData = {
@@ -440,6 +441,7 @@ const InfoPage = () => {
         semester: Number(formData.term),
         part: formData.field ? PART_MAP[formData.field] : "",
       };
+      console.log("requestData", requestData);
     }
 
     try {
