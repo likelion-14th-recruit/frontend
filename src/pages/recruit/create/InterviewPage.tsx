@@ -316,7 +316,10 @@ const InterviewPage = () => {
         cancelText: "취소",
         message:
           "임시저장하지 않고 나가면 지금까지 선택한 내용이 사라집니다. 계속 진행하시겠습니까?",
-        onConfirm: () => navigate(-1),
+        onConfirm: () => {
+          setIsSubmitting(true); // 🔥 blocker 무력화
+          navigate(-1);
+        },
       });
     } else {
       navigate(-1);
