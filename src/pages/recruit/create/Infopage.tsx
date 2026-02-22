@@ -96,6 +96,7 @@ const InfoPage = () => {
 
   // 🔥 1. 수정 모드 여부 (가장 먼저 선언)
   const isEditMode = !!applicationId;
+  const [isBackButtonClicked, setIsBackButtonClicked] = useState(false);
 
   const [isBackModalOpen, setIsBackModalOpen] = useState(false);
   const [authError, setAuthError] = useState("");
@@ -191,6 +192,7 @@ const InfoPage = () => {
     ({ currentLocation, nextLocation }) =>
       // 🔥 제출 중(isSubmitting)이 아닐 때만 블로커 작동
       !isSubmitting &&
+      !isBackButtonClicked &&
       isDirty &&
       currentLocation.pathname !== nextLocation.pathname,
   );
@@ -215,6 +217,8 @@ const InfoPage = () => {
   // 3. 모달의 '취소' 버튼을 눌렀을 때 블로커 해제 처리
   const handleModalClose = () => {
     setInfoModal((prev) => ({ ...prev, isOpen: false }));
+
+    setIsBackButtonClicked(false);
     if (blocker.state === "blocked") {
       blocker.reset(); // 이동 차단 해제
     }
@@ -301,9 +305,9 @@ const InfoPage = () => {
   const isFormValid =
     formData.name.trim() !== "" &&
     isStudentIdValid &&
-    isPhoneValid &&
-    authStatus === "verified" &&
-    (isEditMode || (isPasswordValid && isPasswordMatch)) &&
+    (isEditMode || isPhoneValid) && // 🔥 수정 모드에서는 전화번호 검사 X
+    (isEditMode || authStatus === "verified") && // 🔥 수정 모드에서는 인증 검사 X
+    (isEditMode || (isPasswordValid && isPasswordMatch)) && // 🔥 수정 모드에서는 비밀번호 검사 X
     formData.major.trim() !== "" &&
     formData.status !== "" &&
     isTermValid &&
@@ -570,10 +574,18 @@ const InfoPage = () => {
   };
 
   const handleBackClick = () => {
+    setIsBackButtonClicked(true);
+
     if (isDirty) {
       setIsBackModalOpen(true);
     } else {
-      navigate("/recruit/terms"); // 입력한 게 없으면 바로 이동
+      navigate("/recruit/terms", {
+        state: {
+          applicationId,
+          passwordLength,
+          field: formData.field,
+        },
+      }); // 입력한 게 없으면 바로 이동
     }
   };
 
@@ -619,7 +631,9 @@ const InfoPage = () => {
           guideText={isEditMode ? "" : authGuide || "숫자 11자리"}
           isError={!isEditMode && formData.phone.length > 0 && !isPhoneValid}
           errorText="올바른 형식을 입력해주세요."
-          value={formatPhoneNumber(formData.phone)}
+          value={
+            isEditMode ? formData.phone : formatPhoneNumber(formData.phone)
+          }
           maxLength={13}
         />
 
@@ -801,10 +815,19 @@ const InfoPage = () => {
 
       <ConfirmModal
         isOpen={isBackModalOpen}
-        onClose={() => setIsBackModalOpen(false)}
+        onClose={() => {
+          setIsBackModalOpen(false);
+          setIsBackButtonClicked(false);
+        }}
         onConfirm={() => {
           // setIsBackModalOpen(false);
-          navigate("/recruit/terms");
+          navigate("/recruit/terms", {
+            state: {
+              applicationId,
+              passwordLength,
+              field: formData.field,
+            },
+          });
         }}
         isInfoPage={true}
         message={

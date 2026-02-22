@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 interface CheckboxIconProps {
   isChecked: boolean;
@@ -27,6 +27,8 @@ const CheckboxIcon: React.FC<CheckboxIconProps> = ({ isChecked }) => (
 
 const TermsPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { applicationId, passwordLength, field } = location.state || {};
 
   // 체크박스 상태 관리
   const [checked1, setChecked1] = useState(false);
@@ -212,7 +214,15 @@ const TermsPage = () => {
       {/* 4. 다음으로 버튼 */}
       <button
         disabled={!isAllChecked}
-        onClick={() => navigate("/recruit/info")}
+        onClick={() =>
+          navigate("/recruit/info", {
+            state: {
+              applicationId: applicationId,
+              passwordLength: passwordLength,
+              field: field,
+            },
+          })
+        }
         className={`w-full py-[16px] px-[24px] rounded-[12px] text-[20px] font-Pretendard font-normal transition-all lg:mt-[60px] md:mt-[40px] mt-[32px]
           ${
             isAllChecked
