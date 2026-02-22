@@ -33,7 +33,7 @@ const itemVariants: Variants = {
 
 const RecruitHome = () => {
   const schedules = [
-    { label: "1차 서류 접수", date: "02.21 (토) ~ 03.05 (목)" },
+    { label: "1차 서류 접수", date: "02.23 (월) ~ 03.05 (목)" },
     { label: "1차 발표", date: "03.07 (토)" },
     { label: "2차 면접", date: "03.09 (월) ~ 03.12 (목)" },
     { label: "최종 발표", date: "03.14 (토)" },
