@@ -312,8 +312,6 @@ const InfoPage = () => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
 
-    console.log("🟡 handleChange:", name, value);
-
     if (name === "phone") {
       if (value.length <= 13) {
         setFormData((prev) => ({
@@ -400,8 +398,6 @@ const InfoPage = () => {
   const executeSubmit = async () => {
     setIsSubmitting(true);
 
-    console.log("🟢 submit 직전 formData:", formData);
-
     let requestData:
       | {
           name: string;
@@ -431,7 +427,7 @@ const InfoPage = () => {
           : "",
         part: formData.field ? PART_MAP[formData.field] : "",
       };
-      console.log("🔵 POST requestData:", requestData);
+      // console.log("requestData",requestData);
     } else {
       // [수정하기 PATCH] 명세에 따라 phone, password 제외!!
       requestData = {
@@ -463,10 +459,7 @@ const InfoPage = () => {
         body: JSON.stringify(requestData),
       });
 
-      console.log("🟣 response status:", response.status);
-
       const result = await response.json();
-      console.log("🟣 서버 응답 result:", result);
 
       if (response.ok && result.success) {
         const publicId = result.data?.publicId || applicationId;
