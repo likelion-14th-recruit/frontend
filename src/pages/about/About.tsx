@@ -126,7 +126,7 @@ const About = () => {
             <br className="hidden tablet-lg:block" />
             <br className="block tablet-lg:hidden" />
             <br />
-            아이디어를 현실로 옮기는 경험을 통해 성장해 나가는 여정에
+            아이디어를 현실로 옮기는 경험을 통해 성장해 나가는 여정에{" "}
             <br className="hidden tablet-lg:block" />
             서강대학교 멋쟁이사자처럼이 함께합니다.
           </div>
