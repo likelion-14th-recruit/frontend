@@ -101,8 +101,8 @@ const RecruitHome = () => {
                       desktop:text-[20px]
                     "
                   >
-                    아이디어를 현실로 만들고 싶은 기획자·디자이너·개발자, 그리고 IT
-                    창업에 관심 있는 서강대학교 학생
+                    아이디어를 현실로 만들고 싶은 기획자·디자이너·개발자, 그리고
+                    IT 창업에 관심 있는 서강대학교 학생
                   </p>
                 </div>
               </Section>
@@ -133,19 +133,19 @@ const RecruitHome = () => {
                     title="Backend"
                     description="데이터를 처리하고 비즈니스 로직을 설계하며, 서버 환경을 구축하고 관리합니다."
                     imageUrl="https://likrlion.s3.us-east-1.amazonaws.com/14th+web/Recruit/BE.png"
-                    link="https://inquisitive-glider-d28.notion.site/14-2faac3ee3cde80018b9ef7940f6ba946?source=copy_link"
+                    link=""
                   />
                   <PositionCard
                     title="Frontend"
                     description="사용자와 직접 상호작용하는 인터페이스를 구현하고, 서버와 연동해 동적 웹사이트를 개발합니다."
                     imageUrl="https://likrlion.s3.us-east-1.amazonaws.com/14th+web/Recruit/FE.png"
-                    link="https://inquisitive-glider-d28.notion.site/14-2faac3ee3cde80859892c0d1e524bc1a?source=copy_link"
+                    link=""
                   />
                   <PositionCard
                     title="Product Design"
                     description="사용자의 문제를 정의하고 서비스 전략부터 구조와 UI를 설계해 실제 시장에서 작동하는 제품으로 시각화합니다."
                     imageUrl="https://likrlion.s3.us-east-1.amazonaws.com/14th+web/Recruit/DE.png"
-                    link="https://inquisitive-glider-d28.notion.site/14-2faac3ee3cde80418ad8d14a0d5ae963?source=copy_link"
+                    link=""
                   />
                 </div>
               </Section>
