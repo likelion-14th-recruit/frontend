@@ -106,7 +106,7 @@ const ApplicantTable = ({ data = [], isLoading }: TableProps) => {
                       (i) => i.value === item?.academicStatus
                     )?.label ?? "-"}
                   </td>
-                  <td className="py-[8px] px-[20px] pr-auto flex justify-start text-black">
+                  <td className="py-[8px] px-[20px] pr-auto justify-start text-black">
                     <div className="w-[125px] mr-auto text-center whitespace-nowrap">
                       {item.phoneNumber.replace(
                         /^(\d{2,3})(\d{3,4})(\d{4})$/,
