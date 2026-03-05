@@ -75,7 +75,7 @@ const Admin = () => {
 
   const checkDate = (e: string) => {
     setDateSelected((prev) =>
-      prev.includes(e) ? prev.filter((item) => item !== e) : [...prev, e],
+      prev.includes(e) ? prev.filter((item) => item !== e) : [...prev, e]
     );
   };
 
@@ -102,7 +102,7 @@ const Admin = () => {
           headers: {
             "Content-type": "application/json",
           },
-        },
+        }
       );
 
       if (!response.ok) {
@@ -140,7 +140,7 @@ const Admin = () => {
           headers: {
             "Content-type": "application/json",
           },
-        },
+        }
       );
 
       if (!response.ok) {
@@ -188,7 +188,7 @@ const Admin = () => {
           method: "GET",
           credentials: "include",
           headers: { Accept: "application/json" },
-        },
+        }
       );
 
       if (!response.ok) {
@@ -206,6 +206,32 @@ const Admin = () => {
       console.error("지원서 데이터 불러오기에 실패했습니다.", error);
     }
   };
+
+  // 저장 후 리로드
+  useEffect(() => {
+    const onRefresh = () => {
+      // 현재 필터/페이지 그대로로 다시 조회
+      let cancelled = false;
+
+      const run = async () => {
+        setIsLoading(true);
+        try {
+          await handleFilter();
+        } finally {
+          if (!cancelled) setIsLoading(false);
+        }
+      };
+
+      run();
+      return () => {
+        cancelled = true;
+      };
+    };
+
+    window.addEventListener("admin:refresh", onRefresh);
+    return () => window.removeEventListener("admin:refresh", onRefresh);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page.page, lastSearched]);
 
   useEffect(() => {
     let t: number | undefined;
@@ -243,7 +269,7 @@ const Admin = () => {
     setModalContent(
       type === "doc"
         ? "서류 합격자 문자를 발송하시겠습니까?"
-        : "최종 합격자 문자를 발송하시겠습니까?",
+        : "최종 합격자 문자를 발송하시겠습니까?"
     );
 
     setOpen(true);
