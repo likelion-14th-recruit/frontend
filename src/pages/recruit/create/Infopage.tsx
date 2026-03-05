@@ -70,8 +70,14 @@ const formatPhoneNumber = (value: string) => {
   if (cp < 4) return phoneNumber;
   if (cp < 8) return `${phoneNumber.slice(0, 3)}-${phoneNumber.slice(3)}`;
   if (cp < 12)
-    return `${phoneNumber.slice(0, 3)}-${phoneNumber.slice(3, 7)}-${phoneNumber.slice(7)}`;
-  return `${phoneNumber.slice(0, 3)}-${phoneNumber.slice(3, 7)}-${phoneNumber.slice(7, 11)}`;
+    return `${phoneNumber.slice(0, 3)}-${phoneNumber.slice(
+      3,
+      7
+    )}-${phoneNumber.slice(7)}`;
+  return `${phoneNumber.slice(0, 3)}-${phoneNumber.slice(
+    3,
+    7
+  )}-${phoneNumber.slice(7, 11)}`;
 };
 
 // 상단에 역매핑 객체 추가
@@ -192,7 +198,7 @@ const InfoPage = () => {
       // 🔥 제출 중(isSubmitting)이 아닐 때만 블로커 작동
       !isSubmitting &&
       isDirty &&
-      currentLocation.pathname !== nextLocation.pathname,
+      currentLocation.pathname !== nextLocation.pathname
   );
 
   // 2. 블로커 상태에 따라 모달 제어 (useEffect 이용)
@@ -227,7 +233,7 @@ const InfoPage = () => {
         {
           method: "GET",
           headers: { "Content-Type": "application/json" },
-        },
+        }
       );
 
       const result = await response.json();
@@ -276,7 +282,7 @@ const InfoPage = () => {
       "📍 useEffect 실행됨! ID:",
       applicationId,
       "Length:",
-      passwordLength,
+      passwordLength
     );
     if (!applicationId || !passwordLength) {
       console.warn("⚠️ ID나 비밀번호 길이가 없어서 API를 호출하지 않음");
@@ -356,7 +362,7 @@ const InfoPage = () => {
         setAuthGuide(
           authStatus === "idle"
             ? "인증번호가 전송되었습니다."
-            : "인증번호가 재전송되었습니다.",
+            : "인증번호가 재전송되었습니다."
         );
         setFormData((prev) => ({ ...prev, authCode: "" }));
       } else {
@@ -390,7 +396,7 @@ const InfoPage = () => {
     } catch (error) {
       console.error("s Error:", error);
       setAuthError(
-        "서버와의 연결이 원활하지 않습니다. 잠시 후 다시 시도해 주세요.",
+        "서버와의 연결이 원활하지 않습니다. 잠시 후 다시 시도해 주세요."
       );
     }
   };
@@ -468,7 +474,7 @@ const InfoPage = () => {
         console.log("📍 전달할 applicationId:", publicId);
         console.log(
           "📍 전달할 passwordLength:",
-          isEditMode ? passwordLength : formData.password.length,
+          isEditMode ? passwordLength : formData.password.length
         );
 
         // 🔥 [핵심] 수정사항을 Context에 즉시 반영
@@ -547,7 +553,7 @@ const InfoPage = () => {
     if (!isEditMode) {
       requiredFields.push(
         { key: "password", ref: passwordRef },
-        { key: "passwordConfirm", ref: passwordConfirmRef },
+        { key: "passwordConfirm", ref: passwordConfirmRef }
       );
     }
 
@@ -649,8 +655,8 @@ const InfoPage = () => {
             isEditMode
               ? "인증이 완료된 번호입니다."
               : authStatus === "verified"
-                ? "인증이 완료되었습니다."
-                : ""
+              ? "인증이 완료되었습니다."
+              : ""
           }
         />
 
@@ -724,7 +730,11 @@ const InfoPage = () => {
                 key={val}
                 type="button"
                 onClick={() => handleSelect("status", val)}
-                className={`px-[12px] py-[11px] rounded-[12px] text-[16px] font-semibold transition-all ${formData.status === val ? "bg-[rgba(18,18,18,0.80)] text-white" : "bg-[#F0F0F0] text-[rgba(18,18,18,0.60)]"}`}
+                className={`px-[12px] py-[11px] rounded-[12px] text-[16px] font-semibold transition-all ${
+                  formData.status === val
+                    ? "bg-[rgba(18,18,18,0.80)] text-white"
+                    : "bg-[#F0F0F0] text-[rgba(18,18,18,0.60)]"
+                }`}
               >
                 {val}
               </button>
@@ -758,8 +768,19 @@ const InfoPage = () => {
               <button
                 key={val}
                 type="button"
+                disabled={val === "백엔드"}
                 onClick={() => handleSelect("field", val)}
-                className={`px-[12px] py-[11px] rounded-[12px] text-[16px] font-semibold transition-all ${formData.field === val ? "bg-[rgba(18,18,18,0.80)] text-white" : "bg-[#F0F0F0] text-[rgba(18,18,18,0.60)]"}`}
+                className={`py-4 rounded-[10px] text-[15px] font-bold transition-all ${
+                  formData.field === val
+                    ? "bg-[#000] text-white"
+                    : `bg-[#f2f2f2] text-[#999] ${
+                        val === "백엔드" ? "" : "hover:bg-gray-200"
+                      } `
+                } ${
+                  val === "백엔드"
+                    ? "cursor-not-allowed bg-[#ededed7c] text-[#b4b4b468]"
+                    : ""
+                }`}
               >
                 {val}
               </button>
