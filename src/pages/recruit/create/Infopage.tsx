@@ -773,13 +773,11 @@ const InfoPage = () => {
                 className={`px-[12px] py-[11px] rounded-[12px] text-[16px] font-semibold transition-all ${
                   formData.field === val
                     ? "bg-[rgba(18,18,18,0.80)] text-white"
-                    : `bg-[#F0F0F0] text-[rgba(18,18,18,0.60)] ${
-                        val === "백엔드" ? "" : "hover:bg-gray-200"
+                    : ` ${
+                        val === "백엔드"
+                          ? "cursor-not-allowed bg-[#ededed7c] text-[#b4b4b468]"
+                          : "hover:bg-gray-200 bg-[#F0F0F0] text-[rgba(18,18,18,0.60)]"
                       } `
-                } ${
-                  val === "백엔드"
-                    ? "cursor-not-allowed bg-[#ededed7c] text-[#b4b4b468]"
-                    : ""
                 }`}
               >
                 {val}
