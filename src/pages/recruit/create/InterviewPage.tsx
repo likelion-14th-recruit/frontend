@@ -65,7 +65,7 @@ const InterviewPage = () => {
         if (allTimesRes.ok && allTimesResult.data) {
           // 🔥 날짜 오름차순 정렬 (서버에서 역순으로 올 경우 대비)
           const sortedData = [...allTimesResult.data].sort(
-            (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
+            (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
           );
           setInterviewData(sortedData);
         } else {
@@ -73,7 +73,7 @@ const InterviewPage = () => {
         }
 
         const myAvailableRes = await fetch(
-          `/api/applications/${applicationId}/interview-available`,
+          `/api/applications/${applicationId}/interview-available`
         );
         const myResult = await myAvailableRes.json();
         if (myAvailableRes.ok && myResult.data?.interviewTimeIds) {
@@ -125,7 +125,7 @@ const InterviewPage = () => {
           body: JSON.stringify({
             interviewTimeIds: Array.from(selectedTimes),
           }),
-        },
+        }
       );
 
       if (!saveResponse.ok) {
@@ -140,7 +140,7 @@ const InterviewPage = () => {
           {
             method: "POST", // 명세하신 대로 POST
             headers: headers,
-          },
+          }
         );
 
         const result = await submitResponse.json();
@@ -161,7 +161,9 @@ const InterviewPage = () => {
           });
         } else {
           alert(
-            `제출 실패: ${result.message || "이미 제출되었거나 오류가 발생했습니다."}`,
+            `제출 실패: ${
+              result.message || "이미 제출되었거나 오류가 발생했습니다."
+            }`
           );
         }
       } else {
@@ -216,13 +218,13 @@ const InterviewPage = () => {
             <h3 className="text-[20px] font-bold">
               {item.date} ({DAY_MAP[item.dayOfWeek] || item.dayOfWeek})
             </h3>
-            <div className="grid grid-cols-2 gap-y-5 gap-x-10 px-2">
+            <div className="grid grid-cols-2 px-2 gap-y-5 gap-x-10">
               <label className="flex items-start gap-6 cursor-pointer">
                 <input
                   type="checkbox"
                   // 🔥 item.times 대신 item.interviewTimes 사용
                   checked={item.interviewTimes.every((t) =>
-                    selectedTimes.has(t.interviewTimeId),
+                    selectedTimes.has(t.interviewTimeId)
                   )}
                   onChange={() => toggleDateAll(item.interviewTimes)}
                   className={checkboxStyle}
@@ -252,7 +254,7 @@ const InterviewPage = () => {
         ))}
       </div>
 
-      <footer className="mt-20 flex gap-4 w-full">
+      <footer className="flex w-full gap-4 mt-20">
         <button
           onClick={handleMoveBack} // 🔥 수정됨
           className="flex-1 py-5 border border-[#ccc] rounded-[15px] font-bold"
@@ -284,7 +286,7 @@ const InterviewPage = () => {
         onClose={() => setInfoModal((prev) => ({ ...prev, isOpen: false }))}
         onConfirm={infoModal.onConfirm}
         message={
-          <div className="whitespace-pre-line text-center">
+          <div className="whitespace-pre-line text-start">
             {infoModal.message}
           </div>
         }

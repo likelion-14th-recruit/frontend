@@ -12,8 +12,14 @@ const formatPhoneNumber = (value: string) => {
   if (cp < 4) return phoneNumber;
   if (cp < 8) return `${phoneNumber.slice(0, 3)}-${phoneNumber.slice(3)}`;
   if (cp < 12)
-    return `${phoneNumber.slice(0, 3)}-${phoneNumber.slice(3, 7)}-${phoneNumber.slice(7)}`;
-  return `${phoneNumber.slice(0, 3)}-${phoneNumber.slice(3, 7)}-${phoneNumber.slice(7, 11)}`;
+    return `${phoneNumber.slice(0, 3)}-${phoneNumber.slice(
+      3,
+      7
+    )}-${phoneNumber.slice(7)}`;
+  return `${phoneNumber.slice(0, 3)}-${phoneNumber.slice(
+    3,
+    7
+  )}-${phoneNumber.slice(7, 11)}`;
 };
 
 const ACADEMIC_STATUS_MAP = {
@@ -87,7 +93,7 @@ const InfoPage = () => {
       "📍 useEffect 실행됨! ID:",
       applicationId,
       "Length:",
-      passwordLength,
+      passwordLength
     );
     if (applicationId && passwordLength) {
       fetchUserInfo();
@@ -103,7 +109,7 @@ const InfoPage = () => {
         {
           method: "GET",
           headers: { "Content-Type": "application/json" },
-        },
+        }
       );
 
       const result = await response.json();
@@ -140,7 +146,7 @@ const InfoPage = () => {
 
   const isStudentIdValid = /^[0-9]{8}$/.test(formData.studentId);
   const isPasswordValid = /^(?=.*[a-zA-Z])(?=.*[0-9]).{8,20}$/.test(
-    formData.password,
+    formData.password
   );
   const isPhoneValid = /^[0-9]{11}$/.test(formData.phone);
   const isTermValid = /^[0-9]+$/.test(formData.term);
@@ -157,7 +163,7 @@ const InfoPage = () => {
 
   // 폼에 입력된 내용이 있는지 확인하는 변수
   const isDirty = Object.values(formData).some(
-    (val) => val !== "" && val !== "VERIFIED",
+    (val) => val !== "" && val !== "VERIFIED"
   );
 
   useEffect(() => {
@@ -225,7 +231,7 @@ const InfoPage = () => {
         setAuthGuide(
           authStatus === "idle"
             ? "인증번호가 전송되었습니다."
-            : "인증번호가 재전송되었습니다.",
+            : "인증번호가 재전송되었습니다."
         );
         setFormData((prev) => ({ ...prev, authCode: "" }));
       } else {
@@ -257,7 +263,7 @@ const InfoPage = () => {
       }
     } catch (error) {
       setAuthError(
-        "서버와의 연결이 원활하지 않습니다. 잠시 후 다시 시도해 주세요.",
+        "서버와의 연결이 원활하지 않습니다. 잠시 후 다시 시도해 주세요."
       );
     }
   };
@@ -404,7 +410,7 @@ const InfoPage = () => {
 
   return (
     <div className="flex flex-col max-w-[800px] mx-auto pb-20 font-pretendard">
-      <div className="flex flex-col gap-10 w-full">
+      <div className="flex flex-col w-full gap-10">
         <Input
           label="이름"
           name="name"
@@ -522,7 +528,11 @@ const InfoPage = () => {
                 key={val}
                 type="button"
                 onClick={() => handleSelect("status", val)}
-                className={`py-4 rounded-[10px] text-[15px] font-bold transition-all ${formData.status === val ? "bg-[#000] text-white" : "bg-[#f2f2f2] text-[#999] hover:bg-gray-200"}`}
+                className={`py-4 rounded-[10px] text-[15px] font-bold transition-all ${
+                  formData.status === val
+                    ? "bg-[#000] text-white"
+                    : "bg-[#f2f2f2] text-[#999] hover:bg-gray-200"
+                }`}
               >
                 {val}
               </button>
@@ -551,8 +561,19 @@ const InfoPage = () => {
               <button
                 key={val}
                 type="button"
+                disabled={val === "백엔드"}
                 onClick={() => handleSelect("field", val)}
-                className={`py-4 rounded-[10px] text-[15px] font-bold transition-all ${formData.field === val ? "bg-[#000] text-white" : "bg-[#f2f2f2] text-[#999] hover:bg-gray-200"}`}
+                className={`py-4 rounded-[10px] text-[15px] font-bold transition-all ${
+                  formData.field === val
+                    ? "bg-[#000] text-white"
+                    : `bg-[#f2f2f2] text-[#999] ${
+                        val === "백엔드" ? "" : "hover:bg-gray-200"
+                      } `
+                } ${
+                  val === "백엔드"
+                    ? "cursor-not-allowed bg-[#ededed7c] text-[#b4b4b468]"
+                    : ""
+                }`}
               >
                 {val}
               </button>
@@ -561,7 +582,7 @@ const InfoPage = () => {
         </div>
       </div>
 
-      <footer className="mt-20 flex gap-4 w-full">
+      <footer className="flex w-full gap-4 mt-20">
         <button
           type="button"
           onClick={handleBackClick}
@@ -572,7 +593,11 @@ const InfoPage = () => {
         <button
           type="button"
           onClick={handleSubmit}
-          className={`flex-1 py-5 rounded-[15px] text-lg font-bold transition-all ${isFormValid ? "bg-[#000] text-white cursor-pointer" : "bg-gray-300 text-white cursor-not-allowed"}`}
+          className={`flex-1 py-5 rounded-[15px] text-lg font-bold transition-all ${
+            isFormValid
+              ? "bg-[#000] text-white cursor-pointer"
+              : "bg-gray-300 text-white cursor-not-allowed"
+          }`}
         >
           다음으로
         </button>

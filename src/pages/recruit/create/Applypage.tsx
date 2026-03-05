@@ -30,13 +30,13 @@ const ApplyPage = () => {
       if (!applicationId) return;
       try {
         const qRes = await fetch(
-          `/api/applications/${applicationId}/questions`,
+          `/api/applications/${applicationId}/questions`
         );
         const qResult = await qRes.json();
         if (!qRes.ok || !qResult.data) return;
 
         const sortedQuestions = qResult.data.questions.sort(
-          (a, b) => a.questionNumber - b.questionNumber,
+          (a, b) => a.questionNumber - b.questionNumber
         );
         setQuestions(sortedQuestions);
 
@@ -46,7 +46,7 @@ const ApplyPage = () => {
           const newAnswers = {};
           aResult.data.answers.forEach((ans) => {
             const targetQ = sortedQuestions.find(
-              (q) => q.questionId === ans.questionId,
+              (q) => q.questionId === ans.questionId
             );
             if (targetQ) newAnswers[`q${targetQ.questionNumber}`] = ans.content;
           });
@@ -116,7 +116,7 @@ const ApplyPage = () => {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ answers: answersPayload }),
-        },
+        }
       );
 
       if (response.ok) {
@@ -136,7 +136,7 @@ const ApplyPage = () => {
   const handleMoveBack = () => {
     const backState = { ...location.state, applicationId };
     const hasAnyContent = questions.some((q) =>
-      formData[`q${q.questionNumber}`]?.trim(),
+      formData[`q${q.questionNumber}`]?.trim()
     );
 
     if (isSaved || !hasAnyContent) {
@@ -188,7 +188,7 @@ const ApplyPage = () => {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ answers: answersPayload }),
-        },
+        }
       );
 
       if (response.ok) {
@@ -213,7 +213,7 @@ const ApplyPage = () => {
 
   return (
     <div className="flex flex-col max-w-[800px] mx-auto pb-20 font-pretendard">
-      <div className="flex flex-col gap-12 w-full">
+      <div className="flex flex-col w-full gap-12">
         {questions.map((q) => {
           // 💡 질문 내용에 "GitHub"나 "포트폴리오"가 포함되어 있는지 확인
           const isLinkQuestion =
@@ -262,7 +262,7 @@ const ApplyPage = () => {
         })}
       </div>
 
-      <footer className="mt-20 flex gap-4 w-full">
+      <footer className="flex w-full gap-4 mt-20">
         <button
           type="button"
           onClick={handleMoveBack}
@@ -296,7 +296,7 @@ const ApplyPage = () => {
         onClose={() => setInfoModal((prev) => ({ ...prev, isOpen: false }))}
         onConfirm={infoModal.onConfirm}
         message={
-          <div className="whitespace-pre-line text-center">
+          <div className="whitespace-pre-line text-start">
             {infoModal.message}
           </div>
         }

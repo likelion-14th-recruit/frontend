@@ -51,7 +51,7 @@ const TermsPage = () => {
         <ul className="flex flex-col gap-3 font-medium text-[16px] mobile:text-[14px] mobile:gap-2">
           <li>
             📌 <span className="font-bold">서류 모집 기간 :</span> 2월 21일(토)
-            12:00 ~ 3월 5일(목) 23:59
+            12:00 ~ 3월 6일(금) 23:59
           </li>
           <li>
             📌 <span className="font-bold">서류 합격 발표 :</span> 3월 7일(토)
@@ -82,7 +82,7 @@ const TermsPage = () => {
         <div className="flex flex-col gap-8 text-[16px] leading-relaxed mobile:gap-6">
           {/* 1. 지원 안내 */}
           <div className="flex gap-2">
-            <span className="font-bold shrink-0 w-5">1.</span>
+            <span className="w-5 font-bold shrink-0">1.</span>
             <div className="flex flex-col gap-2">
               <h3 className="font-bold">지원 안내</h3>
               <p className="text-[#121212] mobile:text-[14px]">
@@ -94,15 +94,15 @@ const TermsPage = () => {
               </p>
               <ul className="flex flex-col gap-1 mt-1 ml-4 mobile:text-[14px]">
                 <li className="flex gap-2 text-[#121212]">
-                  <span className="shrink-0 w-4">a.</span>
+                  <span className="w-4 shrink-0">a.</span>
                   <span>인적사항 작성</span>
                 </li>
                 <li className="flex gap-2 text-[#121212]">
-                  <span className="shrink-0 w-4">b.</span>
+                  <span className="w-4 shrink-0">b.</span>
                   <span>지원서 작성</span>
                 </li>
                 <li className="flex gap-2 text-[#121212]">
-                  <span className="shrink-0 w-4">c.</span>
+                  <span className="w-4 shrink-0">c.</span>
                   <span>면접 가능 시간 선택 및 지원서 제출</span>
                 </li>
               </ul>
@@ -111,7 +111,7 @@ const TermsPage = () => {
 
           {/* 2. 면접 촬영 및 개인정보 수집 안내 */}
           <div className="flex gap-2">
-            <span className="font-bold shrink-0 w-5">2.</span>
+            <span className="w-5 font-bold shrink-0">2.</span>
             <div className="flex flex-col gap-2">
               <h3 className="font-bold">면접 촬영 및 개인정보 수집 안내</h3>
               <p className="text-[#121212] mobile:text-[14px]">
@@ -124,7 +124,7 @@ const TermsPage = () => {
 
           {/* 3. 필수 활동 안내 */}
           <div className="flex gap-2">
-            <span className="font-bold shrink-0 w-5">3.</span>
+            <span className="w-5 font-bold shrink-0">3.</span>
             <div className="flex flex-col gap-2">
               <h3 className="font-bold">필수 활동 안내</h3>
               <p className="text-[#121212] mobile:text-[14px]">
@@ -139,7 +139,7 @@ const TermsPage = () => {
 
           {/* 4. 공식 홈페이지, 인스타그램 */}
           <div className="flex gap-2">
-            <span className="font-bold shrink-0 w-5">4.</span>
+            <span className="w-5 font-bold shrink-0">4.</span>
             <div className="flex flex-col gap-2">
               <h3 className="font-bold">공식 홈페이지, 인스타그램</h3>
               <p className="text-[#121212] mobile:text-[14px]">
@@ -151,7 +151,7 @@ const TermsPage = () => {
 
           {/* 5. 회비 안내 */}
           <div className="flex gap-2">
-            <span className="font-bold shrink-0 w-5">5.</span>
+            <span className="w-5 font-bold shrink-0">5.</span>
             <div className="flex flex-col gap-2">
               <h3 className="font-bold">회비 안내</h3>
               <p className="text-[#121212] mobile:text-[14px]">
@@ -162,18 +162,18 @@ const TermsPage = () => {
 
           {/* 6. 문의사항 */}
           <div className="flex gap-2">
-            <span className="font-bold shrink-0 w-5">6.</span>
+            <span className="w-5 font-bold shrink-0">6.</span>
             <div className="flex flex-col gap-2">
               <h3 className="font-bold">문의사항</h3>
               <ul className="flex flex-col gap-1 mt-1 ml-4 text-[#121212] mobile:text-[14px]">
                 <li className="flex gap-2">
-                  <span className="shrink-0 w-4">a.</span>
+                  <span className="w-4 shrink-0">a.</span>
                   <span>
                     대표 김지오: 010-6264-7243 | 부대표 이예나, 전해찬
                   </span>
                 </li>
                 <li className="flex gap-2">
-                  <span className="shrink-0 w-4">b.</span>
+                  <span className="w-4 shrink-0">b.</span>
                   <span>인스타그램: @likelion_sg</span>
                 </li>
               </ul>
@@ -185,7 +185,7 @@ const TermsPage = () => {
       {/* 3. 체크박스 영역 */}
       <div className="flex flex-col gap-4 mt-4 mobile:gap-3 mobile:mt-0">
         <div
-          className="flex items-center justify-between cursor-pointer group px-2"
+          className="flex items-center justify-between px-2 cursor-pointer group"
           onClick={() => setChecked1(!checked1)}
         >
           <span className="font-bold text-[#333] text-[16px] mobile:text-[14px]">
@@ -194,7 +194,7 @@ const TermsPage = () => {
           <CheckboxIcon isChecked={checked1} />
         </div>
         <div
-          className="flex items-center justify-between cursor-pointer group px-2"
+          className="flex items-center justify-between px-2 cursor-pointer group"
           onClick={() => setChecked2(!checked2)}
         >
           <span className="font-bold text-[#333] text-[16px] mobile:text-[14px]">

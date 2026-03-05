@@ -33,7 +33,7 @@ const itemVariants: Variants = {
 
 const RecruitHome = () => {
   const schedules = [
-    { label: "1차 서류 접수", date: "02.21 (토) ~ 03.05 (목)" },
+    { label: "1차 서류 접수", date: "02.21 (토) ~ 03.06 (금)" },
     { label: "1차 발표", date: "03.07 (토)" },
     { label: "2차 면접", date: "03.09 (월) ~ 03.12 (목)" },
     { label: "최종 발표", date: "03.14 (토)" },
@@ -101,8 +101,8 @@ const RecruitHome = () => {
                       desktop:text-[20px]
                     "
                   >
-                    아이디어를 현실로 만들고 싶은 기획자·디자이너·개발자, 그리고 IT
-                    창업에 관심 있는 서강대학교 학생
+                    아이디어를 현실로 만들고 싶은 기획자·디자이너·개발자, 그리고
+                    IT 창업에 관심 있는 서강대학교 학생
                   </p>
                 </div>
               </Section>
