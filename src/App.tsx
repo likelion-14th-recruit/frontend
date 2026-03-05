@@ -2,7 +2,7 @@ import "./index.css";
 import { useEffect } from "react";
 import ReactGA from "react-ga4";
 import { Routes, Route, BrowserRouter } from "react-router-dom";
-import Admin from "./pages/admin/Admin";
+// import Admin from "./pages/admin/Admin";
 import AdminLayout from "./layouts/adminLayout";
 import Home from "./pages/home/Home";
 import MainLayout from "./layouts/mainLayout";
@@ -55,12 +55,8 @@ function App() {
           </Route>
         </Route>
 
-        <Route element={<AdminLayout />}>
-          <Route path={`/${ADMIN_PATH}`} element={<Admin />} />
-          <Route
-            path={`/${ADMIN_PATH}/:applicationPublicId`}
-            element={<AdminDetail />}
-          />
+        <Route path={ADMIN_PATH} element={<AdminLayout />}>
+          <Route path=":applicationPublicId" element={<AdminDetail />} />
         </Route>
       </Routes>
     </BrowserRouter>

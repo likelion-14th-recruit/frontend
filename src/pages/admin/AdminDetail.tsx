@@ -160,7 +160,7 @@ const AdminDetail = () => {
       if (!response.ok) {
         throw new Error("지원 결과 변경 중에 문제가 발생했습니다.");
       }
-      const data = await response.json();
+      // const data = await response.json();
     } catch (error) {
       console.error("Error fetching application detail data:", error);
     }
@@ -385,7 +385,17 @@ const AdminDetail = () => {
         >
           {isSaving ? "저장중..." : "저장하기"}
         </Button>
-        <Modal isTwo={false} isOpen={open} onClose={() => setOpen(false)}>
+        <Modal
+          isTwo={false}
+          isOpen={open}
+          onClose={() => {
+            setOpen(false);
+
+            if (modalMessage === "저장이 완료되었습니다.") {
+              window.dispatchEvent(new Event("admin:refresh"));
+            }
+          }}
+        >
           <div>{modalMessage}</div>
         </Modal>
       </div>

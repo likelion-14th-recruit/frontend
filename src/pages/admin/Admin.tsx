@@ -7,8 +7,6 @@ import Modal from "../../components/admin/Modal";
 import FilterLabel from "../../components/admin/FilterLabel";
 import FilterBtn from "../../components/admin/FilterBtn";
 import {
-  PART,
-  PASS_STATUS,
   applyParts,
   interviewDates,
   interviewTime,
@@ -46,9 +44,9 @@ const Admin = () => {
   const [sendType, setSendType] = useState<"doc" | "final" | null>(null);
 
   //필터 설정
-  const [filters, setFilters] = useState<Filter>({
-    page: 0,
-  });
+  // const [filters, setFilters] = useState<Filter>({
+  //   page: 0,
+  // });
   const [filteredList, setFilteredList] = useState([]); //필터링 결과
 
   const [page, setPage] = useState<Pages>({
@@ -186,7 +184,7 @@ const Admin = () => {
 
     if (search.trim() !== "") nextFilters.search = search.trim();
 
-    setFilters(nextFilters);
+    // setFilters(nextFilters);
 
     try {
       const qs = buildQuery(nextFilters);
@@ -214,6 +212,32 @@ const Admin = () => {
       console.error("지원서 데이터 불러오기에 실패했습니다.", error);
     }
   };
+
+  // 저장 후 리로드
+  useEffect(() => {
+    const onRefresh = () => {
+      // 현재 필터/페이지 그대로로 다시 조회
+      let cancelled = false;
+
+      const run = async () => {
+        setIsLoading(true);
+        try {
+          await handleFilter();
+        } finally {
+          if (!cancelled) setIsLoading(false);
+        }
+      };
+
+      run();
+      return () => {
+        cancelled = true;
+      };
+    };
+
+    window.addEventListener("admin:refresh", onRefresh);
+    return () => window.removeEventListener("admin:refresh", onRefresh);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page.page, lastSearched]);
 
   useEffect(() => {
     let t: number | undefined;
