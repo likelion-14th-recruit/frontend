@@ -770,10 +770,10 @@ const InfoPage = () => {
                 type="button"
                 disabled={val === "백엔드"}
                 onClick={() => handleSelect("field", val)}
-                className={`py-4 rounded-[10px] text-[15px] font-bold transition-all ${
+                className={`px-[12px] py-[11px] rounded-[12px] text-[16px] font-semibold transition-all ${
                   formData.field === val
-                    ? "bg-[#000] text-white"
-                    : `bg-[#f2f2f2] text-[#999] ${
+                    ? "bg-[rgba(18,18,18,0.80)] text-white"
+                    : `bg-[#F0F0F0] text-[rgba(18,18,18,0.60)] ${
                         val === "백엔드" ? "" : "hover:bg-gray-200"
                       } `
                 } ${
