@@ -27,7 +27,7 @@ const AdminDetail = () => {
       date: "",
       startTime: "",
       place: "",
-    },
+    }
   ); //면접 확정 날/시간/장소
 
   const [answers, setAnswers] = useState();
@@ -46,7 +46,7 @@ const AdminDetail = () => {
           headers: {
             "Content-type": "application/json",
           },
-        },
+        }
       );
 
       if (!response.ok) {
@@ -73,7 +73,7 @@ const AdminDetail = () => {
           headers: {
             "Content-type": "application/json",
           },
-        },
+        }
       );
 
       if (!response.ok) {
@@ -99,7 +99,7 @@ const AdminDetail = () => {
           headers: {
             "Content-type": "application/json",
           },
-        },
+        }
       );
 
       if (!response.ok) {
@@ -125,7 +125,7 @@ const AdminDetail = () => {
           headers: {
             "Content-type": "application/json",
           },
-        },
+        }
       );
 
       if (!response.ok) {
@@ -154,7 +154,7 @@ const AdminDetail = () => {
           body: JSON.stringify({
             passStatus: applyState,
           }),
-        },
+        }
       );
 
       if (!response.ok) {
@@ -205,7 +205,7 @@ const AdminDetail = () => {
           startTime: interviewSchedule.startTime,
           place: interviewSchedule.place,
         }),
-      },
+      }
     );
 
     if (!response.ok) {
@@ -385,7 +385,17 @@ const AdminDetail = () => {
         >
           {isSaving ? "저장중..." : "저장하기"}
         </Button>
-        <Modal isTwo={false} isOpen={open} onClose={() => setOpen(false)}>
+        <Modal
+          isTwo={false}
+          isOpen={open}
+          onClose={() => {
+            setOpen(false);
+
+            if (modalMessage === "저장이 완료되었습니다.") {
+              window.dispatchEvent(new Event("admin:refresh"));
+            }
+          }}
+        >
           <div>{modalMessage}</div>
         </Modal>
       </div>

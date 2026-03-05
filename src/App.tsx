@@ -52,10 +52,11 @@ const router = createBrowserRouter([
     ],
   },
   {
+    path: `/${ADMIN_PATH}`,
     element: <AdminLayout />,
     children: [
-      { path: `/${ADMIN_PATH}`, element: <Admin /> },
-      { path: `/${ADMIN_PATH}/:applicationPublicId`, element: <AdminDetail /> },
+      { index: true, element: <Admin /> },
+      { path: ":applicationPublicId", element: <AdminDetail /> },
     ],
   },
 ]);
