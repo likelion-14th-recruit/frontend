@@ -100,7 +100,7 @@ const People = () => {
             { label: "전체", value: "all" },
             { label: "BE", value: "backend" },
             { label: "FE", value: "frontend" },
-            { label: "DE", value: "product_design" },
+            { label: "PD", value: "product_design" },
           ]}
           activeTab={activeTab}
           onTabChange={(value) => setActiveTab(value as TabValue)}
