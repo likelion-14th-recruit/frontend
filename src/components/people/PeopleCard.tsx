@@ -15,7 +15,7 @@ const POSITION_LABEL: Record<PeopleType["position"], string> = {
 const PART_LABEL: Record<PeopleType["part"], string> = {
   FRONTEND: "FE",
   BACKEND: "BE",
-  PRODUCT_DESIGN: "DE",
+  PRODUCT_DESIGN: "PD",
 };
 
 const PeopleCard = ({ person }: PeopleCardProps) => {
