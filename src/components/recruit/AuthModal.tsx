@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { createPortal } from "react-dom";
+import { API_BASE_URL } from "../../constants/api";
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -100,7 +101,7 @@ const AuthModal: React.FC<AuthModalProps> = ({
     setPhoneError("");
     setPasswordError("");
     try {
-      const response = await fetch("/api/login", {
+      const response = await fetch(`${API_BASE_URL}/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

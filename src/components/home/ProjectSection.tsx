@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import ProjectSkeletonCard from "../project/ProjectSkeletonCard";
 import { motion } from "framer-motion";
 import type { Variants } from "framer-motion";
+import { API_BASE_URL } from "../../constants/api";
 
 interface Post {
   imageUrl: string;
@@ -61,7 +62,9 @@ const ProjectSection = () => {
         }
 
         // 2. API 호출
-        const response = await fetch(`/api/projects?cohort=${cohort}`);
+        const response = await fetch(
+          `${API_BASE_URL}/projects?cohort=${cohort}`,
+        );
         const result = await response.json();
 
         const finalData: Post[] = Array.isArray(result)

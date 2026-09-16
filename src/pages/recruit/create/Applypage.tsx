@@ -8,6 +8,7 @@ import {
 import TextArea from "../../../components/recruit/TextArea";
 import Input from "../../../components/recruit/Input";
 import ConfirmModal from "../../../components/recruit/ConfirmModal";
+import { API_BASE_URL } from "../../../constants/api";
 
 interface AnswerResponse {
   questionId: number;
@@ -121,7 +122,7 @@ const ApplyPage = () => {
       try {
         // 1. 질문 목록 로딩
         const qRes = await fetch(
-          `/api/applications/${applicationId}/questions`,
+          `${API_BASE_URL}/applications/${applicationId}/questions`,
         );
         const qResult = (await qRes.json()) as {
           data: {
@@ -136,7 +137,9 @@ const ApplyPage = () => {
         setQuestions(sortedQuestions);
 
         // 2. 답변 로딩 (이미 입력된 내용이 없을 때만 서버에서 가져옴)
-        const aRes = await fetch(`/api/applications/${applicationId}/answers`);
+        const aRes = await fetch(
+          `${API_BASE_URL}/applications/${applicationId}/answers`,
+        );
         const aResult = await aRes.json();
 
         // 답변 로딩 API 성공 시
@@ -218,7 +221,7 @@ const ApplyPage = () => {
       }));
 
       const response = await fetch(
-        `/api/applications/${applicationId}/answers`,
+        `${API_BASE_URL}/applications/${applicationId}/answers`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

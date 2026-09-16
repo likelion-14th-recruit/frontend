@@ -6,6 +6,7 @@ import {
   useBlocker,
 } from "react-router-dom";
 import ConfirmModal from "../../../components/recruit/ConfirmModal";
+import { API_BASE_URL } from "../../../constants/api";
 
 // --- 타입 정의 부분 생략 (동일) ---
 
@@ -155,7 +156,7 @@ const InterviewPage = () => {
       if (!applicationId) return;
       try {
         // 면접 시간 정보 로드
-        const allRes = await fetch("/api/interview-times");
+        const allRes = await fetch(`${API_BASE_URL}/interview-times`);
         const allResult = (await allRes.json()) as ListInterviewTimesResponse;
         if (allRes.ok && allResult.data) {
           const normalized: InterviewDateGroup[] = allResult.data
@@ -181,7 +182,7 @@ const InterviewPage = () => {
 
         // 내가 선택한 시간 로드
         const myRes = await fetch(
-          `/api/applications/${applicationId}/interview-available`,
+          `${API_BASE_URL}/applications/${applicationId}/interview-available`,
         );
         const myResult = await myRes.json();
         if (myRes.ok && myResult.data?.interviewTimeIds) {
@@ -192,7 +193,7 @@ const InterviewPage = () => {
 
         // 질문 목록 로드 (답변 매핑용)
         const qRes = await fetch(
-          `/api/applications/${applicationId}/questions`,
+          `${API_BASE_URL}/applications/${applicationId}/questions`,
         );
         const qResult = await qRes.json();
         if (qRes.ok && qResult.data) {
@@ -245,7 +246,7 @@ const InterviewPage = () => {
     try {
       // A. 면접 시간 저장
       const timePromise = fetch(
-        `/api/applications/${applicationId}/interview-available`,
+        `${API_BASE_URL}/applications/${applicationId}/interview-available`,
         {
           method: "POST",
           headers,
@@ -259,7 +260,7 @@ const InterviewPage = () => {
         content: formData[`q${q.questionNumber}`] || "",
       }));
       const answerPromise = fetch(
-        `/api/applications/${applicationId}/answers`,
+        `${API_BASE_URL}/applications/${applicationId}/answers`,
         {
           method: "POST",
           headers,
@@ -277,7 +278,7 @@ const InterviewPage = () => {
       if (isFinal) {
         // C. 최종 제출
         const submitRes = await fetch(
-          `/api/applications/${applicationId}/submit`,
+          `${API_BASE_URL}/applications/${applicationId}/submit`,
           { method: "POST", headers },
         );
         const result = await submitRes.json();

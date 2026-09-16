@@ -4,6 +4,7 @@ import ProjectPageTitle from "../../components/project/ProjectPageTitle";
 
 import { motion } from "framer-motion";
 import type { Variants } from "framer-motion";
+import { API_BASE_URL } from "../../constants/api";
 
 interface Post {
   imageUrl: string;
@@ -66,7 +67,7 @@ const Project = () => {
 
         while (hasNext) {
           const res = await fetch(
-            `/api/projects?page=${page}&size=15${cohortQuery}`
+            `${API_BASE_URL}/projects?page=${page}&size=15${cohortQuery}`
           );
           if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
