@@ -5,6 +5,7 @@ import { type PeopleType } from "../../types/people";
 
 import { motion } from "framer-motion";
 import type { Variants } from "framer-motion";
+import { API_BASE_URL } from "../../constants/api";
 
 type TabValue = "all" | "backend" | "frontend" | "product_design";
 
@@ -62,7 +63,9 @@ const People = () => {
         const query =
           activeTab === "all" ? "" : `?part=${TAB_TO_PART_MAP[activeTab]}`;
 
-        const res = await fetch(`/api/members${query}`);
+        const res = await fetch(
+          `${API_BASE_URL}/members${query}`,
+        );
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
         const result = await res.json();

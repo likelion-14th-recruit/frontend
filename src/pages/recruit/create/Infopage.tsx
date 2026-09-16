@@ -7,6 +7,7 @@ import {
 } from "react-router-dom";
 import Input from "../../../components/recruit/Input";
 import ConfirmModal from "../../../components/recruit/ConfirmModal";
+import { API_BASE_URL } from "../../../constants/api";
 
 type RequiredField = {
   key: keyof FormDataType;
@@ -229,7 +230,7 @@ const InfoPage = () => {
   const fetchUserInfo = async () => {
     try {
       const response = await fetch(
-        `/api/applications/${applicationId}?password-length=${passwordLength}`,
+        `${API_BASE_URL}/applications/${applicationId}?password-length=${passwordLength}`,
         {
           method: "GET",
           headers: { "Content-Type": "application/json" },
@@ -350,7 +351,7 @@ const InfoPage = () => {
 
   const handleSendAuth = async () => {
     if (!isPhoneValid) return;
-    const API_URL = "/api/verification";
+    const API_URL = `${API_BASE_URL}/verification`;
     try {
       const response = await fetch(API_URL, {
         method: "POST",
@@ -378,7 +379,7 @@ const InfoPage = () => {
     if (!formData.authCode) return;
     setAuthError("");
 
-    const API_URL = "/api/verification/confirm";
+    const API_URL = `${API_BASE_URL}/verification/confirm`;
     try {
       const response = await fetch(API_URL, {
         method: "POST",
@@ -453,8 +454,8 @@ const InfoPage = () => {
     try {
       // 🔥 2. 수정 모드에 따른 URL 및 설정 분기
       const url = isEditMode
-        ? `/api/applications/${applicationId}`
-        : "/api/applications";
+        ? `${API_BASE_URL}/applications/${applicationId}`
+        : `${API_BASE_URL}/applications`;
 
       const method = isEditMode ? "PATCH" : "POST";
 

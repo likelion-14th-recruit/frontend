@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "http://163.239.77.99:8081/:path*"
+      "destination": "https://likelion-recruit.duckdns.org/:path*"
     },
     {
       "source": "/(.*)",

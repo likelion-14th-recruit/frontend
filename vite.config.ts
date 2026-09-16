@@ -15,13 +15,4 @@ export default defineConfig({
       dynamicRoutes: ["/"],
     }),
   ],
-  server: {
-    proxy: {
-      "/api": {
-        target: process.env.VITE_API_URL, // test 주소
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, ""), // /api 부분을 지우고 전달
-      },
-    },
-  },
 });

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Input from "../../components/recruit/Input";
+import { API_BASE_URL } from "../../constants/api";
 
 // 헬퍼 함수: 하이픈 자동 포맷 (InfoPage와 동일)
 const formatPhoneNumber = (value: string) => {
@@ -89,7 +90,7 @@ const FindPasswordPage = () => {
     setPhoneError("");
     try {
       const response = await fetch(
-        "/api/verification/application-modification",
+        `${API_BASE_URL}/verification/application-modification`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -134,7 +135,7 @@ const FindPasswordPage = () => {
     setAuthError("");
 
     try {
-      const response = await fetch("/api/verification/confirm", {
+      const response = await fetch(`${API_BASE_URL}/verification/confirm`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -163,7 +164,7 @@ const FindPasswordPage = () => {
 
     try {
       // 1. 비밀번호 재설정 API 호출
-      const resetResponse = await fetch("/api/password/reset", {
+      const resetResponse = await fetch(`${API_BASE_URL}/password/reset`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -176,7 +177,7 @@ const FindPasswordPage = () => {
 
       if (resetResponse.ok && resetResult.success) {
         // 2. 🔥 자동 로그인 처리 (백엔드에 새 비밀번호로 로그인 요청)
-        const loginResponse = await fetch("/api/login", {
+        const loginResponse = await fetch(`${API_BASE_URL}/login`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
